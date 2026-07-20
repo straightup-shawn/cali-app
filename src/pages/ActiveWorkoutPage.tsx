@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
-import { useTimer } from '@/hooks/useTimer';
 import { useExercises } from '@/hooks/useExercises';
 import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
 import { requestNotificationPermission } from '@/lib/notifications';
@@ -149,9 +148,11 @@ interface SetRowProps {
   previousSet?: PreviousSet;
   onUpdate: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   onComplete: (exerciseId: string, setId: string) => void;
+  onUncomplete: (exerciseId: string, setId: string) => void;
+  onDelete: (exerciseId: string, setId: string) => void;
 }
 
-function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComplete }: SetRowProps) {
+function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
   const [showRpePicker, setShowRpePicker] = useState(false);
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
@@ -169,6 +170,18 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
       }`}
     >
       <div className="flex items-center gap-2">
+        {/* Delete set button */}
+        <button
+          type="button"
+          onClick={() => onDelete(exerciseId, set.id)}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-red-950 hover:text-red-400 active:bg-red-900"
+          aria-label={`Delete set ${set.setNumber}`}
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
         {/* Set number */}
         <span className="w-6 shrink-0 text-center text-xs font-medium text-gray-500">
           {set.setNumber}
@@ -191,8 +204,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
                 reps: e.target.value ? parseInt(e.target.value, 10) : null,
               })
             }
-            disabled={set.completed}
-            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
+            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
 
@@ -208,8 +220,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
                 weightKg: e.target.value ? parseFloat(e.target.value) : null,
               })
             }
-            disabled={set.completed}
-            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
+            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
 
@@ -225,8 +236,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
                 durationSeconds: e.target.value ? parseInt(e.target.value, 10) : null,
               })
             }
-            disabled={set.completed}
-            className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
+            className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
 
@@ -235,29 +245,27 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
           <button
             type="button"
             onClick={() => setShowRpePicker(!showRpePicker)}
-            disabled={set.completed}
             className={`h-8 shrink-0 rounded-full px-2 text-xs font-medium transition-colors ${
               set.rpe !== null
                 ? 'bg-indigo-600 text-white'
                 : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-            } disabled:opacity-50`}
+            }`}
             aria-label={set.rpe !== null ? `RPE ${set.rpe}` : 'Set RPE'}
           >
             {set.rpe !== null ? `${set.rpe}` : 'RPE'}
           </button>
         )}
 
-        {/* Complete button */}
+        {/* Complete/uncomplete button */}
         <button
           type="button"
-          onClick={() => onComplete(exerciseId, set.id)}
-          disabled={set.completed}
+          onClick={() => set.completed ? onUncomplete(exerciseId, set.id) : onComplete(exerciseId, set.id)}
           className={`ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
             set.completed
-              ? 'bg-green-500 text-white'
+              ? 'bg-green-500 text-white hover:bg-green-600 active:bg-green-700'
               : 'border border-gray-600 text-gray-500 hover:border-green-500 hover:text-green-400 active:bg-green-950'
           }`}
-          aria-label={set.completed ? 'Set completed' : 'Complete set'}
+          aria-label={set.completed ? 'Undo set completion' : 'Complete set'}
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -267,7 +275,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
       </div>
 
       {/* Inline RPE picker */}
-      {showRpePicker && !set.completed && (
+      {showRpePicker && (
         <div className="mt-2 ml-6 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
           {RPE_VALUES.map((v) => (
             <button
@@ -318,7 +326,9 @@ interface ExerciseSectionProps {
   exercise: ActiveWorkoutExercise;
   onUpdate: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   onComplete: (exerciseId: string, setId: string) => void;
+  onUncomplete: (exerciseId: string, setId: string) => void;
   onAddSet: (exerciseId: string) => void;
+  onDeleteSet: (exerciseId: string, setId: string) => void;
   onRemove: (exerciseId: string) => void;
   onRestDurationChange: (exerciseId: string, seconds: number) => void;
 }
@@ -339,7 +349,7 @@ const TYPE_COLORS: Record<ExerciseType, string> = {
   static_hold: 'bg-red-900/50 text-red-300',
 };
 
-function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove, onRestDurationChange }: ExerciseSectionProps) {
+function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSet, onDeleteSet, onRemove, onRestDurationChange }: ExerciseSectionProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRestPicker, setShowRestPicker] = useState(false);
   const { data: previousPerformance } = usePreviousPerformance(exercise.exerciseId);
@@ -431,6 +441,8 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove, o
             previousSet={previousPerformance?.sets.find((ps) => ps.setNumber === set.setNumber)}
             onUpdate={onUpdate}
             onComplete={onComplete}
+            onUncomplete={onUncomplete}
+            onDelete={onDeleteSet}
           />
         ))}
       </div>
@@ -643,8 +655,10 @@ export default function ActiveWorkoutPage() {
     addExercise,
     removeExercise,
     addSet,
+    deleteSet,
     updateSet,
     completeSet,
+    uncompleteSet,
     discardWorkout,
   } = useActiveWorkout();
 
@@ -657,8 +671,17 @@ export default function ActiveWorkoutPage() {
     error: finishError,
   } = useFinishWorkout();
 
-  // Timer - count up from workout start
-  const timer = useTimer({ mode: 'countup' });
+  // Timer - derive elapsed from persisted startedAt timestamp (survives refresh)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  useEffect(() => {
+    if (!workout || workout.isPaused) return;
+    const startTime = new Date(workout.startedAt).getTime();
+    const tick = () => setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+    tick(); // immediate first update
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [workout?.startedAt, workout?.isPaused]);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
@@ -670,25 +693,6 @@ export default function ActiveWorkoutPage() {
   useEffect(() => {
     requestNotificationPermission();
   }, []);
-
-  // Start timer on mount if workout is active
-  useEffect(() => {
-    if (workout && !workout.isPaused) {
-      timer.start();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Sync timer with elapsed seconds from workout state
-  useEffect(() => {
-    if (workout) {
-      timer.reset(workout.elapsedSeconds);
-      if (!workout.isPaused) {
-        timer.start();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workout?.isPaused]);
 
   const handleDiscard = useCallback(() => {
     discardWorkout();
@@ -756,7 +760,7 @@ export default function ActiveWorkoutPage() {
     <div className="relative flex min-h-screen flex-col bg-gray-950 pb-24">
       {/* Timer bar header */}
       <WorkoutTimerBar
-        seconds={timer.seconds}
+        seconds={elapsedSeconds}
         workoutName={workout.name}
         onMenuToggle={() => setMenuOpen((o) => !o)}
       />
@@ -789,7 +793,9 @@ export default function ActiveWorkoutPage() {
                 setRestTimerDuration(duration);
                 setRestTimerVisible(true);
               }}
+              onUncomplete={uncompleteSet}
               onAddSet={addSet}
+              onDeleteSet={deleteSet}
               onRemove={removeExercise}
               onRestDurationChange={handleRestDurationChange}
             />

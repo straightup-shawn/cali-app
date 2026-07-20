@@ -26,8 +26,10 @@ interface ActiveWorkoutContextValue {
   removeExercise: (exerciseId: string) => void;
   reorderExercises: (fromIndex: number, toIndex: number) => void;
   addSet: (exerciseId: string) => void;
+  deleteSet: (exerciseId: string, setId: string) => void;
   updateSet: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   completeSet: (exerciseId: string, setId: string) => void;
+  uncompleteSet: (exerciseId: string, setId: string) => void;
   /** Saves workout to Supabase, detects PRs, clears local state. Returns the workout data for PR celebration. */
   finishWorkout: () => Promise<ActiveWorkout | null>;
   discardWorkout: () => void;
@@ -285,6 +287,41 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
+  const uncompleteSet = useCallback((exerciseId: string, setId: string) => {
+    setWorkout((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        exercises: prev.exercises.map((ex) => {
+          if (ex.id !== exerciseId) return ex;
+          return {
+            ...ex,
+            sets: ex.sets.map((s) => {
+              if (s.id !== setId) return s;
+              return { ...s, completed: false, completedAt: null };
+            }),
+          };
+        }),
+      };
+    });
+  }, []);
+
+  const deleteSet = useCallback((exerciseId: string, setId: string) => {
+    setWorkout((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        exercises: prev.exercises.map((ex) => {
+          if (ex.id !== exerciseId) return ex;
+          const filtered = ex.sets.filter((s) => s.id !== setId);
+          // Renumber remaining sets
+          const renumbered = filtered.map((s, i) => ({ ...s, setNumber: i + 1 }));
+          return { ...ex, sets: renumbered };
+        }),
+      };
+    });
+  }, []);
+
   const finishWorkout = useCallback(async (): Promise<ActiveWorkout | null> => {
     const current = workoutRef.current;
     if (!current || !user) return null;
@@ -329,8 +366,10 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     removeExercise,
     reorderExercises,
     addSet,
+    deleteSet,
     updateSet,
     completeSet,
+    uncompleteSet,
     finishWorkout,
     discardWorkout,
     pauseWorkout,

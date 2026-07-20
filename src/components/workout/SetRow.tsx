@@ -13,6 +13,8 @@ interface SetRowProps {
   set: ActiveSet;
   onUpdateSet: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   onCompleteSet: (exerciseId: string, setId: string) => void;
+  onUncompleteSet: (exerciseId: string, setId: string) => void;
+  onDeleteSet: (exerciseId: string, setId: string) => void;
 }
 
 // =============================================================================
@@ -273,6 +275,8 @@ export default function SetRow({
   set,
   onUpdateSet,
   onCompleteSet,
+  onUncompleteSet,
+  onDeleteSet,
 }: SetRowProps) {
   const { weightLabel, kgToDisplay, inputToKg } = useUnitPreference();
 
@@ -317,23 +321,31 @@ export default function SetRow({
   );
 
   const handleComplete = useCallback(() => {
-    onCompleteSet(exerciseId, set.id);
-  }, [exerciseId, set.id, onCompleteSet]);
+    if (set.completed) {
+      onUncompleteSet(exerciseId, set.id);
+    } else {
+      onCompleteSet(exerciseId, set.id);
+    }
+  }, [exerciseId, set.id, set.completed, onCompleteSet, onUncompleteSet]);
+
+  const handleDelete = useCallback(() => {
+    onDeleteSet(exerciseId, set.id);
+  }, [exerciseId, set.id, onDeleteSet]);
 
   // Render inputs based on exercise type
   const renderInputs = () => {
     switch (exerciseType) {
       case 'bodyweight':
-        return <RepsInput value={set.reps} onChange={handleRepsChange} disabled={set.completed} />;
+        return <RepsInput value={set.reps} onChange={handleRepsChange} disabled={false} />;
 
       case 'weighted':
         return (
           <div className="flex items-end gap-3">
-            <RepsInput value={set.reps} onChange={handleRepsChange} disabled={set.completed} />
+            <RepsInput value={set.reps} onChange={handleRepsChange} disabled={false} />
             <WeightInput
               value={displayWeightValue}
               onChange={handleWeightChange}
-              disabled={set.completed}
+              disabled={false}
               label="Weight"
               unitLabel={weightLabel}
             />
@@ -343,11 +355,11 @@ export default function SetRow({
       case 'assisted':
         return (
           <div className="flex items-end gap-3">
-            <RepsInput value={set.reps} onChange={handleRepsChange} disabled={set.completed} />
+            <RepsInput value={set.reps} onChange={handleRepsChange} disabled={false} />
             <WeightInput
               value={displayWeightValue}
               onChange={handleWeightChange}
-              disabled={set.completed}
+              disabled={false}
               label="Assist"
               unitLabel={weightLabel}
             />
@@ -361,14 +373,14 @@ export default function SetRow({
             <DurationInput
               value={set.durationSeconds}
               onChange={handleDurationChange}
-              disabled={set.completed}
+              disabled={false}
             />
             {!set.completed && (
               <ExerciseDurationTimer
                 exerciseType={exerciseType as 'duration' | 'static_hold'}
                 targetDurationSeconds={set.durationSeconds}
                 onDurationCapture={handleDurationChange}
-                disabled={set.completed}
+                disabled={false}
               />
             )}
           </div>
@@ -384,6 +396,18 @@ export default function SetRow({
       className={`rounded-lg px-3 py-2 ${set.completed ? 'bg-green-950/50' : 'bg-gray-800'}`}
     >
       <div className="flex items-center gap-3">
+        {/* Delete set button */}
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-red-950 hover:text-red-400 active:bg-red-900"
+          aria-label={`Delete set ${set.setNumber}`}
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
         {/* Set number */}
         <span className="w-7 shrink-0 text-center text-sm font-medium text-gray-500">
           {set.setNumber}
@@ -392,17 +416,16 @@ export default function SetRow({
         {/* Type-specific inputs */}
         <div className="flex-1">{renderInputs()}</div>
 
-        {/* Complete set button */}
+        {/* Complete/uncomplete set button */}
         <button
           type="button"
           onClick={handleComplete}
-          disabled={set.completed}
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors ${
             set.completed
-              ? 'border-green-600 bg-green-500 text-white'
+              ? 'border-green-600 bg-green-500 text-white hover:bg-green-600 active:bg-green-700'
               : 'border-gray-600 bg-gray-700 text-gray-400 hover:border-green-500 hover:text-green-400 active:bg-green-950'
           }`}
-          aria-label={set.completed ? 'Set completed' : 'Complete set'}
+          aria-label={set.completed ? 'Undo set completion' : 'Complete set'}
         >
           <svg
             className="h-5 w-5"
@@ -423,7 +446,7 @@ export default function SetRow({
           rir={set.rir}
           onRpeChange={handleRpeChange}
           onRirChange={handleRirChange}
-          disabled={set.completed}
+          disabled={false}
         />
       </div>
     </div>
