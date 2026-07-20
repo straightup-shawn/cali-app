@@ -568,14 +568,6 @@ export default function ActiveWorkoutPage() {
     // Navigation handled after PR celebration is dismissed, or if no PRs
   }, [doFinish]);
 
-  // Navigate to dashboard after finish (when workout is cleared and no PR celebration)
-  useEffect(() => {
-    if (!workout && !finishing && !showPRCelebration) {
-      // Workout was cleared (finished or discarded) and no celebration showing
-      // Don't navigate if we're already unmounting
-    }
-  }, [workout, finishing, showPRCelebration]);
-
   const handleAddExercise = useCallback(
     (exercise: { id: string; name: string; exerciseType: ExerciseType }) => {
       addExercise({
