@@ -30,8 +30,8 @@ export default defineConfig({
       manifest: {
         name: 'Calisthenics Log',
         short_name: 'CaliLog',
-        theme_color: '#1a1a2e',
-        background_color: '#1a1a2e',
+        theme_color: '#4f46e5',
+        background_color: '#f9fafb',
         display: 'standalone',
         scope: '/',
         start_url: '/',
