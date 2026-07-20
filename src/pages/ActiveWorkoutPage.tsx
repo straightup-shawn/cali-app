@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useTimer } from '@/hooks/useTimer';
 import { useExercises } from '@/hooks/useExercises';
+import RestTimerOverlay from '@/components/workout/RestTimerOverlay';
 import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 
 // =============================================================================
@@ -526,6 +527,8 @@ export default function ActiveWorkoutPage() {
   const [discardOpen, setDiscardOpen] = useState(false);
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [restTimerVisible, setRestTimerVisible] = useState(false);
+  const [restTimerDuration, setRestTimerDuration] = useState(90); // default 90s
 
   // Start timer on mount if workout is active
   useEffect(() => {
@@ -624,7 +627,14 @@ export default function ActiveWorkoutPage() {
               key={exercise.id}
               exercise={exercise}
               onUpdate={updateSet}
-              onComplete={completeSet}
+              onComplete={(exerciseId, setId) => {
+                completeSet(exerciseId, setId);
+                // Find the exercise's rest duration or use default
+                const ex = workout.exercises.find((e) => e.id === exerciseId);
+                const duration = ex?.restSeconds ?? 90;
+                setRestTimerDuration(duration);
+                setRestTimerVisible(true);
+              }}
               onAddSet={addSet}
               onRemove={removeExercise}
             />
@@ -676,6 +686,13 @@ export default function ActiveWorkoutPage() {
         onClose={() => setAddExerciseOpen(false)}
         onSelect={handleAddExercise}
         excludeIds={exerciseIds}
+      />
+
+      {/* Rest timer overlay - auto-shows after completing a set */}
+      <RestTimerOverlay
+        defaultSeconds={restTimerDuration}
+        onClose={() => setRestTimerVisible(false)}
+        visible={restTimerVisible}
       />
     </div>
   );
