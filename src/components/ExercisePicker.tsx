@@ -23,11 +23,11 @@ const TYPE_LABELS: Record<ExerciseType, string> = {
 };
 
 const TYPE_COLORS: Record<ExerciseType, string> = {
-  bodyweight: 'bg-green-100 text-green-800',
-  weighted: 'bg-blue-100 text-blue-800',
-  assisted: 'bg-purple-100 text-purple-800',
-  duration: 'bg-orange-100 text-orange-800',
-  static_hold: 'bg-red-100 text-red-800',
+  bodyweight: 'bg-green-900/50 text-green-300',
+  weighted: 'bg-blue-900/50 text-blue-300',
+  assisted: 'bg-purple-900/50 text-purple-300',
+  duration: 'bg-orange-900/50 text-orange-300',
+  static_hold: 'bg-red-900/50 text-red-300',
 };
 
 function useDebounce(value: string, delay: number): string {
@@ -72,20 +72,20 @@ export default function ExercisePicker({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-black/60"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative z-50 flex max-h-[85vh] w-full flex-col rounded-t-xl bg-white sm:max-w-lg sm:rounded-xl sm:shadow-xl">
+      <div className="relative z-50 flex max-h-[85vh] w-full flex-col rounded-t-xl border border-gray-700 bg-gray-900 sm:max-w-lg sm:rounded-xl sm:shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-          <h2 className="text-lg font-bold text-gray-900">Add Exercise</h2>
+        <div className="flex items-center justify-between border-b border-gray-700 px-4 py-3">
+          <h2 className="text-lg font-bold text-gray-100">Add Exercise</h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 active:bg-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-800 active:bg-gray-700"
             aria-label="Close"
           >
             <svg
@@ -108,7 +108,7 @@ export default function ExercisePicker({
         <div className="px-4 pt-3 pb-2">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -127,7 +127,7 @@ export default function ExercisePicker({
               value={searchInput}
               onChange={handleSearchChange}
               autoFocus
-              className="block h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 text-base shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function ExercisePicker({
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
             </div>
           ) : exercises && exercises.length > 0 ? (
             <div className="space-y-2">
@@ -156,16 +156,16 @@ export default function ExercisePicker({
                     }
                     className={`flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
                       isExcluded
-                        ? 'border-gray-100 bg-gray-50 opacity-50'
-                        : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100'
+                        ? 'border-gray-800 bg-gray-800/50 opacity-50'
+                        : 'border-gray-700 bg-gray-800 hover:border-indigo-600 hover:bg-gray-700 active:bg-gray-700'
                     }`}
                   >
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-100">
                         {exercise.name}
                       </p>
                       {exercise.muscle_groups && exercise.muscle_groups.length > 0 && (
-                        <p className="mt-0.5 text-xs text-gray-500">
+                        <p className="mt-0.5 text-xs text-gray-400">
                           {exercise.muscle_groups
                             .map((g: string) =>
                               g.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -176,7 +176,7 @@ export default function ExercisePicker({
                     </div>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        TYPE_COLORS[exercise.exercise_type as ExerciseType] ?? 'bg-gray-100 text-gray-800'
+                        TYPE_COLORS[exercise.exercise_type as ExerciseType] ?? 'bg-gray-700 text-gray-300'
                       }`}
                     >
                       {TYPE_LABELS[exercise.exercise_type as ExerciseType] ?? exercise.exercise_type}
@@ -187,7 +187,7 @@ export default function ExercisePicker({
             </div>
           ) : (
             <div className="py-8 text-center">
-              <p className="text-sm text-gray-500">No exercises found</p>
+              <p className="text-sm text-gray-400">No exercises found</p>
             </div>
           )}
         </div>

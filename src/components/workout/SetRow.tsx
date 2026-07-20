@@ -51,7 +51,7 @@ function RepsInput({
 }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <label className="text-xs text-gray-500">Reps</label>
+      <label className="text-xs text-gray-400">Reps</label>
       <input
         type="text"
         inputMode="numeric"
@@ -63,7 +63,7 @@ function RepsInput({
         }}
         disabled={disabled}
         placeholder="—"
-        className="h-11 w-16 rounded-lg border border-gray-300 bg-white text-center text-lg font-medium text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+        className="h-11 w-16 rounded-lg border border-gray-700 bg-gray-800 text-center text-lg font-medium text-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-800/50 disabled:text-gray-500"
         aria-label="Reps"
       />
     </div>
@@ -85,7 +85,7 @@ function WeightInput({
 }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <label className="text-xs text-gray-500">
+      <label className="text-xs text-gray-400">
         {label} ({unitLabel})
       </label>
       <input
@@ -98,7 +98,7 @@ function WeightInput({
         }}
         disabled={disabled}
         placeholder="—"
-        className="h-11 w-20 rounded-lg border border-gray-300 bg-white text-center text-lg font-medium text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+        className="h-11 w-20 rounded-lg border border-gray-700 bg-gray-800 text-center text-lg font-medium text-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-800/50 disabled:text-gray-500"
         aria-label={label}
       />
     </div>
@@ -130,7 +130,7 @@ function DurationInput({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <label className="text-xs text-gray-500">Duration</label>
+      <label className="text-xs text-gray-400">Duration</label>
       <input
         type="text"
         inputMode="numeric"
@@ -139,7 +139,7 @@ function DurationInput({
         onBlur={handleBlur}
         disabled={disabled}
         placeholder="0:00"
-        className="h-11 w-20 rounded-lg border border-gray-300 bg-white text-center text-lg font-medium text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+        className="h-11 w-20 rounded-lg border border-gray-700 bg-gray-800 text-center text-lg font-medium text-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-800/50 disabled:text-gray-500"
         aria-label="Duration (mm:ss)"
       />
     </div>
@@ -170,7 +170,7 @@ function RPERIRSelector({
         type="button"
         onClick={() => setExpanded(!expanded)}
         disabled={disabled}
-        className="flex min-h-[44px] items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+        className="flex min-h-[44px] items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400 hover:bg-gray-800 active:bg-gray-700 disabled:opacity-50"
         aria-expanded={expanded}
         aria-label="Toggle RPE/RIR selector"
       >
@@ -191,16 +191,16 @@ function RPERIRSelector({
       </button>
 
       {expanded && (
-        <div className="mt-2 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+        <div className="mt-2 space-y-3 rounded-lg border border-gray-700 bg-gray-800 p-3">
           {/* RPE */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-600">RPE</span>
+              <span className="text-xs font-medium text-gray-300">RPE</span>
               {rpe !== null && (
                 <button
                   type="button"
                   onClick={() => onRpeChange(null)}
-                  className="text-xs text-blue-600 hover:text-blue-800"
+                  className="text-xs text-indigo-400 hover:text-indigo-300"
                 >
                   Clear
                 </button>
@@ -215,8 +215,8 @@ function RPERIRSelector({
                   disabled={disabled}
                   className={`min-h-[44px] min-w-[44px] rounded-lg border text-sm font-medium transition-colors ${
                     rpe === v
-                      ? 'border-blue-500 bg-blue-500 text-white'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                      ? 'border-indigo-500 bg-indigo-600 text-white'
+                      : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
                   } disabled:opacity-50`}
                 >
                   {v}
@@ -228,12 +228,12 @@ function RPERIRSelector({
           {/* RIR */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-600">RIR</span>
+              <span className="text-xs font-medium text-gray-300">RIR</span>
               {rir !== null && (
                 <button
                   type="button"
                   onClick={() => onRirChange(null)}
-                  className="text-xs text-blue-600 hover:text-blue-800"
+                  className="text-xs text-indigo-400 hover:text-indigo-300"
                 >
                   Clear
                 </button>
@@ -248,8 +248,8 @@ function RPERIRSelector({
                   disabled={disabled}
                   className={`min-h-[44px] min-w-[44px] rounded-lg border text-sm font-medium transition-colors ${
                     rir === v
-                      ? 'border-blue-500 bg-blue-500 text-white'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                      ? 'border-indigo-500 bg-indigo-600 text-white'
+                      : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
                   } disabled:opacity-50`}
                 >
                   {v}
@@ -381,7 +381,7 @@ export default function SetRow({
 
   return (
     <div
-      className={`rounded-lg px-3 py-2 ${set.completed ? 'bg-green-50' : 'bg-white'}`}
+      className={`rounded-lg px-3 py-2 ${set.completed ? 'bg-green-950/50' : 'bg-gray-800'}`}
     >
       <div className="flex items-center gap-3">
         {/* Set number */}
@@ -399,8 +399,8 @@ export default function SetRow({
           disabled={set.completed}
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors ${
             set.completed
-              ? 'border-green-300 bg-green-500 text-white'
-              : 'border-gray-300 bg-white text-gray-400 hover:border-green-400 hover:text-green-500 active:bg-green-50'
+              ? 'border-green-600 bg-green-500 text-white'
+              : 'border-gray-600 bg-gray-700 text-gray-400 hover:border-green-500 hover:text-green-400 active:bg-green-950'
           }`}
           aria-label={set.completed ? 'Set completed' : 'Complete set'}
         >

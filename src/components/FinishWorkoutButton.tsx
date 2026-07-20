@@ -47,7 +47,7 @@ export function FinishWorkoutButton({ onComplete, disabled }: FinishWorkoutButto
         type="button"
         onClick={handleFinish}
         disabled={disabled || isFinishing}
-        className="w-full rounded-lg bg-green-600 px-4 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-green-500 active:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500"
+        className="w-full rounded-lg bg-green-600 px-4 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-green-500 active:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500"
       >
         {isFinishing ? (
           <span className="flex items-center justify-center gap-2">
@@ -72,7 +72,7 @@ export function FinishWorkoutButton({ onComplete, disabled }: FinishWorkoutButto
 
       {/* Error display */}
       {error && (
-        <p className="mt-2 text-center text-sm text-red-600" role="alert">
+        <p className="mt-2 text-center text-sm text-red-400" role="alert">
           {error}
         </p>
       )}

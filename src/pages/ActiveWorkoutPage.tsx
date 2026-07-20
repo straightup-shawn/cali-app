@@ -31,18 +31,18 @@ interface WorkoutTimerBarProps {
 
 function WorkoutTimerBar({ seconds, workoutName, onMenuToggle }: WorkoutTimerBarProps) {
   return (
-    <header className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-3">
+    <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-bold text-gray-900">
+          <h1 className="truncate text-lg font-bold text-gray-100">
             {workoutName}
           </h1>
-          <p className="text-sm font-mono text-indigo-600">{formatTime(seconds)}</p>
+          <p className="text-sm font-mono text-indigo-400">{formatTime(seconds)}</p>
         </div>
         <button
           type="button"
           onClick={onMenuToggle}
-          className="ml-2 flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 active:bg-gray-200"
+          className="ml-2 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:bg-gray-800 active:bg-gray-700"
           aria-label="Workout menu"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,11 +71,11 @@ function HeaderMenu({ open, onClose, onDiscard }: HeaderMenuProps) {
   return (
     <>
       <div className="fixed inset-0 z-20" onClick={onClose} aria-hidden="true" />
-      <div className="absolute right-4 top-14 z-30 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+      <div className="absolute right-4 top-14 z-30 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
         <button
           type="button"
           onClick={onDiscard}
-          className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 active:bg-red-100"
+          className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-gray-700 active:bg-gray-600"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -103,17 +103,17 @@ function DiscardConfirmDialog({ open, onCancel, onConfirm }: DiscardConfirmDialo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="fixed inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
-      <div className="relative z-50 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-        <h3 className="text-lg font-bold text-gray-900">Discard Workout?</h3>
-        <p className="mt-2 text-sm text-gray-600">
+      <div className="fixed inset-0 bg-black/60" onClick={onCancel} aria-hidden="true" />
+      <div className="relative z-50 w-full max-w-sm rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-xl">
+        <h3 className="text-lg font-bold text-gray-100">Discard Workout?</h3>
+        <p className="mt-2 text-sm text-gray-400">
           All progress for this workout will be lost. This action cannot be undone.
         </p>
         <div className="mt-5 flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600"
           >
             Cancel
           </button>
@@ -151,12 +151,12 @@ function SetRow({ set, exerciseType, exerciseId, onUpdate, onComplete }: SetRowP
     <div
       className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
         set.completed
-          ? 'border-green-200 bg-green-50'
-          : 'border-gray-200 bg-white'
+          ? 'border-green-800 bg-green-950/50'
+          : 'border-gray-700 bg-gray-800'
       }`}
     >
       {/* Set number */}
-      <span className="w-6 text-center text-xs font-medium text-gray-400">
+      <span className="w-6 text-center text-xs font-medium text-gray-500">
         {set.setNumber}
       </span>
 
@@ -173,7 +173,7 @@ function SetRow({ set, exerciseType, exerciseId, onUpdate, onComplete }: SetRowP
             })
           }
           disabled={set.completed}
-          className="h-11 w-16 rounded-md border border-gray-300 text-center text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
+          className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
         />
       )}
 
@@ -190,7 +190,7 @@ function SetRow({ set, exerciseType, exerciseId, onUpdate, onComplete }: SetRowP
             })
           }
           disabled={set.completed}
-          className="h-11 w-16 rounded-md border border-gray-300 text-center text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
+          className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
         />
       )}
 
@@ -207,7 +207,7 @@ function SetRow({ set, exerciseType, exerciseId, onUpdate, onComplete }: SetRowP
             })
           }
           disabled={set.completed}
-          className="h-11 w-20 rounded-md border border-gray-300 text-center text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
+          className="h-11 w-20 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
         />
       )}
 
@@ -219,7 +219,7 @@ function SetRow({ set, exerciseType, exerciseId, onUpdate, onComplete }: SetRowP
         className={`ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
           set.completed
             ? 'bg-green-500 text-white'
-            : 'border border-gray-300 text-gray-400 hover:border-green-400 hover:text-green-500 active:bg-green-50'
+            : 'border border-gray-600 text-gray-500 hover:border-green-500 hover:text-green-400 active:bg-green-950'
         }`}
         aria-label={set.completed ? 'Set completed' : 'Complete set'}
       >
@@ -253,22 +253,22 @@ const TYPE_LABELS: Record<ExerciseType, string> = {
 };
 
 const TYPE_COLORS: Record<ExerciseType, string> = {
-  bodyweight: 'bg-green-100 text-green-800',
-  weighted: 'bg-blue-100 text-blue-800',
-  assisted: 'bg-purple-100 text-purple-800',
-  duration: 'bg-orange-100 text-orange-800',
-  static_hold: 'bg-red-100 text-red-800',
+  bodyweight: 'bg-green-900/50 text-green-300',
+  weighted: 'bg-blue-900/50 text-blue-300',
+  assisted: 'bg-purple-900/50 text-purple-300',
+  duration: 'bg-orange-900/50 text-orange-300',
+  static_hold: 'bg-red-900/50 text-red-300',
 };
 
 function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }: ExerciseSectionProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
       {/* Exercise header */}
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-gray-900">
+          <h3 className="truncate text-sm font-semibold text-gray-100">
             {exercise.exerciseName}
           </h3>
           <span
@@ -282,7 +282,7 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }:
         <button
           type="button"
           onClick={() => setShowRemoveConfirm(true)}
-          className="ml-2 flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 active:bg-red-100"
+          className="ml-2 flex h-11 w-11 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-red-950 hover:text-red-400 active:bg-red-900"
           aria-label={`Remove ${exercise.exerciseName}`}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,7 +310,7 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }:
       <button
         type="button"
         onClick={() => onAddSet(exercise.id)}
-        className="mt-3 flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-gray-300 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600 active:bg-indigo-50"
+        className="mt-3 flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-gray-700 py-2.5 text-sm font-medium text-gray-400 transition-colors hover:border-indigo-500 hover:text-indigo-400 active:bg-indigo-950/50"
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -320,12 +320,12 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }:
 
       {/* Remove confirmation */}
       {showRemoveConfirm && (
-        <div className="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
-          <p className="flex-1 text-xs text-red-700">Remove this exercise and all its sets?</p>
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-red-800 bg-red-950/50 p-3">
+          <p className="flex-1 text-xs text-red-300">Remove this exercise and all its sets?</p>
           <button
             type="button"
             onClick={() => setShowRemoveConfirm(false)}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100"
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-gray-700"
           >
             Cancel
           </button>
@@ -378,17 +378,17 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
 
       {/* Sheet */}
-      <div className="relative z-50 flex max-h-[85vh] w-full flex-col rounded-t-xl bg-white sm:max-w-lg sm:rounded-xl sm:shadow-xl">
+      <div className="relative z-50 flex max-h-[85vh] w-full flex-col rounded-t-xl border border-gray-700 bg-gray-900 sm:max-w-lg sm:rounded-xl sm:shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-          <h2 className="text-lg font-bold text-gray-900">Add Exercise</h2>
+        <div className="flex items-center justify-between border-b border-gray-700 px-4 py-3">
+          <h2 className="text-lg font-bold text-gray-100">Add Exercise</h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 active:bg-gray-200"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-800 active:bg-gray-700"
             aria-label="Close"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,7 +402,7 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
         <div className="px-4 pt-3 pb-2">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
               fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -414,7 +414,7 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
-              className="block h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 text-base shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
         </div>
@@ -423,7 +423,7 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
             </div>
           ) : exercises && exercises.length > 0 ? (
             <div className="space-y-2">
@@ -443,14 +443,14 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
                     }
                     className={`flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
                       isExcluded
-                        ? 'border-gray-100 bg-gray-50 opacity-50'
-                        : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100'
+                        ? 'border-gray-800 bg-gray-800/50 opacity-50'
+                        : 'border-gray-700 bg-gray-800 hover:border-indigo-600 hover:bg-gray-700 active:bg-gray-700'
                     }`}
                   >
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{exercise.name}</p>
+                      <p className="text-sm font-medium text-gray-100">{exercise.name}</p>
                       {exercise.muscle_groups && exercise.muscle_groups.length > 0 && (
-                        <p className="mt-0.5 text-xs text-gray-500">
+                        <p className="mt-0.5 text-xs text-gray-400">
                           {exercise.muscle_groups
                             .map((g: string) =>
                               g.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
@@ -461,7 +461,7 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
                     </div>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        TYPE_COLORS[exercise.exercise_type as ExerciseType] ?? 'bg-gray-100 text-gray-800'
+                        TYPE_COLORS[exercise.exercise_type as ExerciseType] ?? 'bg-gray-700 text-gray-300'
                       }`}
                     >
                       {TYPE_LABELS[exercise.exercise_type as ExerciseType] ?? exercise.exercise_type}
@@ -472,7 +472,7 @@ function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSh
             </div>
           ) : (
             <div className="py-8 text-center">
-              <p className="text-sm text-gray-500">No exercises found</p>
+              <p className="text-sm text-gray-400">No exercises found</p>
             </div>
           )}
         </div>
@@ -582,8 +582,8 @@ export default function ActiveWorkoutPage() {
   // If no workout is active, redirect to dashboard
   if (!workout) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
-        <p className="text-sm text-gray-500">No active workout</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">
+        <p className="text-sm text-gray-400">No active workout</p>
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
@@ -598,7 +598,7 @@ export default function ActiveWorkoutPage() {
   const exerciseIds = workout.exercises.map((e) => e.exerciseId);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-gray-50 pb-24">
+    <div className="relative flex min-h-screen flex-col bg-gray-950 pb-24">
       {/* Timer bar header */}
       <WorkoutTimerBar
         seconds={timer.seconds}
@@ -632,13 +632,13 @@ export default function ActiveWorkoutPage() {
         ) : (
           <div className="py-12 text-center">
             <svg
-              className="mx-auto h-12 w-12 text-gray-300"
+              className="mx-auto h-12 w-12 text-gray-600"
               fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            <p className="mt-3 text-sm font-medium text-gray-900">No exercises yet</p>
+            <p className="mt-3 text-sm font-medium text-gray-300">No exercises yet</p>
             <p className="mt-1 text-xs text-gray-500">
               Add exercises to start logging your workout
             </p>
@@ -649,7 +649,7 @@ export default function ActiveWorkoutPage() {
         <button
           type="button"
           onClick={() => setAddExerciseOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-4 text-sm font-medium text-gray-500 transition-colors hover:border-indigo-400 hover:text-indigo-600 active:bg-indigo-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-700 py-4 text-sm font-medium text-gray-400 transition-colors hover:border-indigo-500 hover:text-indigo-400 active:bg-indigo-950/50"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -659,7 +659,7 @@ export default function ActiveWorkoutPage() {
       </div>
 
       {/* Fixed bottom: Finish button */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-200 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-800 bg-gray-900 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <FinishWorkoutButton onFinish={handleFinish} disabled={finishing} />
       </div>
 

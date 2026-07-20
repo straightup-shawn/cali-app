@@ -19,14 +19,14 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-indigo-50 to-white px-6 py-12">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-6 py-12">
       <div className="w-full max-w-md space-y-8">
         {/* Welcome header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-3xl font-bold tracking-tight text-white">
             Welcome to Calisthenics Log
           </h1>
-          <p className="mt-3 text-base text-gray-600">
+          <p className="mt-3 text-base text-gray-400">
             Choose your preferred unit system. You can change this later in settings.
           </p>
         </div>
@@ -38,13 +38,13 @@ export default function OnboardingPage() {
             onClick={() => setSelected('metric')}
             className={`flex flex-col items-center rounded-xl border-2 p-6 transition-all active:scale-[0.97] ${
               selected === 'metric'
-                ? 'border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600'
-                : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50 active:bg-indigo-50'
+                ? 'border-indigo-500 bg-indigo-950/50 ring-2 ring-indigo-500'
+                : 'border-gray-700 bg-gray-900 hover:border-indigo-600 hover:bg-gray-800 active:bg-gray-800'
             }`}
           >
             <span className="text-4xl" aria-hidden="true">🏋️</span>
-            <span className="mt-3 text-lg font-semibold text-gray-900">Metric</span>
-            <span className="mt-1 text-sm text-gray-500">kg, cm</span>
+            <span className="mt-3 text-lg font-semibold text-gray-100">Metric</span>
+            <span className="mt-1 text-sm text-gray-400">kg, cm</span>
           </button>
 
           <button
@@ -52,13 +52,13 @@ export default function OnboardingPage() {
             onClick={() => setSelected('imperial')}
             className={`flex flex-col items-center rounded-xl border-2 p-6 transition-all active:scale-[0.97] ${
               selected === 'imperial'
-                ? 'border-indigo-600 bg-indigo-50 ring-2 ring-indigo-600'
-                : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50 active:bg-indigo-50'
+                ? 'border-indigo-500 bg-indigo-950/50 ring-2 ring-indigo-500'
+                : 'border-gray-700 bg-gray-900 hover:border-indigo-600 hover:bg-gray-800 active:bg-gray-800'
             }`}
           >
             <span className="text-4xl" aria-hidden="true">💪</span>
-            <span className="mt-3 text-lg font-semibold text-gray-900">Imperial</span>
-            <span className="mt-1 text-sm text-gray-500">lbs, in</span>
+            <span className="mt-3 text-lg font-semibold text-gray-100">Imperial</span>
+            <span className="mt-1 text-sm text-gray-400">lbs, in</span>
           </button>
         </div>
 
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
 
         {/* Error display */}
         {updateProfile.isError && (
-          <p className="text-center text-sm text-red-600" role="alert">
+          <p className="text-center text-sm text-red-400" role="alert">
             Something went wrong. Please try again.
           </p>
         )}

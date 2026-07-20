@@ -21,11 +21,11 @@ const TYPE_LABELS: Record<ExerciseType, string> = {
 };
 
 const TYPE_COLORS: Record<ExerciseType, string> = {
-  bodyweight: 'bg-green-100 text-green-800',
-  weighted: 'bg-blue-100 text-blue-800',
-  assisted: 'bg-purple-100 text-purple-800',
-  duration: 'bg-orange-100 text-orange-800',
-  static_hold: 'bg-red-100 text-red-800',
+  bodyweight: 'bg-green-900/50 text-green-300',
+  weighted: 'bg-blue-900/50 text-blue-300',
+  assisted: 'bg-purple-900/50 text-purple-300',
+  duration: 'bg-orange-900/50 text-orange-300',
+  static_hold: 'bg-red-900/50 text-red-300',
 };
 
 // =============================================================================
@@ -115,40 +115,40 @@ function SetRowDisplay({ set, exerciseType, isPR, formatWeight }: SetRowDisplayP
     <div
       className={`flex items-center gap-3 rounded-lg border px-3 py-2 ${
         isPR
-          ? 'border-amber-200 bg-amber-50'
-          : 'border-gray-100 bg-gray-50'
+          ? 'border-amber-700 bg-amber-950/50'
+          : 'border-gray-700 bg-gray-800'
       }`}
     >
       {/* Set number */}
-      <span className="w-6 text-center text-xs font-semibold text-gray-400">
+      <span className="w-6 text-center text-xs font-semibold text-gray-500">
         {set.set_number}
       </span>
 
       {/* Set data */}
       <div className="flex flex-1 flex-wrap items-center gap-x-4 gap-y-1 text-sm">
         {showReps && set.reps !== null && (
-          <span className="text-gray-900">
+          <span className="text-gray-100">
             <span className="font-medium">{set.reps}</span>
-            <span className="ml-0.5 text-xs text-gray-500">reps</span>
+            <span className="ml-0.5 text-xs text-gray-400">reps</span>
           </span>
         )}
         {showWeight && set.weight_kg !== null && (
-          <span className="text-gray-900">
+          <span className="text-gray-100">
             <span className="font-medium">{formatWeight(set.weight_kg)}</span>
           </span>
         )}
         {showDuration && set.duration_seconds !== null && (
-          <span className="text-gray-900">
+          <span className="text-gray-100">
             <span className="font-medium">{formatDuration(set.duration_seconds)}</span>
           </span>
         )}
         {set.rpe !== null && (
-          <span className="text-gray-500 text-xs">
+          <span className="text-gray-400 text-xs">
             RPE {set.rpe}
           </span>
         )}
         {set.rir !== null && (
-          <span className="text-gray-500 text-xs">
+          <span className="text-gray-400 text-xs">
             RIR {set.rir}
           </span>
         )}
@@ -179,10 +179,10 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight }: ExerciseS
   const exerciseType = (exercise.exercises?.exercise_type ?? 'bodyweight') as ExerciseType;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
       {/* Exercise header */}
       <div className="flex items-center gap-2">
-        <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
+        <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-100">
           {exerciseName}
         </h3>
         <span
@@ -206,7 +206,7 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight }: ExerciseS
           />
         ))}
         {exercise.exercise_sets.length === 0 && (
-          <p className="py-2 text-center text-xs text-gray-400">No sets recorded</p>
+          <p className="py-2 text-center text-xs text-gray-500">No sets recorded</p>
         )}
       </div>
     </div>
@@ -225,21 +225,21 @@ export default function WorkoutDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
       </div>
     );
   }
 
   if (error || !workout) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
-        <p className="text-sm text-red-600">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">
+        <p className="text-sm text-red-400">
           {error instanceof Error ? error.message : 'Workout not found'}
         </p>
         <Link
           to="/history"
-          className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mt-4 text-sm font-medium text-indigo-400 hover:text-indigo-300"
         >
           ← Back to History
         </Link>
@@ -251,12 +251,12 @@ export default function WorkoutDetailPage() {
   const exercises = workout.workout_exercises ?? [];
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 pb-20">
+    <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-3">
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
         <Link
           to="/history"
-          className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-indigo-400 hover:text-indigo-300"
         >
           <svg
             className="h-4 w-4"
@@ -274,8 +274,8 @@ export default function WorkoutDetailPage() {
           </svg>
           Back to History
         </Link>
-        <h1 className="text-xl font-bold text-gray-900">{workout.name}</h1>
-        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+        <h1 className="text-xl font-bold text-gray-100">{workout.name}</h1>
+        <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
           <span>{formatDate(workout.started_at)}</span>
           <span>•</span>
           <span>{formatTime(workout.started_at)}</span>
@@ -290,27 +290,27 @@ export default function WorkoutDetailPage() {
 
       {/* Workout summary stats */}
       <div className="grid grid-cols-3 gap-3 px-4 pt-4">
-        <div className="rounded-lg bg-white p-3 text-center border border-gray-100">
-          <p className="text-lg font-bold text-gray-900">{exercises.length}</p>
-          <p className="text-xs text-gray-500">Exercises</p>
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-3 text-center">
+          <p className="text-lg font-bold text-gray-100">{exercises.length}</p>
+          <p className="text-xs text-gray-400">Exercises</p>
         </div>
-        <div className="rounded-lg bg-white p-3 text-center border border-gray-100">
-          <p className="text-lg font-bold text-gray-900">
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-3 text-center">
+          <p className="text-lg font-bold text-gray-100">
             {exercises.reduce((sum, ex) => sum + ex.exercise_sets.length, 0)}
           </p>
-          <p className="text-xs text-gray-500">Total Sets</p>
+          <p className="text-xs text-gray-400">Total Sets</p>
         </div>
-        <div className="rounded-lg bg-white p-3 text-center border border-gray-100">
-          <p className="text-lg font-bold text-amber-600">{records.length}</p>
-          <p className="text-xs text-gray-500">PRs</p>
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-3 text-center">
+          <p className="text-lg font-bold text-amber-400">{records.length}</p>
+          <p className="text-xs text-gray-400">PRs</p>
         </div>
       </div>
 
       {/* Notes */}
       {workout.notes && (
-        <div className="mx-4 mt-4 rounded-lg border border-gray-100 bg-white p-3">
-          <p className="text-xs font-medium text-gray-500 uppercase">Notes</p>
-          <p className="mt-1 text-sm text-gray-700">{workout.notes}</p>
+        <div className="mx-4 mt-4 rounded-lg border border-gray-800 bg-gray-900 p-3">
+          <p className="text-xs font-medium text-gray-400 uppercase">Notes</p>
+          <p className="mt-1 text-sm text-gray-300">{workout.notes}</p>
         </div>
       )}
 
@@ -326,7 +326,7 @@ export default function WorkoutDetailPage() {
         ))}
         {exercises.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-sm text-gray-400">No exercises in this workout</p>
+            <p className="text-sm text-gray-500">No exercises in this workout</p>
           </div>
         )}
       </div>

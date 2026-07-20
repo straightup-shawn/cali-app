@@ -57,15 +57,13 @@ function QuickStartCard({ routines }: { routines: RoutineWithCount[] }) {
   }
 
   function handleStartFromRoutine(routine: RoutineWithCount) {
-    // startWorkout accepts RoutineWithExercises, but for quick start from
-    // the dashboard we pass the routine with count — the context handles it
     startWorkout(routine as any);
     navigate('/workout/active');
   }
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">Quick Start</h2>
+    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+      <h2 className="text-sm font-semibold text-gray-100">Quick Start</h2>
 
       <button
         type="button"
@@ -77,14 +75,14 @@ function QuickStartCard({ routines }: { routines: RoutineWithCount[] }) {
 
       {routines.length > 0 && (
         <div className="mt-3">
-          <p className="text-xs font-medium text-gray-500">From routine</p>
+          <p className="text-xs font-medium text-gray-400">From routine</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {routines.slice(0, 3).map((routine) => (
               <button
                 key={routine.id}
                 type="button"
                 onClick={() => handleStartFromRoutine(routine)}
-                className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700 active:bg-gray-100"
+                className="inline-flex items-center rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-200 active:bg-gray-700"
               >
                 {routine.name}
               </button>
@@ -104,10 +102,10 @@ function RecentWorkouts({ workouts }: { workouts: WorkoutSummary[] }) {
   if (workouts.length === 0) return null;
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900">Recent Workouts</h2>
-        <Link to="/history" className="text-xs font-medium text-indigo-600">
+        <h2 className="text-sm font-semibold text-gray-100">Recent Workouts</h2>
+        <Link to="/history" className="text-xs font-medium text-indigo-400">
           See all
         </Link>
       </div>
@@ -119,18 +117,18 @@ function RecentWorkouts({ workouts }: { workouts: WorkoutSummary[] }) {
             <Link
               key={workout.id}
               to={`/history/${workout.id}`}
-              className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 active:bg-gray-100"
+              className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-800/50 p-3 active:bg-gray-800"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-gray-900">
+                <p className="truncate text-sm font-medium text-gray-100">
                   {workout.name}
                 </p>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-gray-400">
                   {formatDate(dateStr)} · {formatDuration(workout.duration_seconds)}
                 </p>
               </div>
               <svg
-                className="ml-2 h-4 w-4 shrink-0 text-gray-400"
+                className="ml-2 h-4 w-4 shrink-0 text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -166,13 +164,13 @@ function WeeklyStats({ workouts }: { workouts: WorkoutSummary[] }) {
   }, [workouts, weekStart]);
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-900">This Week</h2>
+    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+      <h2 className="text-sm font-semibold text-gray-100">This Week</h2>
       <div className="mt-3 flex items-baseline gap-1">
-        <span className="text-3xl font-bold text-indigo-600">
+        <span className="text-3xl font-bold text-indigo-400">
           {workoutsThisWeek}
         </span>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-400">
           workout{workoutsThisWeek !== 1 ? 's' : ''} completed
         </span>
       </div>
@@ -194,9 +192,9 @@ function WelcomeCard() {
   }
 
   return (
-    <section className="rounded-xl border border-indigo-100 bg-indigo-50 p-5 text-center">
-      <h2 className="text-lg font-bold text-indigo-900">Welcome!</h2>
-      <p className="mt-2 text-sm text-indigo-700">
+    <section className="rounded-xl border border-indigo-800 bg-indigo-950/50 p-5 text-center">
+      <h2 className="text-lg font-bold text-indigo-100">Welcome!</h2>
+      <p className="mt-2 text-sm text-indigo-300">
         You're all set. Start your first workout to begin tracking your progress.
       </p>
       <button
@@ -223,17 +221,17 @@ export default function DashboardPage() {
   const hasWorkouts = (workouts ?? []).length > 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 pb-20">
+    <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+        <h1 className="text-xl font-bold text-gray-100">Dashboard</h1>
       </header>
 
       {/* Content */}
       <div className="flex-1 px-4 pt-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
           </div>
         ) : !hasWorkouts ? (
           <div className="space-y-4">

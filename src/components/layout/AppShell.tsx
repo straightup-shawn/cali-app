@@ -8,7 +8,7 @@ export default function AppShell() {
   const isFullScreen = location.pathname === '/workout/active';
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-950">
       {/* Main content area — add bottom padding to prevent nav overlap on mobile */}
       <main className={isFullScreen ? '' : 'pb-20 md:pb-0'}>
         <Outlet />

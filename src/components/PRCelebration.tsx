@@ -71,17 +71,17 @@ export function PRCelebration({ newPRs, onClose }: PRCelebrationProps) {
       aria-modal="true"
       aria-labelledby="pr-celebration-title"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl animate-in fade-in zoom-in">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-xl animate-in fade-in zoom-in">
         {/* Trophy header */}
         <div className="mb-4 text-center">
           <div className="text-5xl mb-2">🏆</div>
           <h2
             id="pr-celebration-title"
-            className="text-xl font-bold text-gray-900"
+            className="text-xl font-bold text-white"
           >
             New Personal {newPRs.length === 1 ? 'Record' : 'Records'}!
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-400">
             You crushed it this workout
           </p>
         </div>
@@ -91,22 +91,22 @@ export function PRCelebration({ newPRs, onClose }: PRCelebrationProps) {
           {newPRs.map((pr) => (
             <li
               key={`${pr.exerciseId}-${pr.recordType}`}
-              className="flex items-center gap-3 rounded-lg bg-amber-50 p-3 border border-amber-200"
+              className="flex items-center gap-3 rounded-lg bg-amber-950/50 p-3 border border-amber-700"
             >
               <span className="text-2xl" aria-hidden="true">
                 {recordTypeIcon(pr.recordType)}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="font-medium text-gray-100 truncate">
                   {pr.exerciseName}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-300">
                   {recordTypeLabel(pr.recordType)}:{' '}
-                  <span className="font-semibold text-amber-700">
+                  <span className="font-semibold text-amber-400">
                     {formatValue(pr.recordType, pr.newValue)}
                   </span>
                   {pr.previousValue != null && (
-                    <span className="text-gray-400 ml-1">
+                    <span className="text-gray-500 ml-1">
                       (was {formatValue(pr.recordType, pr.previousValue)})
                     </span>
                   )}

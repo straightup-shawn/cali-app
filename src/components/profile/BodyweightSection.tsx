@@ -25,7 +25,7 @@ function BodyweightChart({ entries }: { entries: { entry_date: string; weight_kg
 
   if (chartData.length < 2) {
     return (
-      <div className="flex h-32 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-500">
+      <div className="flex h-32 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-sm text-gray-400">
         Log at least 2 entries to see a trend chart
       </div>
     );
@@ -51,8 +51,8 @@ function BodyweightChart({ entries }: { entries: { entry_date: string; weight_kg
   const polylinePoints = points.join(' ');
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3">
-      <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
+    <div className="rounded-lg border border-gray-700 bg-gray-800 p-3">
+      <div className="mb-1 flex items-center justify-between text-xs text-gray-400">
         <span>{chartData[0].date}</span>
         <span>{chartData[chartData.length - 1].date}</span>
       </div>
@@ -69,7 +69,7 @@ function BodyweightChart({ entries }: { entries: { entry_date: string; weight_kg
           y1={padding}
           x2={width - padding}
           y2={padding}
-          stroke="#e5e7eb"
+          stroke="#374151"
           strokeWidth="0.5"
         />
         <line
@@ -77,7 +77,7 @@ function BodyweightChart({ entries }: { entries: { entry_date: string; weight_kg
           y1={padding + chartHeight / 2}
           x2={width - padding}
           y2={padding + chartHeight / 2}
-          stroke="#e5e7eb"
+          stroke="#374151"
           strokeWidth="0.5"
         />
         <line
@@ -85,14 +85,14 @@ function BodyweightChart({ entries }: { entries: { entry_date: string; weight_kg
           y1={padding + chartHeight}
           x2={width - padding}
           y2={padding + chartHeight}
-          stroke="#e5e7eb"
+          stroke="#374151"
           strokeWidth="0.5"
         />
         {/* Trend line */}
         <polyline
           points={polylinePoints}
           fill="none"
-          stroke="#6366f1"
+          stroke="#818cf8"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -106,14 +106,14 @@ function BodyweightChart({ entries }: { entries: { entry_date: string; weight_kg
               cx={x}
               cy={y}
               r="2.5"
-              fill="#6366f1"
-              stroke="white"
+              fill="#818cf8"
+              stroke="#1f2937"
               strokeWidth="1"
             />
           );
         })}
       </svg>
-      <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
+      <div className="mt-1 flex items-center justify-between text-xs text-gray-400">
         <span>
           {minVal.toFixed(1)} {weightLabel}
         </span>
@@ -171,7 +171,7 @@ function BodyweightForm({
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex gap-3">
         <div className="flex-1">
-          <label htmlFor="bw-weight" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="bw-weight" className="mb-1 block text-sm font-medium text-gray-300">
             Weight ({weightLabel})
           </label>
           <input
@@ -183,11 +183,11 @@ function BodyweightForm({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             placeholder={`e.g. ${weightLabel === 'kg' ? '70.0' : '154.0'}`}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base shadow-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white placeholder:text-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
         <div className="flex-1">
-          <label htmlFor="bw-date" className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="bw-date" className="mb-1 block text-sm font-medium text-gray-300">
             Date
           </label>
           <input
@@ -196,13 +196,13 @@ function BodyweightForm({
             value={date}
             max={today}
             onChange={(e) => setDate(e.target.value)}
-            className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base shadow-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-red-400" role="alert">
           {error}
         </p>
       )}
@@ -276,7 +276,7 @@ function BodyweightList({
   }
 
   return (
-    <ul className="divide-y divide-gray-100">
+    <ul className="divide-y divide-gray-800">
       {entries.map((entry) => (
         <li key={entry.id} className="py-3">
           {editing?.id === entry.id ? (
@@ -290,14 +290,14 @@ function BodyweightList({
                   min="0"
                   value={editing.weight}
                   onChange={(e) => setEditing({ ...editing, weight: e.target.value })}
-                  className="w-24 rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-24 rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   aria-label={`Weight in ${weightLabel}`}
                 />
                 <input
                   type="date"
                   value={editing.date}
                   onChange={(e) => setEditing({ ...editing, date: e.target.value })}
-                  className="flex-1 rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="flex-1 rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   aria-label="Entry date"
                 />
               </div>
@@ -313,7 +313,7 @@ function BodyweightList({
                 <button
                   type="button"
                   onClick={() => setEditing(null)}
-                  className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 active:bg-gray-400"
+                  className="rounded bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-gray-600 active:bg-gray-500"
                 >
                   Cancel
                 </button>
@@ -322,7 +322,7 @@ function BodyweightList({
           ) : deleteConfirmId === entry.id ? (
             // Delete confirmation
             <div className="flex items-center justify-between">
-              <span className="text-sm text-red-600">Delete this entry?</span>
+              <span className="text-sm text-red-400">Delete this entry?</span>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -335,7 +335,7 @@ function BodyweightList({
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmId(null)}
-                  className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 active:bg-gray-400"
+                  className="rounded bg-gray-700 px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-gray-600 active:bg-gray-500"
                 >
                   Cancel
                 </button>
@@ -345,16 +345,16 @@ function BodyweightList({
             // Display mode
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-gray-100">
                   {formatWeight(entry.weight_kg)}
                 </span>
-                <span className="ml-3 text-sm text-gray-500">{entry.entry_date}</span>
+                <span className="ml-3 text-sm text-gray-400">{entry.entry_date}</span>
               </div>
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={() => startEdit(entry)}
-                  className="rounded p-2.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200 transition-colors"
+                  className="rounded p-2.5 text-gray-500 hover:bg-gray-800 hover:text-gray-300 active:bg-gray-700 transition-colors"
                   aria-label={`Edit entry for ${entry.entry_date}`}
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -364,7 +364,7 @@ function BodyweightList({
                 <button
                   type="button"
                   onClick={() => { setDeleteConfirmId(entry.id); setEditing(null); }}
-                  className="rounded p-2.5 text-gray-400 hover:bg-red-50 hover:text-red-600 active:bg-red-100 transition-colors"
+                  className="rounded p-2.5 text-gray-500 hover:bg-red-950 hover:text-red-400 active:bg-red-900 transition-colors"
                   aria-label={`Delete entry for ${entry.entry_date}`}
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -390,9 +390,9 @@ export default function BodyweightSection() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Bodyweight</h2>
+        <h2 className="text-lg font-semibold text-gray-100">Bodyweight</h2>
         <div className="flex items-center justify-center py-8">
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
         </div>
       </div>
     );
@@ -401,8 +401,8 @@ export default function BodyweightSection() {
   if (isError) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Bodyweight</h2>
-        <p className="text-sm text-red-600">Failed to load bodyweight entries.</p>
+        <h2 className="text-lg font-semibold text-gray-100">Bodyweight</h2>
+        <p className="text-sm text-red-400">Failed to load bodyweight entries.</p>
       </div>
     );
   }
@@ -412,7 +412,7 @@ export default function BodyweightSection() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Bodyweight</h2>
+      <h2 className="text-lg font-semibold text-gray-100">Bodyweight</h2>
 
       {/* Form to log new entry */}
       <BodyweightForm defaultWeight={mostRecentWeight} />

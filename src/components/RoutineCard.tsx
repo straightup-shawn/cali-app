@@ -42,22 +42,22 @@ export default function RoutineCard({
   });
 
   return (
-    <div className="relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div className="relative rounded-xl border border-gray-800 bg-gray-900 p-4 transition-colors">
       <Link
         to={`/routines/${id}/edit`}
-        className="block active:bg-gray-50 transition-colors"
+        className="block active:bg-gray-800 transition-colors"
         aria-label={`View routine: ${name}`}
       >
         <div className="flex items-start justify-between gap-2 pr-8">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-base font-medium text-gray-900">
+            <h3 className="truncate text-base font-medium text-gray-100">
               {name}
             </h3>
-            <div className="mt-1 flex items-center gap-3 text-sm text-gray-500">
+            <div className="mt-1 flex items-center gap-3 text-sm text-gray-400">
               <span>
                 {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
               </span>
-              <span className="text-gray-300">•</span>
+              <span className="text-gray-600">•</span>
               <span>Updated {formattedDate}</span>
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function RoutineCard({
           e.stopPropagation();
           setMenuOpen((prev) => !prev);
         }}
-        className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 active:bg-gray-200 transition-colors"
+        className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-800 hover:text-gray-300 active:bg-gray-700 transition-colors"
         aria-label={`Options for ${name}`}
         aria-expanded={menuOpen}
         aria-haspopup="true"
@@ -96,11 +96,11 @@ export default function RoutineCard({
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute right-3 top-12 z-20 w-40 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+          <div className="absolute right-3 top-12 z-20 w-40 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
             <button
               type="button"
               onClick={handleDuplicate}
-              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-200 hover:bg-gray-700 active:bg-gray-600 transition-colors"
             >
               <svg
                 className="h-4 w-4"
@@ -121,7 +121,7 @@ export default function RoutineCard({
             <button
               type="button"
               onClick={handleDelete}
-              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
+              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-400 hover:bg-red-950 active:bg-red-900 transition-colors"
             >
               <svg
                 className="h-4 w-4"

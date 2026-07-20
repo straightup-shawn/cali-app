@@ -109,16 +109,16 @@ export default function ExerciseFormPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3">
         <Link
           to="/exercises"
-          className="text-sm font-medium text-indigo-600 active:text-indigo-700"
+          className="text-sm font-medium text-indigo-400 active:text-indigo-300"
         >
           Cancel
         </Link>
-        <h1 className="text-lg font-bold text-gray-900">New Exercise</h1>
+        <h1 className="text-lg font-bold text-gray-100">New Exercise</h1>
         <div className="w-12" aria-hidden="true" />
       </header>
 
@@ -132,7 +132,7 @@ export default function ExerciseFormPage() {
         {serverError && (
           <div
             role="alert"
-            className="rounded-md bg-red-50 p-3 text-sm text-red-700"
+            className="rounded-md bg-red-900/50 border border-red-800 p-3 text-sm text-red-300"
           >
             {serverError}
           </div>
@@ -142,20 +142,20 @@ export default function ExerciseFormPage() {
         <div>
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-300"
           >
-            Exercise Name <span className="text-red-500">*</span>
+            Exercise Name <span className="text-red-400">*</span>
           </label>
           <input
             id="name"
             type="text"
             autoComplete="off"
-            className="mt-1 block h-11 w-full rounded-md border border-gray-300 px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             placeholder="e.g. Archer Push-Up"
             {...register('name')}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
           )}
         </div>
 
@@ -163,13 +163,13 @@ export default function ExerciseFormPage() {
         <div>
           <label
             htmlFor="exercise_type"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-300"
           >
-            Exercise Type <span className="text-red-500">*</span>
+            Exercise Type <span className="text-red-400">*</span>
           </label>
           <select
             id="exercise_type"
-            className="mt-1 block h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             {...register('exercise_type')}
           >
             <option value="">Select a type...</option>
@@ -180,7 +180,7 @@ export default function ExerciseFormPage() {
             ))}
           </select>
           {errors.exercise_type && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-red-400">
               {errors.exercise_type.message}
             </p>
           )}
@@ -188,7 +188,7 @@ export default function ExerciseFormPage() {
 
         {/* Muscle Groups */}
         <fieldset>
-          <legend className="block text-sm font-medium text-gray-700">
+          <legend className="block text-sm font-medium text-gray-300">
             Muscle Groups
           </legend>
           <p className="mt-1 text-xs text-gray-500">
@@ -204,8 +204,8 @@ export default function ExerciseFormPage() {
                   onClick={() => toggleMuscleGroup(group)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     isSelected
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-300 bg-white text-gray-600 active:bg-gray-100'
+                      ? 'border-indigo-500 bg-indigo-950/50 text-indigo-300'
+                      : 'border-gray-700 bg-gray-800 text-gray-400 active:bg-gray-700'
                   }`}
                   aria-pressed={isSelected}
                 >
@@ -220,14 +220,14 @@ export default function ExerciseFormPage() {
         <div>
           <label
             htmlFor="instructions"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-300"
           >
             Instructions
           </label>
           <textarea
             id="instructions"
             rows={4}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             placeholder="How to perform this exercise..."
             {...register('instructions')}
           />
@@ -237,7 +237,7 @@ export default function ExerciseFormPage() {
         <div>
           <label
             htmlFor="progresses_to"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-300"
           >
             Progresses To
           </label>
@@ -246,7 +246,7 @@ export default function ExerciseFormPage() {
           </p>
           <select
             id="progresses_to"
-            className="mt-1 block h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             {...register('progresses_to')}
           >
             <option value="">None</option>

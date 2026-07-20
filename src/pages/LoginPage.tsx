@@ -51,13 +51,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4 py-12">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-bold tracking-tight text-white">
             Sign in to Calisthenics Log
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-400">
             Track your bodyweight training progress
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
         {error && (
           <div
             role="alert"
-            className="rounded-md bg-red-50 p-3 text-center text-sm text-red-700"
+            className="rounded-md bg-red-900/50 border border-red-800 p-3 text-center text-sm text-red-300"
           >
             {error}
           </div>
@@ -75,7 +75,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-300"
             >
               Email
             </label>
@@ -84,18 +84,18 @@ export default function LoginPage() {
               type="email"
               autoComplete="email"
               inputMode="email"
-              className="mt-1 block h-11 w-full rounded-md border border-gray-300 px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+              className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
               {...register('email')}
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
             )}
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-300"
             >
               Password
             </label>
@@ -103,11 +103,11 @@ export default function LoginPage() {
               id="password"
               type="password"
               autoComplete="current-password"
-              className="mt-1 block h-11 w-full rounded-md border border-gray-300 px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+              className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
               {...register('password')}
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-400">
                 {errors.password.message}
               </p>
             )}
@@ -124,10 +124,10 @@ export default function LoginPage() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-gray-700" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-gray-50 px-2 text-gray-500">
+            <span className="bg-gray-950 px-2 text-gray-400">
               Or continue with
             </span>
           </div>
@@ -137,7 +137,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isGoogleLoading}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 active:bg-gray-100"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-200 shadow-sm hover:bg-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 active:bg-gray-700"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -161,11 +161,11 @@ export default function LoginPage() {
         </button>
 
         <div className="space-y-2 text-center text-sm">
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             Don't have an account?{' '}
             <Link
               to="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-400 hover:text-indigo-300"
             >
               Sign up
             </Link>
@@ -173,7 +173,7 @@ export default function LoginPage() {
           <p>
             <Link
               to="/reset-password"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-indigo-400 hover:text-indigo-300"
             >
               Forgot your password?
             </Link>

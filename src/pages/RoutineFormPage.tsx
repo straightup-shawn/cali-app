@@ -222,23 +222,23 @@ export default function RoutineFormPage() {
 
   if (isEditing && routineLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3">
         <Link
           to="/routines"
-          className="text-sm font-medium text-indigo-600 active:text-indigo-700"
+          className="text-sm font-medium text-indigo-400 active:text-indigo-300"
         >
           Cancel
         </Link>
-        <h1 className="text-lg font-bold text-gray-900">
+        <h1 className="text-lg font-bold text-gray-100">
           {isEditing ? 'Edit Routine' : 'New Routine'}
         </h1>
         <div className="w-12" aria-hidden="true" />
@@ -254,7 +254,7 @@ export default function RoutineFormPage() {
         {serverError && (
           <div
             role="alert"
-            className="rounded-md bg-red-50 p-3 text-sm text-red-700"
+            className="rounded-md bg-red-900/50 border border-red-800 p-3 text-sm text-red-300"
           >
             {serverError}
           </div>
@@ -264,40 +264,40 @@ export default function RoutineFormPage() {
         <div>
           <label
             htmlFor="routine-name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-300"
           >
-            Routine Name <span className="text-red-500">*</span>
+            Routine Name <span className="text-red-400">*</span>
           </label>
           <input
             id="routine-name"
             type="text"
             autoComplete="off"
-            className="mt-1 block h-11 w-full rounded-md border border-gray-300 px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             placeholder="e.g. Push Day"
             {...register('name')}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
           )}
         </div>
 
         {/* Exercises Section */}
         <div>
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-700">Exercises</h2>
+            <h2 className="text-sm font-medium text-gray-300">Exercises</h2>
             <button
               type="button"
               onClick={() => setPickerOpen(true)}
-              className="rounded-md bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 active:bg-indigo-200"
+              className="rounded-md bg-indigo-900/50 px-3 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-900 active:bg-indigo-800"
             >
               + Add Exercise
             </button>
           </div>
 
           {exercises.length === 0 ? (
-            <div className="mt-4 rounded-lg border-2 border-dashed border-gray-300 py-8 text-center">
-              <p className="text-sm text-gray-500">No exercises added yet</p>
-              <p className="mt-1 text-xs text-gray-400">
+            <div className="mt-4 rounded-lg border-2 border-dashed border-gray-700 py-8 text-center">
+              <p className="text-sm text-gray-400">No exercises added yet</p>
+              <p className="mt-1 text-xs text-gray-500">
                 Tap "Add Exercise" to get started
               </p>
             </div>
@@ -369,11 +369,11 @@ interface ExerciseListItemProps {
 }
 
 const TYPE_BADGE_COLORS: Record<ExerciseType, string> = {
-  bodyweight: 'bg-green-100 text-green-800',
-  weighted: 'bg-blue-100 text-blue-800',
-  assisted: 'bg-purple-100 text-purple-800',
-  duration: 'bg-orange-100 text-orange-800',
-  static_hold: 'bg-red-100 text-red-800',
+  bodyweight: 'bg-green-900/50 text-green-300',
+  weighted: 'bg-blue-900/50 text-blue-300',
+  assisted: 'bg-purple-900/50 text-purple-300',
+  duration: 'bg-orange-900/50 text-orange-300',
+  static_hold: 'bg-red-900/50 text-red-300',
 };
 
 const TYPE_BADGE_LABELS: Record<ExerciseType, string> = {
@@ -394,7 +394,7 @@ function ExerciseListItem({
   onFieldChange,
 }: ExerciseListItemProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
       {/* Exercise header row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -404,7 +404,7 @@ function ExerciseListItem({
               type="button"
               onClick={onMoveUp}
               disabled={index === 0}
-              className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-100 active:bg-gray-200 transition-colors disabled:opacity-30"
+              className="flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-800 active:bg-gray-700 transition-colors disabled:opacity-30"
               aria-label="Move up"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,7 +415,7 @@ function ExerciseListItem({
               type="button"
               onClick={onMoveDown}
               disabled={index === total - 1}
-              className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-100 active:bg-gray-200 transition-colors disabled:opacity-30"
+              className="flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-800 active:bg-gray-700 transition-colors disabled:opacity-30"
               aria-label="Move down"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,7 +425,7 @@ function ExerciseListItem({
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-gray-900">
+            <p className="truncate text-sm font-medium text-gray-100">
               {item.name}
             </p>
             <span
@@ -440,7 +440,7 @@ function ExerciseListItem({
         <button
           type="button"
           onClick={onRemove}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-red-400 hover:bg-red-50 active:bg-red-100"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-red-400 hover:bg-red-950 active:bg-red-900"
           aria-label={`Remove ${item.name}`}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -453,28 +453,28 @@ function ExerciseListItem({
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {/* Sets (always shown) */}
         <div>
-          <label className="block text-xs text-gray-500">Sets</label>
+          <label className="block text-xs text-gray-400">Sets</label>
           <input
             type="number"
             inputMode="numeric"
             min={1}
             value={item.target_sets ?? ''}
             onChange={(e) => onFieldChange('target_sets', e.target.value)}
-            className="mt-0.5 block h-11 w-full rounded border border-gray-300 px-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-0.5 block h-11 w-full rounded border border-gray-700 bg-gray-800 px-2 text-sm text-white focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
 
         {/* Reps (bodyweight, weighted, assisted) */}
         {needsReps(item.exercise_type) && (
           <div>
-            <label className="block text-xs text-gray-500">Reps</label>
+            <label className="block text-xs text-gray-400">Reps</label>
             <input
               type="number"
               inputMode="numeric"
               min={1}
               value={item.target_reps ?? ''}
               onChange={(e) => onFieldChange('target_reps', e.target.value)}
-              className="mt-0.5 block h-11 w-full rounded border border-gray-300 px-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+              className="mt-0.5 block h-11 w-full rounded border border-gray-700 bg-gray-800 px-2 text-sm text-white focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
         )}
@@ -482,7 +482,7 @@ function ExerciseListItem({
         {/* Weight (weighted only) */}
         {needsWeight(item.exercise_type) && (
           <div>
-            <label className="block text-xs text-gray-500">Weight (kg)</label>
+            <label className="block text-xs text-gray-400">Weight (kg)</label>
             <input
               type="number"
               inputMode="decimal"
@@ -490,7 +490,7 @@ function ExerciseListItem({
               step={0.5}
               value={item.target_weight_kg ?? ''}
               onChange={(e) => onFieldChange('target_weight_kg', e.target.value)}
-              className="mt-0.5 block h-11 w-full rounded border border-gray-300 px-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+              className="mt-0.5 block h-11 w-full rounded border border-gray-700 bg-gray-800 px-2 text-sm text-white focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
         )}
@@ -498,7 +498,7 @@ function ExerciseListItem({
         {/* Duration (duration, static_hold) */}
         {needsDuration(item.exercise_type) && (
           <div>
-            <label className="block text-xs text-gray-500">Duration (s)</label>
+            <label className="block text-xs text-gray-400">Duration (s)</label>
             <input
               type="number"
               inputMode="numeric"
@@ -507,14 +507,14 @@ function ExerciseListItem({
               onChange={(e) =>
                 onFieldChange('target_duration_seconds', e.target.value)
               }
-              className="mt-0.5 block h-11 w-full rounded border border-gray-300 px-2 text-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+              className="mt-0.5 block h-11 w-full rounded border border-gray-700 bg-gray-800 px-2 text-sm text-white focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
         )}
 
         {/* Rest seconds (always shown, optional) */}
         <div>
-          <label className="block text-xs text-gray-500">Rest (s)</label>
+          <label className="block text-xs text-gray-400">Rest (s)</label>
           <input
             type="number"
             inputMode="numeric"
@@ -522,7 +522,7 @@ function ExerciseListItem({
             placeholder="default"
             value={item.rest_seconds ?? ''}
             onChange={(e) => onFieldChange('rest_seconds', e.target.value)}
-            className="mt-0.5 block h-11 w-full rounded border border-gray-300 px-2 text-sm placeholder:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+            className="mt-0.5 block h-11 w-full rounded border border-gray-700 bg-gray-800 px-2 text-sm text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
       </div>

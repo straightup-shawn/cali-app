@@ -58,7 +58,7 @@ export default function BottomNavigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800 bg-gray-900 pb-[env(safe-area-inset-bottom)] md:hidden"
       aria-label="Main navigation"
     >
       <ul className="flex items-center justify-around">
@@ -69,8 +69,8 @@ export default function BottomNavigation() {
               className={({ isActive }) =>
                 `flex min-h-[44px] flex-col items-center justify-center gap-0.5 px-1 py-2 text-xs transition-colors active:scale-95 active:opacity-70 ${
                   isActive
-                    ? 'text-indigo-600 font-medium'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-indigo-400 font-medium'
+                    : 'text-gray-500 hover:text-gray-300'
                 }`
               }
             >

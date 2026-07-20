@@ -16,17 +16,17 @@ export default function RoutinesPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 pb-20">
+    <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-900">Routines</h1>
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+        <h1 className="text-xl font-bold text-gray-100">Routines</h1>
       </header>
 
       {/* Routine List */}
       <div className="flex-1 px-4 pt-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
           </div>
         ) : routines && routines.length > 0 ? (
           <div className="space-y-3">
@@ -45,7 +45,7 @@ export default function RoutinesPage() {
         ) : (
           <div className="py-12 text-center">
             <svg
-              className="mx-auto h-12 w-12 text-gray-300"
+              className="mx-auto h-12 w-12 text-gray-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -58,7 +58,7 @@ export default function RoutinesPage() {
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
               />
             </svg>
-            <p className="mt-3 text-sm font-medium text-gray-900">
+            <p className="mt-3 text-sm font-medium text-gray-300">
               No routines yet
             </p>
             <p className="mt-1 text-xs text-gray-500">

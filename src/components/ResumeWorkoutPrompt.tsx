@@ -58,29 +58,29 @@ export function ResumeWorkoutPrompt() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="resume-workout-title"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-xl">
         <h2
           id="resume-workout-title"
-          className="text-lg font-semibold text-gray-900"
+          className="text-lg font-semibold text-gray-100"
         >
           Resume Workout?
         </h2>
 
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-gray-400">
           You have an unfinished workout from{' '}
-          <span className="font-medium">{formattedTime}</span>.
+          <span className="font-medium text-gray-200">{formattedTime}</span>.
         </p>
 
-        <div className="mt-3 rounded-lg bg-gray-50 p-3">
-          <p className="text-sm font-medium text-gray-800">
+        <div className="mt-3 rounded-lg border border-gray-700 bg-gray-800 p-3">
+          <p className="text-sm font-medium text-gray-100">
             {workout?.name ?? 'Workout'}
           </p>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-400">
             {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''} &middot;{' '}
             {completedSets} set{completedSets !== 1 ? 's' : ''} completed
           </p>
@@ -90,7 +90,7 @@ export function ResumeWorkoutPrompt() {
           <button
             type="button"
             onClick={handleDiscard}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 active:bg-gray-100 transition-colors"
+            className="flex-1 rounded-lg border border-gray-600 px-4 py-3 text-sm font-medium text-gray-300 active:bg-gray-800 transition-colors"
           >
             Discard
           </button>

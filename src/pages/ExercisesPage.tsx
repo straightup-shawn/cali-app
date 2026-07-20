@@ -70,17 +70,17 @@ export default function ExercisesPage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 pb-20">
+    <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-900">Exercises</h1>
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+        <h1 className="text-xl font-bold text-gray-100">Exercises</h1>
       </header>
 
       {/* Search */}
       <div className="px-4 pt-4">
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -98,7 +98,7 @@ export default function ExercisesPage() {
             placeholder="Search exercises..."
             value={searchInput}
             onChange={handleSearchChange}
-            className="block h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 text-base shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function ExercisesPage() {
         <select
           value={muscleGroup}
           onChange={(e) => setMuscleGroup(e.target.value)}
-          className="h-10 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          className="h-10 flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           aria-label="Filter by muscle group"
         >
           <option value="">All Muscles</option>
@@ -122,7 +122,7 @@ export default function ExercisesPage() {
         <select
           value={exerciseType}
           onChange={(e) => setExerciseType(e.target.value)}
-          className="h-10 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          className="h-10 flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           aria-label="Filter by exercise type"
         >
           <option value="">All Types</option>
@@ -138,7 +138,7 @@ export default function ExercisesPage() {
       <div className="flex-1 px-4 pt-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
           </div>
         ) : exercises && exercises.length > 0 ? (
           <div className="space-y-3">
@@ -154,8 +154,8 @@ export default function ExercisesPage() {
           </div>
         ) : (
           <div className="py-12 text-center">
-            <p className="text-sm text-gray-500">No exercises found</p>
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="text-sm text-gray-400">No exercises found</p>
+            <p className="mt-1 text-xs text-gray-500">
               Try adjusting your search or filters
             </p>
           </div>

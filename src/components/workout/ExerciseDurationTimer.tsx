@@ -107,7 +107,7 @@ export default function ExerciseDurationTimer({
       {/* Time display */}
       <span
         className={`min-w-[52px] text-center font-mono text-lg font-semibold tabular-nums ${
-          timer.isRunning ? 'text-blue-600' : 'text-gray-800'
+          timer.isRunning ? 'text-indigo-400' : 'text-gray-300'
         }`}
         aria-live="polite"
         aria-label={`Timer: ${formatTime(timer.seconds)}`}
@@ -122,8 +122,8 @@ export default function ExerciseDurationTimer({
         disabled={disabled}
         className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
           timer.isRunning
-            ? 'bg-red-100 text-red-600 hover:bg-red-200 active:bg-red-300'
-            : 'bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300'
+            ? 'bg-red-900/50 text-red-400 hover:bg-red-900 active:bg-red-800'
+            : 'bg-indigo-900/50 text-indigo-400 hover:bg-indigo-900 active:bg-indigo-800'
         } disabled:opacity-40 disabled:pointer-events-none`}
         aria-label={timer.isRunning ? 'Stop timer' : 'Start timer'}
       >
@@ -146,7 +146,7 @@ export default function ExerciseDurationTimer({
           type="button"
           onClick={handleReset}
           disabled={disabled || timer.isRunning}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 active:bg-gray-300 disabled:opacity-40 disabled:pointer-events-none"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-700 text-gray-400 transition-colors hover:bg-gray-600 active:bg-gray-500 disabled:opacity-40 disabled:pointer-events-none"
           aria-label="Reset timer"
         >
           <svg

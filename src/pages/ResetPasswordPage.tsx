@@ -39,13 +39,13 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4 py-12">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-bold tracking-tight text-white">
             Reset your password
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-400">
             Enter your email and we'll send you a reset link
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
         {isSuccess ? (
           <div
             role="status"
-            className="rounded-md bg-green-50 p-4 text-center text-sm text-green-700"
+            className="rounded-md bg-green-900/50 border border-green-800 p-4 text-center text-sm text-green-300"
           >
             <p className="font-medium">Check your email</p>
             <p className="mt-1">
@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
             {error && (
               <div
                 role="alert"
-                className="rounded-md bg-red-50 p-3 text-center text-sm text-red-700"
+                className="rounded-md bg-red-900/50 border border-red-800 p-3 text-center text-sm text-red-300"
               >
                 {error}
               </div>
@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-300"
                 >
                   Email
                 </label>
@@ -84,11 +84,11 @@ export default function ResetPasswordPage() {
                   type="email"
                   autoComplete="email"
                   inputMode="email"
-                  className="mt-1 block h-11 w-full rounded-md border border-gray-300 px-3 text-base shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+                  className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
                   {...register('email')}
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
                 )}
               </div>
 
@@ -103,10 +103,10 @@ export default function ResetPasswordPage() {
           </>
         )}
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-gray-400">
           <Link
             to="/login"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-indigo-400 hover:text-indigo-300"
           >
             Back to sign in
           </Link>
