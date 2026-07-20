@@ -4,9 +4,12 @@ import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { useTimer } from '@/hooks/useTimer';
 import { useExercises } from '@/hooks/useExercises';
+import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
+import { requestNotificationPermission } from '@/lib/notifications';
 import RestTimerOverlay from '@/components/workout/RestTimerOverlay';
 import { PRCelebration } from '@/components/PRCelebration';
 import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
+import type { PreviousSet } from '@/hooks/usePreviousPerformance';
 
 // =============================================================================
 // Helper: format seconds as HH:MM:SS or MM:SS
@@ -137,103 +140,175 @@ function DiscardConfirmDialog({ open, onCancel, onConfirm }: DiscardConfirmDialo
 // SetRow
 // =============================================================================
 
+const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10] as const;
+
 interface SetRowProps {
   set: ActiveSet;
   exerciseType: ExerciseType;
   exerciseId: string;
+  previousSet?: PreviousSet;
   onUpdate: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   onComplete: (exerciseId: string, setId: string) => void;
 }
 
-function SetRow({ set, exerciseType, exerciseId, onUpdate, onComplete }: SetRowProps) {
+function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComplete }: SetRowProps) {
+  const [showRpePicker, setShowRpePicker] = useState(false);
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
   const showDuration = ['duration', 'static_hold'].includes(exerciseType);
+  const showRpe = ['bodyweight', 'weighted', 'assisted', 'static_hold'].includes(exerciseType);
+
+  const previousLabel = formatPreviousSet(previousSet, exerciseType);
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+      className={`rounded-lg border px-3 py-2 ${
         set.completed
           ? 'border-green-800 bg-green-950/50'
           : 'border-gray-700 bg-gray-800'
       }`}
     >
-      {/* Set number */}
-      <span className="w-6 text-center text-xs font-medium text-gray-500">
-        {set.setNumber}
-      </span>
+      <div className="flex items-center gap-2">
+        {/* Set number */}
+        <span className="w-6 shrink-0 text-center text-xs font-medium text-gray-500">
+          {set.setNumber}
+        </span>
 
-      {/* Reps input */}
-      {showReps && (
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder="Reps"
-          value={set.reps ?? ''}
-          onChange={(e) =>
-            onUpdate(exerciseId, set.id, {
-              reps: e.target.value ? parseInt(e.target.value, 10) : null,
-            })
-          }
+        {/* Previous performance */}
+        <span className="w-20 shrink-0 truncate text-center text-xs text-gray-500" title={previousLabel}>
+          {previousLabel}
+        </span>
+
+        {/* Reps input */}
+        {showReps && (
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Reps"
+            value={set.reps ?? ''}
+            onChange={(e) =>
+              onUpdate(exerciseId, set.id, {
+                reps: e.target.value ? parseInt(e.target.value, 10) : null,
+              })
+            }
+            disabled={set.completed}
+            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
+          />
+        )}
+
+        {/* Weight input */}
+        {showWeight && (
+          <input
+            type="number"
+            inputMode="decimal"
+            placeholder="kg"
+            value={set.weightKg ?? ''}
+            onChange={(e) =>
+              onUpdate(exerciseId, set.id, {
+                weightKg: e.target.value ? parseFloat(e.target.value) : null,
+              })
+            }
+            disabled={set.completed}
+            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
+          />
+        )}
+
+        {/* Duration input */}
+        {showDuration && (
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Sec"
+            value={set.durationSeconds ?? ''}
+            onChange={(e) =>
+              onUpdate(exerciseId, set.id, {
+                durationSeconds: e.target.value ? parseInt(e.target.value, 10) : null,
+              })
+            }
+            disabled={set.completed}
+            className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
+          />
+        )}
+
+        {/* RPE pill button */}
+        {showRpe && (
+          <button
+            type="button"
+            onClick={() => setShowRpePicker(!showRpePicker)}
+            disabled={set.completed}
+            className={`h-8 shrink-0 rounded-full px-2 text-xs font-medium transition-colors ${
+              set.rpe !== null
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+            } disabled:opacity-50`}
+            aria-label={set.rpe !== null ? `RPE ${set.rpe}` : 'Set RPE'}
+          >
+            {set.rpe !== null ? `${set.rpe}` : 'RPE'}
+          </button>
+        )}
+
+        {/* Complete button */}
+        <button
+          type="button"
+          onClick={() => onComplete(exerciseId, set.id)}
           disabled={set.completed}
-          className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
-        />
-      )}
+          className={`ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
+            set.completed
+              ? 'bg-green-500 text-white'
+              : 'border border-gray-600 text-gray-500 hover:border-green-500 hover:text-green-400 active:bg-green-950'
+          }`}
+          aria-label={set.completed ? 'Set completed' : 'Complete set'}
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M5 13l4 4L19 7" />
+          </svg>
+        </button>
+      </div>
 
-      {/* Weight input */}
-      {showWeight && (
-        <input
-          type="number"
-          inputMode="decimal"
-          placeholder="kg"
-          value={set.weightKg ?? ''}
-          onChange={(e) =>
-            onUpdate(exerciseId, set.id, {
-              weightKg: e.target.value ? parseFloat(e.target.value) : null,
-            })
-          }
-          disabled={set.completed}
-          className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
-        />
+      {/* Inline RPE picker */}
+      {showRpePicker && !set.completed && (
+        <div className="mt-2 ml-6 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
+          {RPE_VALUES.map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => {
+                onUpdate(exerciseId, set.id, { rpe: v });
+                setShowRpePicker(false);
+              }}
+              className={`min-h-[36px] min-w-[36px] rounded-lg border text-xs font-medium transition-colors ${
+                set.rpe === v
+                  ? 'border-indigo-500 bg-indigo-600 text-white'
+                  : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+              }`}
+            >
+              {v}
+            </button>
+          ))}
+          {set.rpe !== null && (
+            <button
+              type="button"
+              onClick={() => {
+                onUpdate(exerciseId, set.id, { rpe: null });
+                setShowRpePicker(false);
+              }}
+              className="min-h-[36px] rounded-lg border border-gray-600 bg-gray-700 px-2 text-xs font-medium text-red-400 hover:bg-gray-600"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       )}
-
-      {/* Duration input */}
-      {showDuration && (
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder="Sec"
-          value={set.durationSeconds ?? ''}
-          onChange={(e) =>
-            onUpdate(exerciseId, set.id, {
-              durationSeconds: e.target.value ? parseInt(e.target.value, 10) : null,
-            })
-          }
-          disabled={set.completed}
-          className="h-11 w-20 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:bg-gray-800/50 disabled:text-gray-500"
-        />
-      )}
-
-      {/* Complete button */}
-      <button
-        type="button"
-        onClick={() => onComplete(exerciseId, set.id)}
-        disabled={set.completed}
-        className={`ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
-          set.completed
-            ? 'bg-green-500 text-white'
-            : 'border border-gray-600 text-gray-500 hover:border-green-500 hover:text-green-400 active:bg-green-950'
-        }`}
-        aria-label={set.completed ? 'Set completed' : 'Complete set'}
-      >
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M5 13l4 4L19 7" />
-        </svg>
-      </button>
     </div>
   );
 }
+
+// =============================================================================
+// Rest Timer Duration Options
+// =============================================================================
+
+const REST_DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300] as const;
 
 // =============================================================================
 // ExerciseSection
@@ -245,6 +320,7 @@ interface ExerciseSectionProps {
   onComplete: (exerciseId: string, setId: string) => void;
   onAddSet: (exerciseId: string) => void;
   onRemove: (exerciseId: string) => void;
+  onRestDurationChange: (exerciseId: string, seconds: number) => void;
 }
 
 const TYPE_LABELS: Record<ExerciseType, string> = {
@@ -263,8 +339,12 @@ const TYPE_COLORS: Record<ExerciseType, string> = {
   static_hold: 'bg-red-900/50 text-red-300',
 };
 
-function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }: ExerciseSectionProps) {
+function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove, onRestDurationChange }: ExerciseSectionProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [showRestPicker, setShowRestPicker] = useState(false);
+  const { data: previousPerformance } = usePreviousPerformance(exercise.exerciseId);
+
+  const currentRest = exercise.restSeconds ?? 90;
 
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
@@ -274,13 +354,28 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }:
           <h3 className="truncate text-sm font-semibold text-gray-100">
             {exercise.exerciseName}
           </h3>
-          <span
-            className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-              TYPE_COLORS[exercise.exerciseType]
-            }`}
-          >
-            {TYPE_LABELS[exercise.exerciseType]}
-          </span>
+          <div className="mt-1 flex items-center gap-2">
+            <span
+              className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                TYPE_COLORS[exercise.exerciseType]
+              }`}
+            >
+              {TYPE_LABELS[exercise.exerciseType]}
+            </span>
+            {/* Rest timer duration button */}
+            <button
+              type="button"
+              onClick={() => setShowRestPicker(!showRestPicker)}
+              className="inline-flex items-center gap-1 rounded-full bg-gray-800 px-2 py-0.5 text-xs font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600"
+              aria-label={`Rest timer: ${currentRest} seconds. Tap to change.`}
+            >
+              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {currentRest}s
+            </button>
+          </div>
         </div>
         <button
           type="button"
@@ -295,14 +390,45 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onAddSet, onRemove }:
         </button>
       </div>
 
+      {/* Rest duration picker (inline) */}
+      {showRestPicker && (
+        <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-800 p-2">
+          {REST_DURATION_OPTIONS.map((sec) => (
+            <button
+              key={sec}
+              type="button"
+              onClick={() => {
+                onRestDurationChange(exercise.id, sec);
+                setShowRestPicker(false);
+              }}
+              className={`min-h-[36px] rounded-lg border px-3 text-xs font-medium transition-colors ${
+                currentRest === sec
+                  ? 'border-indigo-500 bg-indigo-600 text-white'
+                  : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+              }`}
+            >
+              {sec >= 60 ? `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}` : `${sec}s`}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Column headers */}
+      <div className="mt-3 mb-1 flex items-center gap-2 px-3 text-xs text-gray-500">
+        <span className="w-6 text-center">Set</span>
+        <span className="w-20 text-center">Previous</span>
+        <span className="flex-1"></span>
+      </div>
+
       {/* Sets */}
-      <div className="mt-3 space-y-2">
+      <div className="space-y-2">
         {exercise.sets.map((set) => (
           <SetRow
             key={set.id}
             set={set}
             exerciseType={exercise.exerciseType}
             exerciseId={exercise.id}
+            previousSet={previousPerformance?.sets.find((ps) => ps.setNumber === set.setNumber)}
             onUpdate={onUpdate}
             onComplete={onComplete}
           />
@@ -538,6 +664,12 @@ export default function ActiveWorkoutPage() {
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
   const [restTimerVisible, setRestTimerVisible] = useState(false);
   const [restTimerDuration, setRestTimerDuration] = useState(90); // default 90s
+  const [exerciseRestDurations, setExerciseRestDurations] = useState<Record<string, number>>({});
+
+  // Request notification permission on first mount (when starting a workout)
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
 
   // Start timer on mount if workout is active
   useEffect(() => {
@@ -584,6 +716,13 @@ export default function ActiveWorkoutPage() {
       setAddExerciseOpen(false);
     },
     [addExercise]
+  );
+
+  const handleRestDurationChange = useCallback(
+    (exerciseId: string, seconds: number) => {
+      setExerciseRestDurations((prev) => ({ ...prev, [exerciseId]: seconds }));
+    },
+    []
   );
 
   // If no workout is active and not showing PRs, auto-navigate to dashboard
@@ -638,18 +777,21 @@ export default function ActiveWorkoutPage() {
           workout.exercises.map((exercise) => (
             <ExerciseSection
               key={exercise.id}
-              exercise={exercise}
+              exercise={{
+                ...exercise,
+                restSeconds: exerciseRestDurations[exercise.id] ?? exercise.restSeconds,
+              }}
               onUpdate={updateSet}
               onComplete={(exerciseId, setId) => {
                 completeSet(exerciseId, setId);
-                // Find the exercise's rest duration or use default
-                const ex = workout.exercises.find((e) => e.id === exerciseId);
-                const duration = ex?.restSeconds ?? 90;
+                // Find the exercise's rest duration (local override or from exercise state)
+                const duration = exerciseRestDurations[exerciseId] ?? exercise.restSeconds ?? 90;
                 setRestTimerDuration(duration);
                 setRestTimerVisible(true);
               }}
               onAddSet={addSet}
               onRemove={removeExercise}
+              onRestDurationChange={handleRestDurationChange}
             />
           ))
         ) : (

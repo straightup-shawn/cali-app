@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useTimer } from '@/hooks/useTimer';
+import { sendTimerNotification } from '@/lib/notifications';
 
 interface RestTimerOverlayProps {
   /** Default countdown duration in seconds (from profile or exercise override) */
@@ -39,6 +40,8 @@ export default function RestTimerOverlay({
     if (navigator.vibrate) {
       navigator.vibrate([200, 100, 200]);
     }
+    // Send browser notification (works when app is backgrounded)
+    sendTimerNotification('Rest Complete', 'Time to start your next set!');
   }, []);
 
   const { seconds, isRunning, start, reset, adjustTime } = useTimer({
