@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
+import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { useTimer } from '@/hooks/useTimer';
 import { useExercises } from '@/hooks/useExercises';
 import RestTimerOverlay from '@/components/workout/RestTimerOverlay';
+import { PRCelebration } from '@/components/PRCelebration';
 import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 
 // =============================================================================
@@ -517,16 +519,23 @@ export default function ActiveWorkoutPage() {
     addSet,
     updateSet,
     completeSet,
-    finishWorkout,
     discardWorkout,
   } = useActiveWorkout();
+
+  const {
+    finishWorkout: doFinish,
+    isFinishing: finishing,
+    newPRs,
+    showPRCelebration,
+    dismissPRCelebration,
+    error: finishError,
+  } = useFinishWorkout();
 
   // Timer - count up from workout start
   const timer = useTimer({ mode: 'countup' });
   const [menuOpen, setMenuOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
-  const [finishing, setFinishing] = useState(false);
   const [restTimerVisible, setRestTimerVisible] = useState(false);
   const [restTimerDuration, setRestTimerDuration] = useState(90); // default 90s
 
@@ -555,14 +564,17 @@ export default function ActiveWorkoutPage() {
   }, [discardWorkout, navigate]);
 
   const handleFinish = useCallback(async () => {
-    setFinishing(true);
-    try {
-      await finishWorkout();
-      navigate('/dashboard');
-    } catch {
-      setFinishing(false);
+    await doFinish();
+    // Navigation handled after PR celebration is dismissed, or if no PRs
+  }, [doFinish]);
+
+  // Navigate to dashboard after finish (when workout is cleared and no PR celebration)
+  useEffect(() => {
+    if (!workout && !finishing && !showPRCelebration) {
+      // Workout was cleared (finished or discarded) and no celebration showing
+      // Don't navigate if we're already unmounting
     }
-  }, [finishWorkout, navigate]);
+  }, [workout, finishing, showPRCelebration]);
 
   const handleAddExercise = useCallback(
     (exercise: { id: string; name: string; exerciseType: ExerciseType }) => {
@@ -582,21 +594,30 @@ export default function ActiveWorkoutPage() {
     [addExercise]
   );
 
-  // If no workout is active, redirect to dashboard
-  if (!workout) {
+  // If no workout is active and not showing PRs, auto-navigate to dashboard
+  if (!workout && !showPRCelebration) {
+    // Use effect to navigate instead of rendering a dead-end
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
+
+  // Show PR celebration even after workout is cleared
+  if (!workout && showPRCelebration) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">
-        <p className="text-sm text-gray-400">No active workout</p>
-        <button
-          type="button"
-          onClick={() => navigate('/dashboard')}
-          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-        >
-          Go to Dashboard
-        </button>
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+        <PRCelebration
+          newPRs={newPRs}
+          onClose={() => {
+            dismissPRCelebration();
+            navigate('/dashboard');
+          }}
+        />
       </div>
     );
   }
+
+  // At this point workout is guaranteed to be non-null
+  if (!workout) return null;
 
   const exerciseIds = workout.exercises.map((e) => e.exerciseId);
 
@@ -671,6 +692,9 @@ export default function ActiveWorkoutPage() {
       {/* Fixed bottom: Finish button */}
       <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-800 bg-gray-900 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <FinishWorkoutButton onFinish={handleFinish} disabled={finishing} />
+        {finishError && (
+          <p className="mt-2 text-center text-sm text-red-400">{finishError}</p>
+        )}
       </div>
 
       {/* Discard confirmation dialog */}
@@ -694,6 +718,13 @@ export default function ActiveWorkoutPage() {
         onClose={() => setRestTimerVisible(false)}
         visible={restTimerVisible}
       />
+
+      {/* Finish error display */}
+      {finishError && (
+        <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white shadow-lg">
+          {finishError}
+        </div>
+      )}
     </div>
   );
 }
