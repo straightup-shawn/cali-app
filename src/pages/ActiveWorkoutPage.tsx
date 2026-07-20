@@ -156,7 +156,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
   const showDuration = ['duration', 'static_hold'].includes(exerciseType);
-  const showRpe = ['bodyweight', 'weighted', 'assisted', 'static_hold'].includes(exerciseType);
+  const showRpe = true; // RPE is available for all exercise types
 
   const previousLabel = formatPreviousSet(previousSet, exerciseType);
 
