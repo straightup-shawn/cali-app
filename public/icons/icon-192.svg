@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="24" fill="#1a1a2e"/>
+  <text x="96" y="110" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="#863bff" text-anchor="middle">CL</text>
+  <path d="M96 140 l-12 8 l12 8 l12 -8 z" fill="#863bff" opacity="0.6"/>
+</svg>

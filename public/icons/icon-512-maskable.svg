@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Maskable icon: safe zone is center 80% (circle r=204.8), so content stays within -->
+  <rect width="512" height="512" fill="#1a1a2e"/>
+  <text x="256" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="180" font-weight="700" fill="#863bff" text-anchor="middle">CL</text>
+  <path d="M256 360 l-28 18 l28 18 l28 -18 z" fill="#863bff" opacity="0.6"/>
+</svg>

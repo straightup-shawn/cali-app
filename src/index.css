@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+  /* Remove default tap highlight on mobile WebKit browsers */
+  *,
+  *::before,
+  *::after {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    /* Ensure safe-area insets are respected on notched devices */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-white text-gray-900 antialiased;
+    /* Prevent pull-to-refresh interference on mobile */
+    overscroll-behavior-y: contain;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-gray-900 text-gray-100;
+    }
+  }
+
+  /* Ensure all interactive elements have fast touch feedback */
+  button,
+  a,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    touch-action: manipulation;
+  }
+}
