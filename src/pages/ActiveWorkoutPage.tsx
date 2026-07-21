@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
-import { useExercises } from '@/hooks/useExercises';
 import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { initAudioContext } from '@/lib/audio-alert';
+import ExercisePicker from '@/components/ExercisePicker';
 import RestTimerOverlay from '@/components/workout/RestTimerOverlay';
 import { PRCelebration } from '@/components/PRCelebration';
 import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
@@ -479,139 +479,8 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSe
 }
 
 // =============================================================================
-// AddExerciseSheet (bottom sheet with exercise picker)
+// FinishWorkoutButton
 // =============================================================================
-
-interface AddExerciseSheetProps {
-  open: boolean;
-  onClose: () => void;
-  onSelect: (exercise: { id: string; name: string; exerciseType: ExerciseType }) => void;
-  excludeIds: string[];
-}
-
-function AddExerciseSheet({ open, onClose, onSelect, excludeIds }: AddExerciseSheetProps) {
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  useEffect(() => {
-    if (open) setSearch('');
-  }, [open]);
-
-  const { data: exercises, isLoading } = useExercises({
-    search: debouncedSearch || undefined,
-  });
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:items-center sm:pt-0">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/60" onClick={onClose} aria-hidden="true" />
-
-      {/* Sheet */}
-      <div className="relative z-50 flex h-[80vh] w-full flex-col rounded-xl border border-gray-700 bg-gray-900 mx-4 sm:max-w-lg sm:shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-700 px-4 py-3">
-          <h2 className="text-lg font-bold text-gray-100">Add Exercise</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-800 active:bg-gray-700"
-            aria-label="Close"
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="px-4 pt-3 pb-2">
-          <div className="relative">
-            <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search exercises..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Exercise list */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
-            </div>
-          ) : exercises && exercises.length > 0 ? (
-            <div className="space-y-2">
-              {exercises.map((exercise) => {
-                const isExcluded = excludeIds.includes(exercise.id);
-                return (
-                  <button
-                    key={exercise.id}
-                    type="button"
-                    disabled={isExcluded}
-                    onClick={() =>
-                      onSelect({
-                        id: exercise.id,
-                        name: exercise.name,
-                        exerciseType: exercise.exercise_type as ExerciseType,
-                      })
-                    }
-                    className={`flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
-                      isExcluded
-                        ? 'border-gray-800 bg-gray-800/50 opacity-50'
-                        : 'border-gray-700 bg-gray-800 hover:border-indigo-600 hover:bg-gray-700 active:bg-gray-700'
-                    }`}
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-gray-100">{exercise.name}</p>
-                      {exercise.muscle_groups && exercise.muscle_groups.length > 0 && (
-                        <p className="mt-0.5 text-xs text-gray-400">
-                          {exercise.muscle_groups
-                            .map((g: string) =>
-                              g.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-                            )
-                            .join(', ')}
-                        </p>
-                      )}
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        TYPE_COLORS[exercise.exercise_type as ExerciseType] ?? 'bg-gray-700 text-gray-300'
-                      }`}
-                    >
-                      {TYPE_LABELS[exercise.exercise_type as ExerciseType] ?? exercise.exercise_type}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="py-8 text-center">
-              <p className="text-sm text-gray-400">No exercises found</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // =============================================================================
 // FinishWorkoutButton
@@ -846,11 +715,17 @@ export default function ActiveWorkoutPage() {
         onConfirm={handleDiscard}
       />
 
-      {/* Add exercise sheet */}
-      <AddExerciseSheet
+      {/* Add exercise picker (shared component with create new exercise) */}
+      <ExercisePicker
         open={addExerciseOpen}
         onClose={() => setAddExerciseOpen(false)}
-        onSelect={handleAddExercise}
+        onSelect={(exercise) => {
+          handleAddExercise({
+            id: exercise.id,
+            name: exercise.name,
+            exerciseType: exercise.exercise_type as ExerciseType,
+          });
+        }}
         excludeIds={exerciseIds}
       />
 
