@@ -4,7 +4,7 @@ const BUCKET = 'workout-photos';
 
 /**
  * Uploads a workout photo to Supabase Storage.
- * Returns the public URL of the uploaded file.
+ * Returns the public URL of the uploaded file with a cache-busting parameter.
  */
 export async function uploadWorkoutPhoto(
   workoutId: string,
@@ -12,12 +12,14 @@ export async function uploadWorkoutPhoto(
   file: File
 ): Promise<string> {
   const ext = file.name.split('.').pop() ?? 'jpg';
-  const path = `${userId}/${workoutId}.${ext}`;
+  // Use timestamp in filename to avoid cache issues when replacing
+  const timestamp = Date.now();
+  const path = `${userId}/${workoutId}_${timestamp}.${ext}`;
 
   const { error } = await supabase.storage
     .from(BUCKET)
     .upload(path, file, {
-      cacheControl: '3600',
+      cacheControl: '0',
       upsert: true,
     });
 
