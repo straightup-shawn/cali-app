@@ -923,11 +923,21 @@ export default function WorkoutDetailPage() {
         </div>
       </div>
 
-      {/* Notes */}
+      {/* Notes & Photo */}
       {workout.notes && (
         <div className="mx-4 mt-4 rounded-lg border border-gray-800 bg-gray-900 p-3">
           <p className="text-xs font-medium text-gray-400 uppercase">Notes</p>
-          <p className="mt-1 text-sm text-gray-300">{workout.notes}</p>
+          {/* Render photo if URL is embedded in notes */}
+          {workout.notes.includes('📷 http') && (
+            <img
+              src={workout.notes.split('📷 ')[1]?.split('\n')[0]?.trim()}
+              alt="Workout photo"
+              className="mt-2 w-full rounded-lg object-cover"
+            />
+          )}
+          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-300">
+            {workout.notes.replace(/📷 https?:\/\/\S+/g, '').trim()}
+          </p>
         </div>
       )}
 
