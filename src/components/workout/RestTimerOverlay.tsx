@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useTimer } from '@/hooks/useTimer';
 import { sendTimerNotification } from '@/lib/notifications';
+import { playTimerAlert } from '@/lib/audio-alert';
 
 interface RestTimerOverlayProps {
   /** Default countdown duration in seconds (from profile or exercise override) */
@@ -36,11 +37,13 @@ export default function RestTimerOverlay({
 
   const handleComplete = useCallback(() => {
     setCompleted(true);
+    // Play audio alert (works on iOS even when foregrounded after background)
+    playTimerAlert();
     // Vibrate if the API is available (mobile devices)
     if (navigator.vibrate) {
-      navigator.vibrate([200, 100, 200]);
+      navigator.vibrate([200, 100, 200, 100, 200]);
     }
-    // Send browser notification (works when app is backgrounded)
+    // Send browser notification (works on Android when backgrounded)
     sendTimerNotification('Rest Complete', 'Time to start your next set!');
   }, []);
 

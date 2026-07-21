@@ -5,6 +5,7 @@ import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { useExercises } from '@/hooks/useExercises';
 import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
 import { requestNotificationPermission } from '@/lib/notifications';
+import { initAudioContext } from '@/lib/audio-alert';
 import RestTimerOverlay from '@/components/workout/RestTimerOverlay';
 import { PRCelebration } from '@/components/PRCelebration';
 import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
@@ -787,6 +788,8 @@ export default function ActiveWorkoutPage() {
               onUpdate={updateSet}
               onComplete={(exerciseId, setId) => {
                 completeSet(exerciseId, setId);
+                // Init audio on user gesture (required for iOS)
+                initAudioContext();
                 // Find the exercise's rest duration (local override or from exercise state)
                 const duration = exerciseRestDurations[exerciseId] ?? exercise.restSeconds ?? 90;
                 setRestTimerDuration(duration);
