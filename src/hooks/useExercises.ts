@@ -86,6 +86,53 @@ export function useExercise(id: string | undefined) {
 }
 
 /**
+ * Updates an existing custom exercise by ID.
+ * Invalidates the exercises query cache on success.
+ */
+export function useUpdateExercise() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      name?: string;
+      exercise_type?: string;
+      muscle_groups?: string[];
+      instructions?: string | null;
+    }) => {
+      const { id, ...updates } = input;
+      const { data, error } = await supabase
+        .from('exercises')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    },
+  });
+}
+
+/**
+ * Deletes an exercise by ID.
+ * Invalidates the exercises query cache on success.
+ */
+export function useDeleteExercise() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('exercises').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    },
+  });
+}
+
+/**
  * Creates a new custom exercise. Validates name uniqueness via Supabase constraint.
  * Invalidates the exercises query cache on success.
  */

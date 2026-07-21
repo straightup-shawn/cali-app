@@ -69,7 +69,7 @@ export default function ExercisePicker({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:items-center sm:pt-0">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60"
@@ -78,7 +78,7 @@ export default function ExercisePicker({
       />
 
       {/* Modal */}
-      <div className="relative z-50 flex max-h-[85vh] w-full flex-col rounded-t-xl border border-gray-700 bg-gray-900 sm:max-w-lg sm:rounded-xl sm:shadow-xl">
+      <div className="relative z-50 flex h-[80vh] w-full flex-col rounded-xl border border-gray-700 bg-gray-900 mx-4 sm:max-w-lg sm:shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-700 px-4 py-3">
           <h2 className="text-lg font-bold text-gray-100">Add Exercise</h2>
@@ -126,7 +126,6 @@ export default function ExercisePicker({
               placeholder="Search exercises..."
               value={searchInput}
               onChange={handleSearchChange}
-              autoFocus
               className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
