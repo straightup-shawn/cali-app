@@ -163,34 +163,20 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
 
   return (
     <div
-      className={`rounded-lg border px-3 py-2 ${
+      className={`overflow-hidden rounded-lg border px-2 py-2 ${
         set.completed
           ? 'border-green-800 bg-green-950/50'
           : 'border-gray-700 bg-gray-800'
       }`}
     >
-      <div className="flex items-center gap-2">
-        {/* Delete set button */}
-        <button
-          type="button"
-          onClick={() => onDelete(exerciseId, set.id)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-red-950 hover:text-red-400 active:bg-red-900"
-          aria-label={`Delete set ${set.setNumber}`}
-        >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        {/* Set number */}
-        <span className="w-6 shrink-0 text-center text-xs font-medium text-gray-500">
-          {set.setNumber}
-        </span>
-
-        {/* Previous performance */}
-        <span className="w-20 shrink-0 truncate text-center text-xs text-gray-500" title={previousLabel}>
-          {previousLabel}
-        </span>
+      <div className="flex items-center gap-1.5">
+        {/* Set number + previous stacked */}
+        <div className="w-7 shrink-0 text-center">
+          <span className="text-xs font-medium text-gray-400">{set.setNumber}</span>
+          {previousLabel !== '—' && (
+            <p className="truncate text-[9px] leading-tight text-gray-500" title={previousLabel}>{previousLabel}</p>
+          )}
+        </div>
 
         {/* Reps input */}
         {showReps && (
@@ -204,7 +190,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
                 reps: e.target.value ? parseInt(e.target.value, 10) : null,
               })
             }
-            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="h-10 w-0 min-w-[3rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
 
@@ -220,7 +206,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
                 weightKg: e.target.value ? parseFloat(e.target.value) : null,
               })
             }
-            className="h-11 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="h-10 w-0 min-w-[3rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
 
@@ -236,7 +222,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
                 durationSeconds: e.target.value ? parseInt(e.target.value, 10) : null,
               })
             }
-            className="h-11 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="h-10 w-0 min-w-[3.5rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
 
@@ -260,23 +246,35 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
         <button
           type="button"
           onClick={() => set.completed ? onUncomplete(exerciseId, set.id) : onComplete(exerciseId, set.id)}
-          className={`ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
             set.completed
               ? 'bg-green-500 text-white hover:bg-green-600 active:bg-green-700'
               : 'border border-gray-600 text-gray-500 hover:border-green-500 hover:text-green-400 active:bg-green-950'
           }`}
           aria-label={set.completed ? 'Undo set completion' : 'Complete set'}
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
               d="M5 13l4 4L19 7" />
+          </svg>
+        </button>
+
+        {/* Delete set button */}
+        <button
+          type="button"
+          onClick={() => onDelete(exerciseId, set.id)}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-gray-600 hover:text-red-400 active:bg-red-950"
+          aria-label="Delete set"
+        >
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       {/* Inline RPE picker */}
       {showRpePicker && (
-        <div className="mt-2 ml-6 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
+        <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
           {RPE_VALUES.map((v) => (
             <button
               key={v}
@@ -357,7 +355,7 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSe
   const currentRest = exercise.restSeconds ?? 90;
 
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+    <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-3">
       {/* Exercise header */}
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
@@ -423,15 +421,8 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSe
         </div>
       )}
 
-      {/* Column headers */}
-      <div className="mt-3 mb-1 flex items-center gap-2 px-3 text-xs text-gray-500">
-        <span className="w-6 text-center">Set</span>
-        <span className="w-20 text-center">Previous</span>
-        <span className="flex-1"></span>
-      </div>
-
       {/* Sets */}
-      <div className="space-y-2">
+      <div className="mt-3 space-y-2">
         {exercise.sets.map((set) => (
           <SetRow
             key={set.id}
