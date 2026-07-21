@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
 import { useWorkoutPersonalRecords } from '@/hooks/usePersonalRecords';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
@@ -577,15 +578,21 @@ interface NotesPhotoSectionProps {
 
 function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [localPhotoUrl, setLocalPhotoUrl] = useState<string | null>(null);
+  const [localNotes, setLocalNotes] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Use local state if we just updated, otherwise use prop
+  const currentNotes = localNotes ?? notes;
+
   // Extract photo URL and text from notes
-  const photoUrl = notes?.match(/📷 (https?:\/\/\S+)/)?.[1] ?? null;
-  const textNotes = notes?.replace(/📷 https?:\/\/\S+/g, '').trim() ?? '';
+  const photoUrl = localPhotoUrl ?? currentNotes?.match(/📷 (https?:\/\/\S+)/)?.[1] ?? null;
+  const textNotes = currentNotes?.replace(/📷 https?:\/\/\S+/g, '').trim() ?? '';
 
   const handleStartEditNotes = () => {
     setNotesValue(textNotes);
@@ -598,8 +605,12 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
       const photoPart = photoUrl ? `\n\n📷 ${photoUrl}` : '';
       const finalNotes = notesValue.trim() + photoPart;
       await supabase.from('workouts').update({ notes: finalNotes || null }).eq('id', workoutId);
+      setLocalNotes(finalNotes || null);
       setEditingNotes(false);
-    } catch { /* ignore */ }
+      queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
+    } catch (err) {
+      alert(`Save notes failed: ${err instanceof Error ? err.message : 'Unknown'}`);
+    }
     setSaving(false);
   };
 
@@ -608,7 +619,12 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
     try {
       const newNotes = textNotes || null;
       await supabase.from('workouts').update({ notes: newNotes }).eq('id', workoutId);
-    } catch { /* ignore */ }
+      setLocalPhotoUrl(null);
+      setLocalNotes(newNotes);
+      queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
+    } catch (err) {
+      alert(`Delete photo failed: ${err instanceof Error ? err.message : 'Unknown'}`);
+    }
     setSaving(false);
   };
 
@@ -627,9 +643,13 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
       const photoPart = `📷 ${url}`;
       const finalNotes = textNotes ? `${textNotes}\n\n${photoPart}` : photoPart;
       await supabase.from('workouts').update({ notes: finalNotes }).eq('id', workoutId);
+      setLocalPhotoUrl(url);
+      setLocalNotes(finalNotes);
       setPhotoPreview(null);
-    } catch {
+      queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
+    } catch (err) {
       setPhotoPreview(null);
+      alert(`Photo upload failed: ${err instanceof Error ? err.message : 'Unknown'}`);
     }
     setSaving(false);
   };
