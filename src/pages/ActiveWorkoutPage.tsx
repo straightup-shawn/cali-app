@@ -669,6 +669,7 @@ export default function ActiveWorkoutPage() {
     showPRCelebration,
     dismissPRCelebration,
     error: finishError,
+    result: finishResult,
   } = useFinishWorkout();
 
   // Timer - derive elapsed from persisted startedAt timestamp (survives refresh)
@@ -700,9 +701,13 @@ export default function ActiveWorkoutPage() {
   }, [discardWorkout, navigate]);
 
   const handleFinish = useCallback(async () => {
-    await doFinish();
-    // Navigation handled after PR celebration is dismissed, or if no PRs
-  }, [doFinish]);
+    const result = await doFinish();
+    // If no PRs to celebrate, navigate directly to summary
+    if (result && !result.newPRs.length) {
+      navigate('/workout/summary', { state: result });
+    }
+    // If PRs exist, navigation happens after PR celebration is dismissed
+  }, [doFinish, navigate]);
 
   const handleAddExercise = useCallback(
     (exercise: { id: string; name: string; exerciseType: ExerciseType }) => {
@@ -744,7 +749,11 @@ export default function ActiveWorkoutPage() {
           newPRs={newPRs}
           onClose={() => {
             dismissPRCelebration();
-            navigate('/dashboard');
+            if (finishResult) {
+              navigate('/workout/summary', { state: finishResult });
+            } else {
+              navigate('/dashboard');
+            }
           }}
         />
       </div>

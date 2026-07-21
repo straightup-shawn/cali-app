@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
-import { useSaveWorkout } from '@/hooks/useSaveWorkout';
+import { useSaveWorkout, type SaveWorkoutResult } from '@/hooks/useSaveWorkout';
 import { addToPendingSync } from '@/lib/sync';
 import { showSyncToast } from '@/components/SyncToast';
 import type { PRCheck } from '@/lib/personal-records';
@@ -14,6 +14,7 @@ export interface FinishWorkoutState {
   error: string | null;
   newPRs: PRCheck[];
   showPRCelebration: boolean;
+  result: SaveWorkoutResult | null;
 }
 
 // =============================================================================
@@ -25,7 +26,7 @@ export interface FinishWorkoutState {
  * 1. Clears active workout from context and localStorage
  * 2. Saves workout to Supabase via useSaveWorkout (includes sets, exercises)
  * 3. Detects personal records and upserts new ones
- * 4. Returns PR celebration state for UI display
+ * 4. Returns PR celebration state and summary result for UI display
  */
 export function useFinishWorkout() {
   const { finishWorkout: contextFinish } = useActiveWorkout();
@@ -35,9 +36,10 @@ export function useFinishWorkout() {
     error: null,
     newPRs: [],
     showPRCelebration: false,
+    result: null,
   });
 
-  const finishWorkout = useCallback(async () => {
+  const finishWorkout = useCallback(async (): Promise<SaveWorkoutResult | null> => {
     setState((prev) => ({ ...prev, isFinishing: true, error: null }));
 
     try {
@@ -45,7 +47,7 @@ export function useFinishWorkout() {
       const workoutData = await contextFinish();
       if (!workoutData) {
         setState((prev) => ({ ...prev, isFinishing: false }));
-        return;
+        return null;
       }
 
       // Step 2: If offline, queue for later sync
@@ -57,8 +59,9 @@ export function useFinishWorkout() {
           error: null,
           newPRs: [],
           showPRCelebration: false,
+          result: null,
         });
-        return;
+        return null;
       }
 
       // Step 3: Save to Supabase + detect PRs
@@ -71,6 +74,7 @@ export function useFinishWorkout() {
           error: null,
           newPRs: result.newPRs,
           showPRCelebration: true,
+          result,
         });
       } else {
         setState({
@@ -78,8 +82,11 @@ export function useFinishWorkout() {
           error: null,
           newPRs: [],
           showPRCelebration: false,
+          result,
         });
       }
+
+      return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save workout';
       setState({
@@ -87,7 +94,9 @@ export function useFinishWorkout() {
         error: message,
         newPRs: [],
         showPRCelebration: false,
+        result: null,
       });
+      return null;
     }
   }, [contextFinish, saveWorkoutMutation]);
 

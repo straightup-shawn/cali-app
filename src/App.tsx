@@ -20,6 +20,7 @@ const RoutinesPage = lazy(() => import('@/pages/RoutinesPage'));
 const RoutineFormPage = lazy(() => import('@/pages/RoutineFormPage'));
 const ActiveWorkoutPage = lazy(() => import('@/pages/ActiveWorkoutPage'));
 const WorkoutDetailPage = lazy(() => import('@/pages/WorkoutDetailPage'));
+const WorkoutSummaryPage = lazy(() => import('@/pages/WorkoutSummaryPage'));
 const HistoryPage = lazy(() => import('@/pages/HistoryPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
@@ -50,6 +51,9 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             {/* Onboarding sits outside the AppShell (no bottom nav) */}
             <Route path="/onboarding" element={<OnboardingPage />} />
+
+            {/* Workout summary sits outside AppShell (no bottom nav) */}
+            <Route path="/workout/summary" element={<WorkoutSummaryPage />} />
 
             {/* App shell wraps all main app pages with bottom navigation */}
             <Route element={<AppShell />}>

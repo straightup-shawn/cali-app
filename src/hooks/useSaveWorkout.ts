@@ -11,7 +11,14 @@ import type { ActiveWorkout, PersonalRecord } from '@/types';
 
 export interface SaveWorkoutResult {
   workoutId: string;
+  workoutName: string;
+  startedAt: string;
+  completedAt: string;
   durationSeconds: number;
+  exerciseCount: number;
+  totalSets: number;
+  totalReps: number;
+  totalVolume: number;
   newPRs: PRCheck[];
 }
 
@@ -138,9 +145,28 @@ export function useSaveWorkout() {
         if (prError) throw prError;
       }
 
+      // Compute summary stats
+      const exerciseCount = workout.exercises.length;
+      const completedSetsAll = workout.exercises.flatMap((e) =>
+        e.sets.filter((s) => s.completed)
+      );
+      const totalSets = completedSetsAll.length;
+      const totalReps = completedSetsAll.reduce((sum, s) => sum + (s.reps ?? 0), 0);
+      const totalVolume = completedSetsAll.reduce(
+        (sum, s) => sum + (s.reps ?? 0) * (s.weightKg ?? 0),
+        0
+      );
+
       return {
         workoutId: savedWorkout.id,
+        workoutName: workout.name,
+        startedAt: workout.startedAt,
+        completedAt,
         durationSeconds,
+        exerciseCount,
+        totalSets,
+        totalReps,
+        totalVolume,
         newPRs,
       };
     },
