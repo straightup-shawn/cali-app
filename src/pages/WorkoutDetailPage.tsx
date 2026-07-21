@@ -642,19 +642,22 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
       const url = await uploadWorkoutPhoto(workoutId, user.id, file);
       const photoPart = `📷 ${url}`;
       const finalNotes = textNotes ? `${textNotes}\n\n${photoPart}` : photoPart;
-      await supabase.from('workouts').update({ notes: finalNotes }).eq('id', workoutId);
+      const { error: updateError } = await supabase.from('workouts').update({ notes: finalNotes }).eq('id', workoutId);
+      if (updateError) throw updateError;
       setLocalPhotoUrl(url);
       setLocalNotes(finalNotes);
+      // Keep photoPreview showing until the query refetches
+      await queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
+      // Only clear preview after refetch
       setPhotoPreview(null);
-      queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
     } catch (err) {
-      setPhotoPreview(null);
+      // Keep the preview so user sees something failed
       alert(`Photo upload failed: ${err instanceof Error ? err.message : 'Unknown'}`);
     }
     setSaving(false);
   };
 
-  const displayPhoto = photoPreview ?? photoUrl;
+  const displayPhoto = photoPreview ?? localPhotoUrl ?? currentNotes?.match(/📷 (https?:\/\/\S+)/)?.[1] ?? null;
 
   return (
     <div className="mx-4 mt-4 space-y-3">
