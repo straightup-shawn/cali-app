@@ -193,10 +193,21 @@ export interface ReplaceExercisePayload {
   new_exercise_id: string;
 }
 
+export interface AddSetPayload {
+  workout_exercise_id: string;
+  set_number: number;
+  reps?: number | null;
+  weight_kg?: number | null;
+  duration_seconds?: number | null;
+  rpe?: number | null;
+}
+
 export interface UpdateWorkoutPayload {
   workoutId: string;
   name?: string;
   sets?: UpdateSetPayload[];
+  deleteSets?: string[];
+  addSets?: AddSetPayload[];
   deleteExercises?: string[];
   addExercises?: AddExercisePayload[];
   replaceExercises?: ReplaceExercisePayload[];
@@ -221,6 +232,35 @@ export function useUpdateWorkout() {
           .update({ name: payload.name })
           .eq('id', payload.workoutId)
           .eq('user_id', user.id);
+
+        if (error) throw error;
+      }
+
+      // Delete individual sets
+      if (payload.deleteSets && payload.deleteSets.length > 0) {
+        const { error } = await supabase
+          .from('exercise_sets')
+          .delete()
+          .in('id', payload.deleteSets);
+
+        if (error) throw error;
+      }
+
+      // Add individual sets to existing exercises
+      if (payload.addSets && payload.addSets.length > 0) {
+        const setsToInsert = payload.addSets.map((s) => ({
+          workout_exercise_id: s.workout_exercise_id,
+          set_number: s.set_number,
+          reps: s.reps ?? null,
+          weight_kg: s.weight_kg ?? null,
+          duration_seconds: s.duration_seconds ?? null,
+          rpe: s.rpe ?? null,
+          completed: true,
+        }));
+
+        const { error } = await supabase
+          .from('exercise_sets')
+          .insert(setsToInsert);
 
         if (error) throw error;
       }

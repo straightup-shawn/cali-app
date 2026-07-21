@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
+import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
 import { useWorkoutPersonalRecords } from '@/hooks/usePersonalRecords';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
 import ExercisePicker from '@/components/ExercisePicker';
@@ -227,17 +227,19 @@ interface SetRowEditProps {
   exerciseType: ExerciseType;
   editValues: EditSetValues;
   onUpdate: (setId: string, field: keyof EditSetValues, value: number | null) => void;
+  onDelete: (setId: string) => void;
+  isDeleted: boolean;
 }
 
-function SetRowEdit({ set, exerciseType, editValues, onUpdate }: SetRowEditProps) {
+function SetRowEdit({ set, exerciseType, editValues, onUpdate, onDelete, isDeleted }: SetRowEditProps) {
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
   const showDuration = ['duration', 'static_hold'].includes(exerciseType);
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2">
+    <div className={`flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 ${isDeleted ? 'opacity-50' : ''}`}>
       {/* Set number */}
-      <span className="w-6 shrink-0 text-center text-xs font-semibold text-gray-500">
+      <span className={`w-6 shrink-0 text-center text-xs font-semibold text-gray-500 ${isDeleted ? 'line-through' : ''}`}>
         {set.set_number}
       </span>
 
@@ -252,7 +254,8 @@ function SetRowEdit({ set, exerciseType, editValues, onUpdate }: SetRowEditProps
             onChange={(e) =>
               onUpdate(set.id, 'reps', e.target.value ? parseInt(e.target.value, 10) : null)
             }
-            className="h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            disabled={isDeleted}
+            className={`h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none ${isDeleted ? 'line-through' : ''}`}
           />
           <span className="text-xs text-gray-500">reps</span>
         </div>
@@ -268,7 +271,8 @@ function SetRowEdit({ set, exerciseType, editValues, onUpdate }: SetRowEditProps
             onChange={(e) =>
               onUpdate(set.id, 'weight_kg', e.target.value ? parseFloat(e.target.value) : null)
             }
-            className="h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            disabled={isDeleted}
+            className={`h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none ${isDeleted ? 'line-through' : ''}`}
           />
           <span className="text-xs text-gray-500">kg</span>
         </div>
@@ -284,7 +288,8 @@ function SetRowEdit({ set, exerciseType, editValues, onUpdate }: SetRowEditProps
             onChange={(e) =>
               onUpdate(set.id, 'duration_seconds', e.target.value ? parseInt(e.target.value, 10) : null)
             }
-            className="h-9 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            disabled={isDeleted}
+            className={`h-9 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none ${isDeleted ? 'line-through' : ''}`}
           />
           <span className="text-xs text-gray-500">sec</span>
         </div>
@@ -303,10 +308,33 @@ function SetRowEdit({ set, exerciseType, editValues, onUpdate }: SetRowEditProps
           onChange={(e) =>
             onUpdate(set.id, 'rpe', e.target.value ? parseFloat(e.target.value) : null)
           }
-          className="h-9 w-12 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          disabled={isDeleted}
+          className={`h-9 w-12 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none ${isDeleted ? 'line-through' : ''}`}
         />
         <span className="text-xs text-gray-500">RPE</span>
       </div>
+
+      {/* Delete / Undo button */}
+      <button
+        type="button"
+        onClick={() => onDelete(set.id)}
+        className={`ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+          isDeleted
+            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            : 'bg-red-900/50 text-red-400 hover:bg-red-800/60 active:bg-red-700/60'
+        }`}
+        title={isDeleted ? 'Undo delete' : 'Delete set'}
+      >
+        {isDeleted ? (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h4l3-7 4 14 3-7h4" />
+          </svg>
+        ) : (
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        )}
+      </button>
     </div>
   );
 }
@@ -326,9 +354,15 @@ interface ExerciseSummarySectionProps {
   onReplaceExercise?: (workoutExerciseId: string) => void;
   isMarkedForDelete?: boolean;
   replacementName?: string | null;
+  deletedSetIds?: Set<string>;
+  onDeleteSet?: (setId: string) => void;
+  onAddSet?: (workoutExerciseId: string) => void;
+  newSetsForExercise?: EditSetValues[];
+  onUpdateNewSet?: (workoutExerciseId: string, index: number, field: keyof EditSetValues, value: number | null) => void;
+  onDeleteNewSet?: (workoutExerciseId: string, index: number) => void;
 }
 
-function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, editSets, onUpdateSet, onDeleteExercise, onReplaceExercise, isMarkedForDelete, replacementName }: ExerciseSummarySectionProps) {
+function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, editSets, onUpdateSet, onDeleteExercise, onReplaceExercise, isMarkedForDelete, replacementName, deletedSetIds, onDeleteSet, onAddSet, newSetsForExercise, onUpdateNewSet, onDeleteNewSet }: ExerciseSummarySectionProps) {
   const exerciseName = exercise.exercises?.name ?? 'Unknown Exercise';
   const exerciseType = (exercise.exercises?.exercise_type ?? 'bodyweight') as ExerciseType;
 
@@ -403,6 +437,8 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
                 exerciseType={exerciseType}
                 editValues={editSets[set.id] ?? { reps: set.reps, weight_kg: set.weight_kg, duration_seconds: set.duration_seconds, rpe: set.rpe }}
                 onUpdate={onUpdateSet}
+                onDelete={onDeleteSet ?? (() => {})}
+                isDeleted={deletedSetIds?.has(set.id) ?? false}
               />
             ) : (
               <SetRowDisplay
@@ -414,7 +450,108 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
               />
             )
           )}
-          {exercise.exercise_sets.length === 0 && (
+
+          {/* New sets (pending save) */}
+          {isEditing && newSetsForExercise && newSetsForExercise.map((newSet, idx) => (
+            <div key={`new-set-${idx}`} className="flex items-center gap-2 rounded-lg border border-dashed border-indigo-600 bg-gray-800 px-3 py-2">
+              <span className="w-6 shrink-0 text-center text-xs font-semibold text-indigo-400">
+                {exercise.exercise_sets.length + idx + 1}
+              </span>
+
+              {['bodyweight', 'weighted', 'assisted'].includes(exerciseType) && (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Reps"
+                    value={newSet.reps ?? ''}
+                    onChange={(e) =>
+                      onUpdateNewSet?.(exercise.id, idx, 'reps', e.target.value ? parseInt(e.target.value, 10) : null)
+                    }
+                    className="h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  />
+                  <span className="text-xs text-gray-500">reps</span>
+                </div>
+              )}
+
+              {['weighted', 'assisted'].includes(exerciseType) && (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="kg"
+                    value={newSet.weight_kg ?? ''}
+                    onChange={(e) =>
+                      onUpdateNewSet?.(exercise.id, idx, 'weight_kg', e.target.value ? parseFloat(e.target.value) : null)
+                    }
+                    className="h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  />
+                  <span className="text-xs text-gray-500">kg</span>
+                </div>
+              )}
+
+              {['duration', 'static_hold'].includes(exerciseType) && (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Sec"
+                    value={newSet.duration_seconds ?? ''}
+                    onChange={(e) =>
+                      onUpdateNewSet?.(exercise.id, idx, 'duration_seconds', e.target.value ? parseInt(e.target.value, 10) : null)
+                    }
+                    className="h-9 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  />
+                  <span className="text-xs text-gray-500">sec</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="RPE"
+                  step="0.5"
+                  min="6"
+                  max="10"
+                  value={newSet.rpe ?? ''}
+                  onChange={(e) =>
+                    onUpdateNewSet?.(exercise.id, idx, 'rpe', e.target.value ? parseFloat(e.target.value) : null)
+                  }
+                  className="h-9 w-12 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                />
+                <span className="text-xs text-gray-500">RPE</span>
+              </div>
+
+              {/* Remove new set */}
+              <button
+                type="button"
+                onClick={() => onDeleteNewSet?.(exercise.id, idx)}
+                className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-red-900/50 text-red-400 hover:bg-red-800/60 active:bg-red-700/60"
+                title="Remove set"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))}
+
+          {/* Add Set button */}
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => onAddSet?.(exercise.id)}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-600 px-3 py-2 text-xs font-medium text-gray-400 hover:border-indigo-600 hover:text-indigo-400 active:bg-gray-800"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Set
+            </button>
+          )}
+
+          {exercise.exercise_sets.length === 0 && (!newSetsForExercise || newSetsForExercise.length === 0) && (
             <p className="py-2 text-center text-xs text-gray-500">No sets recorded</p>
           )}
         </div>
@@ -452,6 +589,10 @@ export default function WorkoutDetailPage() {
   const [pickerMode, setPickerMode] = useState<'add' | 'replace'>('add');
   const [replaceTargetId, setReplaceTargetId] = useState<string | null>(null);
 
+  // Set-level management state (edit mode)
+  const [deletedSetIds, setDeletedSetIds] = useState<Set<string>>(new Set());
+  const [newSets, setNewSets] = useState<Record<string, EditSetValues[]>>({});
+
   const handleStartEdit = useCallback(() => {
     if (!workout) return;
     setEditName(workout.name);
@@ -471,6 +612,8 @@ export default function WorkoutDetailPage() {
     setDeletedExerciseIds(new Set());
     setAddedExercises([]);
     setReplacedExercises([]);
+    setDeletedSetIds(new Set());
+    setNewSets({});
     setIsEditing(true);
   }, [workout]);
 
@@ -481,6 +624,8 @@ export default function WorkoutDetailPage() {
     setDeletedExerciseIds(new Set());
     setAddedExercises([]);
     setReplacedExercises([]);
+    setDeletedSetIds(new Set());
+    setNewSets({});
   }, []);
 
   const handleUpdateSet = useCallback((setId: string, field: keyof EditSetValues, value: number | null) => {
@@ -491,6 +636,47 @@ export default function WorkoutDetailPage() {
         [field]: value,
       },
     }));
+  }, []);
+
+  // Toggle delete for a set
+  const handleToggleDeleteSet = useCallback((setId: string) => {
+    setDeletedSetIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(setId)) {
+        next.delete(setId);
+      } else {
+        next.add(setId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Add a new set to an exercise
+  const handleAddSet = useCallback((workoutExerciseId: string) => {
+    setNewSets((prev) => ({
+      ...prev,
+      [workoutExerciseId]: [
+        ...(prev[workoutExerciseId] ?? []),
+        { reps: null, weight_kg: null, duration_seconds: null, rpe: null },
+      ],
+    }));
+  }, []);
+
+  // Update a new set's field
+  const handleUpdateNewSet = useCallback((workoutExerciseId: string, index: number, field: keyof EditSetValues, value: number | null) => {
+    setNewSets((prev) => {
+      const exerciseSets = [...(prev[workoutExerciseId] ?? [])];
+      exerciseSets[index] = { ...exerciseSets[index], [field]: value };
+      return { ...prev, [workoutExerciseId]: exerciseSets };
+    });
+  }, []);
+
+  // Remove a new set (before save)
+  const handleDeleteNewSet = useCallback((workoutExerciseId: string, index: number) => {
+    setNewSets((prev) => {
+      const exerciseSets = (prev[workoutExerciseId] ?? []).filter((_, i) => i !== index);
+      return { ...prev, [workoutExerciseId]: exerciseSets };
+    });
   }, []);
 
   // Toggle delete for an exercise
@@ -575,6 +761,27 @@ export default function WorkoutDetailPage() {
       workoutId: id,
       name: editName !== workout.name ? editName : undefined,
       sets: changedSets.length > 0 ? changedSets : undefined,
+      deleteSets: deletedSetIds.size > 0 ? Array.from(deletedSetIds) : undefined,
+      addSets: (() => {
+        const allNewSets: AddSetPayload[] = [];
+        for (const exercise of workout.workout_exercises ?? []) {
+          const exerciseNewSets = newSets[exercise.id];
+          if (!exerciseNewSets || exerciseNewSets.length === 0) continue;
+          // Count non-deleted existing sets to determine set_number offset
+          const existingCount = exercise.exercise_sets.filter((s) => !deletedSetIds.has(s.id)).length;
+          for (let i = 0; i < exerciseNewSets.length; i++) {
+            allNewSets.push({
+              workout_exercise_id: exercise.id,
+              set_number: existingCount + i + 1,
+              reps: exerciseNewSets[i].reps,
+              weight_kg: exerciseNewSets[i].weight_kg,
+              duration_seconds: exerciseNewSets[i].duration_seconds,
+              rpe: exerciseNewSets[i].rpe,
+            });
+          }
+        }
+        return allNewSets.length > 0 ? allNewSets : undefined;
+      })(),
       deleteExercises: deletedExerciseIds.size > 0 ? Array.from(deletedExerciseIds) : undefined,
       addExercises: addedExercises.length > 0
         ? addedExercises.map(({ _name, ...rest }) => rest)
@@ -588,7 +795,9 @@ export default function WorkoutDetailPage() {
     setDeletedExerciseIds(new Set());
     setAddedExercises([]);
     setReplacedExercises([]);
-  }, [workout, id, editName, editSets, updateWorkout, deletedExerciseIds, addedExercises, replacedExercises]);
+    setDeletedSetIds(new Set());
+    setNewSets({});
+  }, [workout, id, editName, editSets, updateWorkout, deletedExerciseIds, addedExercises, replacedExercises, deletedSetIds, newSets]);
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!id) return;
@@ -737,6 +946,12 @@ export default function WorkoutDetailPage() {
             onReplaceExercise={handleOpenReplaceExercise}
             isMarkedForDelete={deletedExerciseIds.has(exercise.id)}
             replacementName={replacedExercises.find((r) => r.workout_exercise_id === exercise.id)?._name ?? null}
+            deletedSetIds={deletedSetIds}
+            onDeleteSet={handleToggleDeleteSet}
+            onAddSet={handleAddSet}
+            newSetsForExercise={newSets[exercise.id]}
+            onUpdateNewSet={handleUpdateNewSet}
+            onDeleteNewSet={handleDeleteNewSet}
           />
         ))}
 
