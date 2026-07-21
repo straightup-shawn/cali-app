@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import { uploadWorkoutPhoto } from '@/lib/storage';
+import { useAuth } from '@/context/AuthContext';
 import type { SaveWorkoutResult } from '@/hooks/useSaveWorkout';
 import type { PRCheck } from '@/lib/personal-records';
 import type { RecordType } from '@/types';
@@ -69,10 +71,12 @@ function formatPRValue(pr: PRCheck): string {
 export default function WorkoutSummaryPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const summaryData = location.state as SaveWorkoutResult | null;
 
   const [notes, setNotes] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,6 +92,7 @@ export default function WorkoutSummaryPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setPhotoFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => {
       setPhotoPreview(ev.target?.result as string);
@@ -98,11 +103,28 @@ export default function WorkoutSummaryPage() {
   const handleDone = async () => {
     setSaving(true);
     try {
-      // Save notes if user wrote any
-      if (notes.trim()) {
+      let photoUrl: string | null = null;
+
+      // Upload photo if one was selected
+      if (photoFile && user) {
+        try {
+          photoUrl = await uploadWorkoutPhoto(workoutId, user.id, photoFile);
+        } catch {
+          // Photo upload failed — non-critical, continue
+        }
+      }
+
+      // Build notes content (include photo URL if uploaded)
+      let finalNotes = notes.trim();
+      if (photoUrl) {
+        finalNotes = `${finalNotes}${finalNotes ? '\n\n' : ''}📷 ${photoUrl}`;
+      }
+
+      // Save notes to workout
+      if (finalNotes) {
         await supabase
           .from('workouts')
-          .update({ notes: notes.trim() })
+          .update({ notes: finalNotes })
           .eq('id', workoutId);
       }
     } catch {
@@ -199,6 +221,7 @@ export default function WorkoutSummaryPage() {
                 type="button"
                 onClick={() => {
                   setPhotoPreview(null);
+                  setPhotoFile(null);
                   if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
                 className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
