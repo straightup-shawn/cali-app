@@ -1,8 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
 import { useWorkoutPersonalRecords } from '@/hooks/usePersonalRecords';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
+import { useAuth } from '@/context/AuthContext';
+import { uploadWorkoutPhoto } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 import ExercisePicker from '@/components/ExercisePicker';
 import type { ExerciseType } from '@/types';
 import type { PersonalRecordRow } from '@/hooks/usePersonalRecords';
@@ -563,6 +566,185 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
 // =============================================================================
 // WorkoutDetailPage
 // =============================================================================
+// NotesPhotoSection — inline editable notes and photo for past workouts
+// =============================================================================
+
+interface NotesPhotoSectionProps {
+  workoutId: string;
+  notes: string | null;
+  isEditing: boolean;
+}
+
+function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
+  const { user } = useAuth();
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Extract photo URL and text from notes
+  const photoUrl = notes?.match(/📷 (https?:\/\/\S+)/)?.[1] ?? null;
+  const textNotes = notes?.replace(/📷 https?:\/\/\S+/g, '').trim() ?? '';
+
+  const handleStartEditNotes = () => {
+    setNotesValue(textNotes);
+    setEditingNotes(true);
+  };
+
+  const handleSaveNotes = async () => {
+    setSaving(true);
+    try {
+      const photoPart = photoUrl ? `\n\n📷 ${photoUrl}` : '';
+      const finalNotes = notesValue.trim() + photoPart;
+      await supabase.from('workouts').update({ notes: finalNotes || null }).eq('id', workoutId);
+      setEditingNotes(false);
+    } catch { /* ignore */ }
+    setSaving(false);
+  };
+
+  const handleDeletePhoto = async () => {
+    setSaving(true);
+    try {
+      const newNotes = textNotes || null;
+      await supabase.from('workouts').update({ notes: newNotes }).eq('id', workoutId);
+    } catch { /* ignore */ }
+    setSaving(false);
+  };
+
+  const handleAddPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+
+    setSaving(true);
+    try {
+      const url = await uploadWorkoutPhoto(workoutId, user.id, file);
+      const photoPart = `📷 ${url}`;
+      const finalNotes = textNotes ? `${textNotes}\n\n${photoPart}` : photoPart;
+      await supabase.from('workouts').update({ notes: finalNotes }).eq('id', workoutId);
+      setPhotoPreview(null);
+    } catch {
+      setPhotoPreview(null);
+    }
+    setSaving(false);
+  };
+
+  const displayPhoto = photoPreview ?? photoUrl;
+
+  return (
+    <div className="mx-4 mt-4 space-y-3">
+      {/* Photo section */}
+      <div className="rounded-lg border border-gray-800 bg-gray-900 p-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium text-gray-400 uppercase">Photo</p>
+          <div className="flex gap-2">
+            {displayPhoto && (
+              <button
+                type="button"
+                onClick={handleDeletePhoto}
+                disabled={saving}
+                className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+              >
+                Remove
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={saving}
+              className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50"
+            >
+              {displayPhoto ? 'Replace' : 'Add Photo'}
+            </button>
+          </div>
+        </div>
+        {displayPhoto && (
+          <img
+            src={displayPhoto}
+            alt="Workout photo"
+            className="mt-2 w-full rounded-lg object-cover max-h-64"
+          />
+        )}
+        {!displayPhoto && (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-700 py-6 text-sm text-gray-500 hover:border-indigo-500 hover:text-indigo-400"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Add Photo
+          </button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleAddPhoto}
+          className="hidden"
+        />
+      </div>
+
+      {/* Notes section */}
+      <div className="rounded-lg border border-gray-800 bg-gray-900 p-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium text-gray-400 uppercase">Notes</p>
+          {!editingNotes && (
+            <button
+              type="button"
+              onClick={handleStartEditNotes}
+              className="text-xs text-indigo-400 hover:text-indigo-300"
+            >
+              {textNotes ? 'Edit' : 'Add'}
+            </button>
+          )}
+        </div>
+        {editingNotes ? (
+          <div className="mt-2">
+            <textarea
+              value={notesValue}
+              onChange={(e) => setNotesValue(e.target.value)}
+              rows={3}
+              placeholder="How did the workout feel?..."
+              className="block w-full resize-none rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingNotes(false)}
+                className="flex-1 rounded-lg border border-gray-600 px-3 py-2 text-xs font-medium text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveNotes}
+                disabled={saving}
+                className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-300">
+            {textNotes || <span className="text-gray-500 italic">No notes</span>}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
 
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -923,23 +1105,12 @@ export default function WorkoutDetailPage() {
         </div>
       </div>
 
-      {/* Notes & Photo */}
-      {workout.notes && (
-        <div className="mx-4 mt-4 rounded-lg border border-gray-800 bg-gray-900 p-3">
-          <p className="text-xs font-medium text-gray-400 uppercase">Notes</p>
-          {/* Render photo if URL is embedded in notes */}
-          {workout.notes.includes('📷 http') && (
-            <img
-              src={workout.notes.split('📷 ')[1]?.split('\n')[0]?.trim()}
-              alt="Workout photo"
-              className="mt-2 w-full rounded-lg object-cover"
-            />
-          )}
-          <p className="mt-1 whitespace-pre-wrap text-sm text-gray-300">
-            {workout.notes.replace(/📷 https?:\/\/\S+/g, '').trim()}
-          </p>
-        </div>
-      )}
+      {/* Notes & Photo — editable */}
+      <NotesPhotoSection
+        workoutId={id!}
+        notes={workout.notes}
+        isEditing={isEditing}
+      />
 
       {/* Exercise list */}
       <div className="flex-1 space-y-4 px-4 pt-4">
