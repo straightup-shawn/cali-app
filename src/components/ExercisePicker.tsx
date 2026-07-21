@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useExercises } from '@/hooks/useExercises';
+import { useExercises, useCreateExercise } from '@/hooks/useExercises';
 import type { ExerciseType } from '@/types';
 
 interface ExercisePickerProps {
@@ -30,6 +30,8 @@ const TYPE_COLORS: Record<ExerciseType, string> = {
   static_hold: 'bg-red-900/50 text-red-300',
 };
 
+const EXERCISE_TYPES: ExerciseType[] = ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold'];
+
 function useDebounce(value: string, delay: number): string {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -48,11 +50,16 @@ export default function ExercisePicker({
   excludeIds = [],
 }: ExercisePickerProps) {
   const [searchInput, setSearchInput] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newType, setNewType] = useState<ExerciseType>('bodyweight');
+  const [createError, setCreateError] = useState<string | null>(null);
   const debouncedSearch = useDebounce(searchInput, 300);
 
   const { data: exercises, isLoading } = useExercises({
     search: debouncedSearch || undefined,
   });
+  const createExercise = useCreateExercise();
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,10 +68,38 @@ export default function ExercisePicker({
     []
   );
 
-  // Reset search when modal opens
+  // Reset state when modal opens
   useEffect(() => {
-    if (open) setSearchInput('');
+    if (open) {
+      setSearchInput('');
+      setShowCreateForm(false);
+      setNewName('');
+      setNewType('bodyweight');
+      setCreateError(null);
+    }
   }, [open]);
+
+  const handleCreate = async () => {
+    if (!newName.trim()) {
+      setCreateError('Name is required');
+      return;
+    }
+    setCreateError(null);
+    try {
+      const created = await createExercise.mutateAsync({
+        name: newName.trim(),
+        exercise_type: newType,
+      });
+      // Select the newly created exercise immediately
+      onSelect({
+        id: created.id,
+        name: created.name,
+        exercise_type: created.exercise_type,
+      });
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create exercise');
+    }
+  };
 
   if (!open) return null;
 
@@ -133,6 +168,70 @@ export default function ExercisePicker({
 
         {/* Exercise List */}
         <div className="flex-1 overflow-y-auto px-4 pb-4">
+          {/* Create New Exercise button */}
+          {!showCreateForm && (
+            <button
+              type="button"
+              onClick={() => {
+                setNewName(searchInput);
+                setShowCreateForm(true);
+              }}
+              className="mb-3 flex w-full items-center gap-2 rounded-xl border border-dashed border-indigo-600/50 bg-indigo-950/30 p-3 text-left transition-colors hover:bg-indigo-950/50 active:bg-indigo-900/40"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">
+                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-indigo-300">Create New Exercise</p>
+                <p className="text-xs text-gray-500">Add a custom exercise to your library</p>
+              </div>
+            </button>
+          )}
+
+          {/* Inline Create Form */}
+          {showCreateForm && (
+            <div className="mb-3 rounded-xl border border-indigo-600/50 bg-indigo-950/20 p-4 space-y-3">
+              <h3 className="text-sm font-semibold text-indigo-200">New Exercise</h3>
+              <input
+                type="text"
+                placeholder="Exercise name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              />
+              <select
+                value={newType}
+                onChange={(e) => setNewType(e.target.value as ExerciseType)}
+                className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none appearance-none"
+              >
+                {EXERCISE_TYPES.map((t) => (
+                  <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+                ))}
+              </select>
+              {createError && (
+                <p className="text-xs text-red-400">{createError}</p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className="flex-1 rounded-lg border border-gray-600 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreate}
+                  disabled={createExercise.isPending}
+                  className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                >
+                  {createExercise.isPending ? 'Creating...' : 'Create & Add'}
+                </button>
+              </div>
+            </div>
+          )}
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-6 w-6 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />
