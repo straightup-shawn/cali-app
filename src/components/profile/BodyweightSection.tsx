@@ -185,18 +185,23 @@ function BodyweightForm({
           className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white placeholder:text-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
-      <div>
+      <div className="relative overflow-hidden">
         <label htmlFor="bw-date" className="mb-1 block text-sm font-medium text-gray-300">
           Date
         </label>
-        <input
-          id="bw-date"
-          type="date"
-          value={date}
-          max={today}
-          onChange={(e) => setDate(e.target.value)}
-          className="block w-full max-w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-        />
+        <div className="relative">
+          <input
+            id="bw-date"
+            type="date"
+            value={date}
+            max={today}
+            onChange={(e) => setDate(e.target.value)}
+            className="absolute inset-0 h-full w-full opacity-0"
+          />
+          <div className="flex h-[44px] w-full items-center rounded-lg border border-gray-700 bg-gray-800 px-3 text-base text-white">
+            {date ? new Date(date + 'T00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Select date'}
+          </div>
+        </div>
       </div>
 
       {error && (
