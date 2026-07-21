@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useWorkouts, type WorkoutSummary } from '@/hooks/useWorkouts';
@@ -44,6 +44,52 @@ function getStartOfWeek(): Date {
 }
 
 // =============================================================================
+// StartRoutineButton — fetches full routine then starts workout
+// =============================================================================
+
+function StartRoutineButton({ routine }: { routine: RoutineWithCount }) {
+  const { startWorkout } = useActiveWorkout();
+  const navigate = useNavigate();
+  const [starting, setStarting] = useState(false);
+
+  async function handleStart() {
+    setStarting(true);
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data: fullRoutine } = await supabase
+        .from('routines')
+        .select(`
+          *,
+          routine_exercises(
+            *,
+            exercises(id, name, exercise_type, muscle_groups)
+          )
+        `)
+        .eq('id', routine.id)
+        .single();
+
+      startWorkout(fullRoutine ? (fullRoutine as any) : undefined);
+    } catch {
+      startWorkout();
+    } finally {
+      setStarting(false);
+      navigate('/workout/active');
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleStart}
+      disabled={starting}
+      className="inline-flex items-center rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-200 active:bg-gray-700 disabled:opacity-50"
+    >
+      {starting ? '...' : routine.name}
+    </button>
+  );
+}
+
+// =============================================================================
 // QuickStartCard
 // =============================================================================
 
@@ -53,11 +99,6 @@ function QuickStartCard({ routines }: { routines: RoutineWithCount[] }) {
 
   function handleStartEmpty() {
     startWorkout();
-    navigate('/workout/active');
-  }
-
-  function handleStartFromRoutine(routine: RoutineWithCount) {
-    startWorkout(routine as any);
     navigate('/workout/active');
   }
 
@@ -78,14 +119,7 @@ function QuickStartCard({ routines }: { routines: RoutineWithCount[] }) {
           <p className="text-xs font-medium text-gray-400">From routine</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {routines.slice(0, 3).map((routine) => (
-              <button
-                key={routine.id}
-                type="button"
-                onClick={() => handleStartFromRoutine(routine)}
-                className="inline-flex items-center rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-200 active:bg-gray-700"
-              >
-                {routine.name}
-              </button>
+              <StartRoutineButton key={routine.id} routine={routine} />
             ))}
           </div>
         </div>
