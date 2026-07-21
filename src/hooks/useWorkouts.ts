@@ -177,14 +177,34 @@ export interface UpdateSetPayload {
   rpe?: number | null;
 }
 
+export interface AddExercisePayload {
+  exercise_id: string;
+  position: number;
+  sets: {
+    reps?: number | null;
+    weight_kg?: number | null;
+    duration_seconds?: number | null;
+    rpe?: number | null;
+  }[];
+}
+
+export interface ReplaceExercisePayload {
+  workout_exercise_id: string;
+  new_exercise_id: string;
+}
+
 export interface UpdateWorkoutPayload {
   workoutId: string;
   name?: string;
   sets?: UpdateSetPayload[];
+  deleteExercises?: string[];
+  addExercises?: AddExercisePayload[];
+  replaceExercises?: ReplaceExercisePayload[];
 }
 
 /**
- * Updates a workout's name and/or individual exercise set values.
+ * Updates a workout's name, individual exercise set values,
+ * and supports adding/deleting/replacing exercises.
  */
 export function useUpdateWorkout() {
   const { user } = useAuth();
@@ -203,6 +223,63 @@ export function useUpdateWorkout() {
           .eq('user_id', user.id);
 
         if (error) throw error;
+      }
+
+      // Delete exercises (CASCADE deletes their sets)
+      if (payload.deleteExercises && payload.deleteExercises.length > 0) {
+        const { error } = await supabase
+          .from('workout_exercises')
+          .delete()
+          .in('id', payload.deleteExercises);
+
+        if (error) throw error;
+      }
+
+      // Replace exercises (update exercise_id on workout_exercises row)
+      if (payload.replaceExercises && payload.replaceExercises.length > 0) {
+        for (const replace of payload.replaceExercises) {
+          const { error } = await supabase
+            .from('workout_exercises')
+            .update({ exercise_id: replace.new_exercise_id })
+            .eq('id', replace.workout_exercise_id);
+
+          if (error) throw error;
+        }
+      }
+
+      // Add exercises: insert workout_exercises then their sets
+      if (payload.addExercises && payload.addExercises.length > 0) {
+        for (const addEx of payload.addExercises) {
+          const { data: insertedWe, error: weError } = await supabase
+            .from('workout_exercises')
+            .insert({
+              workout_id: payload.workoutId,
+              exercise_id: addEx.exercise_id,
+              position: addEx.position,
+            })
+            .select()
+            .single();
+
+          if (weError) throw weError;
+
+          if (addEx.sets.length > 0) {
+            const setsToInsert = addEx.sets.map((s, idx) => ({
+              workout_exercise_id: insertedWe.id,
+              set_number: idx + 1,
+              reps: s.reps ?? null,
+              weight_kg: s.weight_kg ?? null,
+              duration_seconds: s.duration_seconds ?? null,
+              rpe: s.rpe ?? null,
+              completed: true,
+            }));
+
+            const { error: setsError } = await supabase
+              .from('exercise_sets')
+              .insert(setsToInsert);
+
+            if (setsError) throw setsError;
+          }
+        }
       }
 
       // Update individual sets if provided

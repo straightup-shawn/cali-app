@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload } from '@/hooks/useWorkouts';
+import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
 import { useWorkoutPersonalRecords } from '@/hooks/usePersonalRecords';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
+import ExercisePicker from '@/components/ExercisePicker';
 import type { ExerciseType } from '@/types';
 import type { PersonalRecordRow } from '@/hooks/usePersonalRecords';
 import type { Database } from '@/types/database';
@@ -321,18 +322,30 @@ interface ExerciseSummarySectionProps {
   isEditing: boolean;
   editSets: Record<string, EditSetValues>;
   onUpdateSet: (setId: string, field: keyof EditSetValues, value: number | null) => void;
+  onDeleteExercise?: (workoutExerciseId: string) => void;
+  onReplaceExercise?: (workoutExerciseId: string) => void;
+  isMarkedForDelete?: boolean;
+  replacementName?: string | null;
 }
 
-function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, editSets, onUpdateSet }: ExerciseSummarySectionProps) {
+function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, editSets, onUpdateSet, onDeleteExercise, onReplaceExercise, isMarkedForDelete, replacementName }: ExerciseSummarySectionProps) {
   const exerciseName = exercise.exercises?.name ?? 'Unknown Exercise';
   const exerciseType = (exercise.exercises?.exercise_type ?? 'bodyweight') as ExerciseType;
 
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+    <div className={`rounded-xl border bg-gray-900 p-4 ${isMarkedForDelete ? 'border-red-700 opacity-50' : replacementName ? 'border-indigo-700' : 'border-gray-800'}`}>
       {/* Exercise header */}
       <div className="flex items-center gap-2">
         <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-100">
-          {exerciseName}
+          {isMarkedForDelete && <span className="mr-1 text-red-400 line-through">{exerciseName}</span>}
+          {!isMarkedForDelete && !replacementName && exerciseName}
+          {!isMarkedForDelete && replacementName && (
+            <>
+              <span className="text-gray-500 line-through">{exerciseName}</span>
+              <span className="mx-1 text-gray-600">→</span>
+              <span className="text-indigo-300">{replacementName}</span>
+            </>
+          )}
         </h3>
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -341,33 +354,71 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
         >
           {TYPE_LABELS[exerciseType]}
         </span>
+        {/* Edit mode action buttons */}
+        {isEditing && !isMarkedForDelete && (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onReplaceExercise?.(exercise.id)}
+              className="flex h-7 items-center gap-1 rounded-md border border-gray-600 px-2 text-xs font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600"
+              title="Replace exercise"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+              Replace
+            </button>
+            <button
+              type="button"
+              onClick={() => onDeleteExercise?.(exercise.id)}
+              className="flex h-7 w-7 items-center justify-center rounded-md bg-red-900/50 text-red-400 hover:bg-red-800/60 active:bg-red-700/60"
+              title="Remove exercise"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {isEditing && isMarkedForDelete && (
+          <button
+            type="button"
+            onClick={() => onDeleteExercise?.(exercise.id)}
+            className="flex h-7 items-center gap-1 rounded-md border border-gray-600 px-2 text-xs font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600"
+            title="Undo remove"
+          >
+            Undo
+          </button>
+        )}
       </div>
 
       {/* Sets */}
-      <div className="mt-3 space-y-1.5">
-        {exercise.exercise_sets.map((set) =>
-          isEditing ? (
-            <SetRowEdit
-              key={set.id}
-              set={set}
-              exerciseType={exerciseType}
-              editValues={editSets[set.id] ?? { reps: set.reps, weight_kg: set.weight_kg, duration_seconds: set.duration_seconds, rpe: set.rpe }}
-              onUpdate={onUpdateSet}
-            />
-          ) : (
-            <SetRowDisplay
-              key={set.id}
-              set={set}
-              exerciseType={exerciseType}
-              isPR={setHasPR(set, exercise.exercise_id, prRecords)}
-              formatWeight={formatWeight}
-            />
-          )
-        )}
-        {exercise.exercise_sets.length === 0 && (
-          <p className="py-2 text-center text-xs text-gray-500">No sets recorded</p>
-        )}
-      </div>
+      {!isMarkedForDelete && (
+        <div className="mt-3 space-y-1.5">
+          {exercise.exercise_sets.map((set) =>
+            isEditing ? (
+              <SetRowEdit
+                key={set.id}
+                set={set}
+                exerciseType={exerciseType}
+                editValues={editSets[set.id] ?? { reps: set.reps, weight_kg: set.weight_kg, duration_seconds: set.duration_seconds, rpe: set.rpe }}
+                onUpdate={onUpdateSet}
+              />
+            ) : (
+              <SetRowDisplay
+                key={set.id}
+                set={set}
+                exerciseType={exerciseType}
+                isPR={setHasPR(set, exercise.exercise_id, prRecords)}
+                formatWeight={formatWeight}
+              />
+            )
+          )}
+          {exercise.exercise_sets.length === 0 && (
+            <p className="py-2 text-center text-xs text-gray-500">No sets recorded</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -393,6 +444,14 @@ export default function WorkoutDetailPage() {
   const [editSets, setEditSets] = useState<Record<string, EditSetValues>>({});
   const updateWorkout = useUpdateWorkout();
 
+  // Exercise management state (edit mode)
+  const [deletedExerciseIds, setDeletedExerciseIds] = useState<Set<string>>(new Set());
+  const [addedExercises, setAddedExercises] = useState<(AddExercisePayload & { _name: string })[]>([]);
+  const [replacedExercises, setReplacedExercises] = useState<(ReplaceExercisePayload & { _name: string })[]>([]);
+  const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'add' | 'replace'>('add');
+  const [replaceTargetId, setReplaceTargetId] = useState<string | null>(null);
+
   const handleStartEdit = useCallback(() => {
     if (!workout) return;
     setEditName(workout.name);
@@ -409,6 +468,9 @@ export default function WorkoutDetailPage() {
       }
     }
     setEditSets(setsMap);
+    setDeletedExerciseIds(new Set());
+    setAddedExercises([]);
+    setReplacedExercises([]);
     setIsEditing(true);
   }, [workout]);
 
@@ -416,6 +478,9 @@ export default function WorkoutDetailPage() {
     setIsEditing(false);
     setEditSets({});
     setEditName('');
+    setDeletedExerciseIds(new Set());
+    setAddedExercises([]);
+    setReplacedExercises([]);
   }, []);
 
   const handleUpdateSet = useCallback((setId: string, field: keyof EditSetValues, value: number | null) => {
@@ -428,12 +493,69 @@ export default function WorkoutDetailPage() {
     }));
   }, []);
 
+  // Toggle delete for an exercise
+  const handleToggleDeleteExercise = useCallback((workoutExerciseId: string) => {
+    setDeletedExerciseIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(workoutExerciseId)) {
+        next.delete(workoutExerciseId);
+      } else {
+        next.add(workoutExerciseId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Open picker for adding a new exercise
+  const handleOpenAddExercise = useCallback(() => {
+    setPickerMode('add');
+    setReplaceTargetId(null);
+    setExercisePickerOpen(true);
+  }, []);
+
+  // Open picker for replacing an exercise
+  const handleOpenReplaceExercise = useCallback((workoutExerciseId: string) => {
+    setPickerMode('replace');
+    setReplaceTargetId(workoutExerciseId);
+    setExercisePickerOpen(true);
+  }, []);
+
+  // Handle exercise selected from picker
+  const handleExerciseSelected = useCallback((exercise: { id: string; name: string; exercise_type: string }) => {
+    if (pickerMode === 'add') {
+      const currentExerciseCount = (workout?.workout_exercises?.length ?? 0) + addedExercises.length;
+      setAddedExercises((prev) => [
+        ...prev,
+        {
+          exercise_id: exercise.id,
+          position: currentExerciseCount,
+          sets: [{ reps: null, weight_kg: null, duration_seconds: null, rpe: null }],
+          _name: exercise.name,
+        },
+      ]);
+    } else if (pickerMode === 'replace' && replaceTargetId) {
+      // Remove any existing replacement for the same target
+      setReplacedExercises((prev) => [
+        ...prev.filter((r) => r.workout_exercise_id !== replaceTargetId),
+        { workout_exercise_id: replaceTargetId, new_exercise_id: exercise.id, _name: exercise.name },
+      ]);
+    }
+    setExercisePickerOpen(false);
+  }, [pickerMode, replaceTargetId, workout, addedExercises.length]);
+
+  // Remove a newly added exercise (before save)
+  const handleRemoveAddedExercise = useCallback((index: number) => {
+    setAddedExercises((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
   const handleSaveEdit = useCallback(async () => {
     if (!workout || !id) return;
 
     // Build the sets payload - only include sets that actually changed
     const changedSets: UpdateSetPayload[] = [];
     for (const exercise of workout.workout_exercises ?? []) {
+      // Skip sets of deleted exercises
+      if (deletedExerciseIds.has(exercise.id)) continue;
       for (const set of exercise.exercise_sets) {
         const edited = editSets[set.id];
         if (!edited) continue;
@@ -453,10 +575,20 @@ export default function WorkoutDetailPage() {
       workoutId: id,
       name: editName !== workout.name ? editName : undefined,
       sets: changedSets.length > 0 ? changedSets : undefined,
+      deleteExercises: deletedExerciseIds.size > 0 ? Array.from(deletedExerciseIds) : undefined,
+      addExercises: addedExercises.length > 0
+        ? addedExercises.map(({ _name, ...rest }) => rest)
+        : undefined,
+      replaceExercises: replacedExercises.length > 0
+        ? replacedExercises.map(({ _name, ...rest }) => rest)
+        : undefined,
     });
 
     setIsEditing(false);
-  }, [workout, id, editName, editSets, updateWorkout]);
+    setDeletedExerciseIds(new Set());
+    setAddedExercises([]);
+    setReplacedExercises([]);
+  }, [workout, id, editName, editSets, updateWorkout, deletedExerciseIds, addedExercises, replacedExercises]);
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!id) return;
@@ -601,14 +733,67 @@ export default function WorkoutDetailPage() {
             isEditing={isEditing}
             editSets={editSets}
             onUpdateSet={handleUpdateSet}
+            onDeleteExercise={handleToggleDeleteExercise}
+            onReplaceExercise={handleOpenReplaceExercise}
+            isMarkedForDelete={deletedExerciseIds.has(exercise.id)}
+            replacementName={replacedExercises.find((r) => r.workout_exercise_id === exercise.id)?._name ?? null}
           />
         ))}
-        {exercises.length === 0 && (
+
+        {/* Newly added exercises (pending save) */}
+        {isEditing && addedExercises.length > 0 && (
+          <>
+            {addedExercises.map((added, index) => (
+              <div key={`added-${index}`} className="rounded-xl border border-dashed border-indigo-600 bg-gray-900 p-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-indigo-400">NEW</span>
+                  <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-100">
+                    {added._name}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAddedExercise(index)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md bg-red-900/50 text-red-400 hover:bg-red-800/60 active:bg-red-700/60"
+                    title="Remove"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">1 empty set will be added</p>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Add Exercise button (edit mode) */}
+        {isEditing && (
+          <button
+            type="button"
+            onClick={handleOpenAddExercise}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-700 bg-gray-900/50 px-4 py-4 text-sm font-medium text-gray-400 hover:border-indigo-600 hover:text-indigo-400 active:bg-gray-800"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Exercise
+          </button>
+        )}
+
+        {exercises.length === 0 && !isEditing && (
           <div className="py-12 text-center">
             <p className="text-sm text-gray-500">No exercises in this workout</p>
           </div>
         )}
       </div>
+
+      {/* Exercise picker modal */}
+      <ExercisePicker
+        open={exercisePickerOpen}
+        onClose={() => setExercisePickerOpen(false)}
+        onSelect={handleExerciseSelected}
+      />
 
       {/* Edit mode footer */}
       {isEditing && (
