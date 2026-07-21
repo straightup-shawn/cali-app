@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import type { Database } from '@/types/database';
@@ -132,6 +132,96 @@ export function useWorkout(id: string | undefined) {
       return result as WorkoutWithExercises;
     },
     enabled: !!user && !!id,
+  });
+}
+
+// =============================================================================
+// useDeleteWorkout – deletes a workout (CASCADE handles child records)
+// =============================================================================
+
+/**
+ * Deletes a workout by ID. Supabase CASCADE on foreign keys will remove
+ * workout_exercises, exercise_sets, and personal_records linked to this workout.
+ */
+export function useDeleteWorkout() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (workoutId: string) => {
+      if (!user) throw new Error('No authenticated user');
+
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', workoutId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+    },
+  });
+}
+
+// =============================================================================
+// useUpdateWorkout – updates workout name and individual set values
+// =============================================================================
+
+export interface UpdateSetPayload {
+  id: string;
+  reps?: number | null;
+  weight_kg?: number | null;
+  duration_seconds?: number | null;
+  rpe?: number | null;
+}
+
+export interface UpdateWorkoutPayload {
+  workoutId: string;
+  name?: string;
+  sets?: UpdateSetPayload[];
+}
+
+/**
+ * Updates a workout's name and/or individual exercise set values.
+ */
+export function useUpdateWorkout() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: UpdateWorkoutPayload) => {
+      if (!user) throw new Error('No authenticated user');
+
+      // Update workout name if provided
+      if (payload.name !== undefined) {
+        const { error } = await supabase
+          .from('workouts')
+          .update({ name: payload.name })
+          .eq('id', payload.workoutId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      }
+
+      // Update individual sets if provided
+      if (payload.sets && payload.sets.length > 0) {
+        for (const set of payload.sets) {
+          const { id, ...updates } = set;
+          const { error } = await supabase
+            .from('exercise_sets')
+            .update(updates)
+            .eq('id', id);
+
+          if (error) throw error;
+        }
+      }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['workouts', variables.workoutId] });
+    },
   });
 }
 

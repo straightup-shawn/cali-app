@@ -1,5 +1,6 @@
-import { useParams, Link } from 'react-router-dom';
-import { useWorkout, type WorkoutExerciseWithSets } from '@/hooks/useWorkouts';
+import { useState, useCallback } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload } from '@/hooks/useWorkouts';
 import { useWorkoutPersonalRecords } from '@/hooks/usePersonalRecords';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
 import type { ExerciseType } from '@/types';
@@ -96,7 +97,52 @@ function setHasPR(
 }
 
 // =============================================================================
-// SetRowDisplay
+// DeleteConfirmDialog
+// =============================================================================
+
+interface DeleteConfirmDialogProps {
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  isDeleting: boolean;
+}
+
+function DeleteConfirmDialog({ open, onCancel, onConfirm, isDeleting }: DeleteConfirmDialogProps) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="fixed inset-0 bg-black/60" onClick={onCancel} aria-hidden="true" />
+      <div className="relative z-50 w-full max-w-sm rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-xl">
+        <h3 className="text-lg font-bold text-gray-100">Delete Workout?</h3>
+        <p className="mt-2 text-sm text-gray-400">
+          This workout and all its data will be permanently deleted. This action cannot be undone.
+        </p>
+        <div className="mt-5 flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isDeleting}
+            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isDeleting}
+            className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500 active:bg-red-700 disabled:opacity-50"
+          >
+            {isDeleting ? 'Deleting…' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// SetRowDisplay (view mode)
 // =============================================================================
 
 interface SetRowDisplayProps {
@@ -165,6 +211,106 @@ function SetRowDisplay({ set, exerciseType, isPR, formatWeight }: SetRowDisplayP
 }
 
 // =============================================================================
+// SetRowEdit (edit mode)
+// =============================================================================
+
+interface EditSetValues {
+  reps: number | null;
+  weight_kg: number | null;
+  duration_seconds: number | null;
+  rpe: number | null;
+}
+
+interface SetRowEditProps {
+  set: ExerciseSetRow;
+  exerciseType: ExerciseType;
+  editValues: EditSetValues;
+  onUpdate: (setId: string, field: keyof EditSetValues, value: number | null) => void;
+}
+
+function SetRowEdit({ set, exerciseType, editValues, onUpdate }: SetRowEditProps) {
+  const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
+  const showWeight = ['weighted', 'assisted'].includes(exerciseType);
+  const showDuration = ['duration', 'static_hold'].includes(exerciseType);
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2">
+      {/* Set number */}
+      <span className="w-6 shrink-0 text-center text-xs font-semibold text-gray-500">
+        {set.set_number}
+      </span>
+
+      {/* Editable fields */}
+      {showReps && (
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Reps"
+            value={editValues.reps ?? ''}
+            onChange={(e) =>
+              onUpdate(set.id, 'reps', e.target.value ? parseInt(e.target.value, 10) : null)
+            }
+            className="h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+          <span className="text-xs text-gray-500">reps</span>
+        </div>
+      )}
+
+      {showWeight && (
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            inputMode="decimal"
+            placeholder="kg"
+            value={editValues.weight_kg ?? ''}
+            onChange={(e) =>
+              onUpdate(set.id, 'weight_kg', e.target.value ? parseFloat(e.target.value) : null)
+            }
+            className="h-9 w-14 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+          <span className="text-xs text-gray-500">kg</span>
+        </div>
+      )}
+
+      {showDuration && (
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="Sec"
+            value={editValues.duration_seconds ?? ''}
+            onChange={(e) =>
+              onUpdate(set.id, 'duration_seconds', e.target.value ? parseInt(e.target.value, 10) : null)
+            }
+            className="h-9 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+          <span className="text-xs text-gray-500">sec</span>
+        </div>
+      )}
+
+      {/* RPE */}
+      <div className="flex items-center gap-1">
+        <input
+          type="number"
+          inputMode="decimal"
+          placeholder="RPE"
+          step="0.5"
+          min="6"
+          max="10"
+          value={editValues.rpe ?? ''}
+          onChange={(e) =>
+            onUpdate(set.id, 'rpe', e.target.value ? parseFloat(e.target.value) : null)
+          }
+          className="h-9 w-12 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+        />
+        <span className="text-xs text-gray-500">RPE</span>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
 // ExerciseSummarySection
 // =============================================================================
 
@@ -172,9 +318,12 @@ interface ExerciseSummarySectionProps {
   exercise: WorkoutExerciseWithSets;
   prRecords: PersonalRecordRow[];
   formatWeight: (kg: number) => string;
+  isEditing: boolean;
+  editSets: Record<string, EditSetValues>;
+  onUpdateSet: (setId: string, field: keyof EditSetValues, value: number | null) => void;
 }
 
-function ExerciseSummarySection({ exercise, prRecords, formatWeight }: ExerciseSummarySectionProps) {
+function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, editSets, onUpdateSet }: ExerciseSummarySectionProps) {
   const exerciseName = exercise.exercises?.name ?? 'Unknown Exercise';
   const exerciseType = (exercise.exercises?.exercise_type ?? 'bodyweight') as ExerciseType;
 
@@ -196,15 +345,25 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight }: ExerciseS
 
       {/* Sets */}
       <div className="mt-3 space-y-1.5">
-        {exercise.exercise_sets.map((set) => (
-          <SetRowDisplay
-            key={set.id}
-            set={set}
-            exerciseType={exerciseType}
-            isPR={setHasPR(set, exercise.exercise_id, prRecords)}
-            formatWeight={formatWeight}
-          />
-        ))}
+        {exercise.exercise_sets.map((set) =>
+          isEditing ? (
+            <SetRowEdit
+              key={set.id}
+              set={set}
+              exerciseType={exerciseType}
+              editValues={editSets[set.id] ?? { reps: set.reps, weight_kg: set.weight_kg, duration_seconds: set.duration_seconds, rpe: set.rpe }}
+              onUpdate={onUpdateSet}
+            />
+          ) : (
+            <SetRowDisplay
+              key={set.id}
+              set={set}
+              exerciseType={exerciseType}
+              isPR={setHasPR(set, exercise.exercise_id, prRecords)}
+              formatWeight={formatWeight}
+            />
+          )
+        )}
         {exercise.exercise_sets.length === 0 && (
           <p className="py-2 text-center text-xs text-gray-500">No sets recorded</p>
         )}
@@ -219,9 +378,91 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight }: ExerciseS
 
 export default function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: workout, isLoading, error } = useWorkout(id);
   const { data: prRecords } = useWorkoutPersonalRecords(id);
   const { formatWeight } = useUnitPreference();
+
+  // Delete state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const deleteWorkout = useDeleteWorkout();
+
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editSets, setEditSets] = useState<Record<string, EditSetValues>>({});
+  const updateWorkout = useUpdateWorkout();
+
+  const handleStartEdit = useCallback(() => {
+    if (!workout) return;
+    setEditName(workout.name);
+    // Initialize edit values from current set data
+    const setsMap: Record<string, EditSetValues> = {};
+    for (const exercise of workout.workout_exercises ?? []) {
+      for (const set of exercise.exercise_sets) {
+        setsMap[set.id] = {
+          reps: set.reps,
+          weight_kg: set.weight_kg,
+          duration_seconds: set.duration_seconds,
+          rpe: set.rpe,
+        };
+      }
+    }
+    setEditSets(setsMap);
+    setIsEditing(true);
+  }, [workout]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+    setEditSets({});
+    setEditName('');
+  }, []);
+
+  const handleUpdateSet = useCallback((setId: string, field: keyof EditSetValues, value: number | null) => {
+    setEditSets((prev) => ({
+      ...prev,
+      [setId]: {
+        ...prev[setId],
+        [field]: value,
+      },
+    }));
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!workout || !id) return;
+
+    // Build the sets payload - only include sets that actually changed
+    const changedSets: UpdateSetPayload[] = [];
+    for (const exercise of workout.workout_exercises ?? []) {
+      for (const set of exercise.exercise_sets) {
+        const edited = editSets[set.id];
+        if (!edited) continue;
+        const changes: Partial<UpdateSetPayload> = {};
+        if (edited.reps !== set.reps) changes.reps = edited.reps;
+        if (edited.weight_kg !== set.weight_kg) changes.weight_kg = edited.weight_kg;
+        if (edited.duration_seconds !== set.duration_seconds) changes.duration_seconds = edited.duration_seconds;
+        if (edited.rpe !== set.rpe) changes.rpe = edited.rpe;
+
+        if (Object.keys(changes).length > 0) {
+          changedSets.push({ id: set.id, ...changes });
+        }
+      }
+    }
+
+    await updateWorkout.mutateAsync({
+      workoutId: id,
+      name: editName !== workout.name ? editName : undefined,
+      sets: changedSets.length > 0 ? changedSets : undefined,
+    });
+
+    setIsEditing(false);
+  }, [workout, id, editName, editSets, updateWorkout]);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!id) return;
+    await deleteWorkout.mutateAsync(id);
+    navigate('/history');
+  }, [id, deleteWorkout, navigate]);
 
   if (isLoading) {
     return (
@@ -254,27 +495,62 @@ export default function WorkoutDetailPage() {
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
-        <Link
-          to="/history"
-          className="mb-2 inline-flex items-center gap-1 text-sm font-medium text-indigo-400 hover:text-indigo-300"
-        >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
+        <div className="flex items-center justify-between">
+          <Link
+            to="/history"
+            className="inline-flex items-center gap-1 text-sm font-medium text-indigo-400 hover:text-indigo-300"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to History
-        </Link>
-        <h1 className="text-xl font-bold text-gray-100">{workout.name}</h1>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Back
+          </Link>
+          {/* Action buttons */}
+          <div className="flex items-center gap-2">
+            {!isEditing && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleStartEdit}
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 active:bg-indigo-700"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-500 active:bg-red-700"
+                >
+                  Delete
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Workout title */}
+        {isEditing ? (
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xl font-bold text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+        ) : (
+          <h1 className="mt-2 text-xl font-bold text-gray-100">{workout.name}</h1>
+        )}
+
         <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
           <span>{formatDate(workout.started_at)}</span>
           <span>•</span>
@@ -322,6 +598,9 @@ export default function WorkoutDetailPage() {
             exercise={exercise}
             prRecords={records}
             formatWeight={formatWeight}
+            isEditing={isEditing}
+            editSets={editSets}
+            onUpdateSet={handleUpdateSet}
           />
         ))}
         {exercises.length === 0 && (
@@ -330,6 +609,38 @@ export default function WorkoutDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Edit mode footer */}
+      {isEditing && (
+        <div className="sticky bottom-0 border-t border-gray-800 bg-gray-900 px-4 py-3">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              disabled={updateWorkout.isPending}
+              className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveEdit}
+              disabled={updateWorkout.isPending}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50"
+            >
+              {updateWorkout.isPending ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onCancel={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deleteWorkout.isPending}
+      />
     </div>
   );
 }
