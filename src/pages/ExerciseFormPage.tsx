@@ -111,7 +111,7 @@ export default function ExerciseFormPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 flex items-center justify-between glass-header px-4 py-3">
         <Link
           to="/exercises"
           className="text-sm font-medium text-indigo-400 active:text-indigo-300"

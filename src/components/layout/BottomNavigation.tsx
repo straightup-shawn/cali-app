@@ -58,7 +58,7 @@ export default function BottomNavigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800 bg-gray-900 pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 glass-nav pb-[env(safe-area-inset-bottom)] md:hidden"
       aria-label="Main navigation"
     >
       <ul className="flex items-center justify-around">

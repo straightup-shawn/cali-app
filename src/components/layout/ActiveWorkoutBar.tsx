@@ -82,7 +82,7 @@ export default function ActiveWorkoutBar() {
     <button
       type="button"
       onClick={() => navigate('/workout/active')}
-      className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 flex items-center justify-between gap-3 bg-gradient-to-r from-slate-900 to-indigo-900 px-4 py-3 shadow-lg shadow-black/20 transition-transform active:scale-[0.99] md:hidden"
+      className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 flex items-center justify-between gap-3 glass-nav shadow-lg shadow-black/30 px-4 py-3 transition-transform active:scale-[0.99] md:hidden"
       aria-label="Resume active workout"
     >
       {/* Left section: workout info */}

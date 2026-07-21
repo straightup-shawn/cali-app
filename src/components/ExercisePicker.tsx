@@ -72,15 +72,15 @@ export default function ExercisePicker({
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:items-center sm:pt-0">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative z-50 flex h-[80vh] w-full flex-col rounded-xl border border-gray-700 bg-gray-900 mx-4 sm:max-w-lg sm:shadow-xl">
+      <div className="relative z-50 flex h-[80vh] w-full flex-col glass-card rounded-2xl mx-4 sm:max-w-lg sm:shadow-xl animate-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-700 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
           <h2 className="text-lg font-bold text-gray-100">Add Exercise</h2>
           <button
             type="button"

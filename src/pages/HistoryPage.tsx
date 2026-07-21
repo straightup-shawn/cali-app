@@ -33,7 +33,7 @@ function WorkoutCard({ workout }: { workout: WorkoutSummary }) {
   return (
     <Link
       to={`/history/${workout.id}`}
-      className="block rounded-xl border border-gray-800 bg-gray-900 p-4 transition-colors active:bg-gray-800"
+      className="block glass-card rounded-2xl p-4 transition-colors active:bg-gray-800"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -111,7 +111,7 @@ export default function HistoryPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">History</h1>
       </header>
 

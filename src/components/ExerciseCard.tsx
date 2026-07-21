@@ -28,7 +28,7 @@ export default function ExerciseCard({ id, name, exerciseType, muscleGroups }: E
   return (
     <Link
       to={`/exercises/${id}`}
-      className="block rounded-xl border border-gray-800 bg-gray-900 p-4 transition-colors active:bg-gray-800"
+      className="block glass-card rounded-2xl p-4 transition-colors active:bg-gray-800"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-base font-medium text-gray-100">{name}</h3>

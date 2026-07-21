@@ -86,12 +86,12 @@ export default function RestTimerOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       role="dialog"
       aria-label="Rest timer"
       aria-modal="true"
     >
-      <div className="flex w-full max-w-sm flex-col items-center gap-6 rounded-2xl bg-gray-900 p-8 shadow-2xl">
+      <div className="flex w-full max-w-sm flex-col items-center gap-6 glass-card rounded-2xl p-8 shadow-2xl animate-slide-up">
         {/* Circular progress with countdown */}
         <div className="relative flex items-center justify-center">
           <svg

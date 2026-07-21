@@ -36,7 +36,7 @@ interface WorkoutTimerBarProps {
 
 function WorkoutTimerBar({ seconds, workoutName, onMenuToggle }: WorkoutTimerBarProps) {
   return (
-    <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+    <header className="sticky top-0 z-10 glass-header px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold text-gray-100">
@@ -108,8 +108,8 @@ function DiscardConfirmDialog({ open, onCancel, onConfirm }: DiscardConfirmDialo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="fixed inset-0 bg-black/60" onClick={onCancel} aria-hidden="true" />
-      <div className="relative z-50 w-full max-w-sm rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-xl">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
+      <div className="relative z-50 w-full max-w-sm glass-card rounded-2xl p-6 shadow-xl animate-slide-up">
         <h3 className="text-lg font-bold text-gray-100">Discard Workout?</h3>
         <p className="mt-2 text-sm text-gray-400">
           All progress for this workout will be lost. This action cannot be undone.
@@ -118,14 +118,14 @@ function DiscardConfirmDialog({ open, onCancel, onConfirm }: DiscardConfirmDialo
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600"
+            className="flex-1 rounded-xl border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 transition-all duration-200 hover:bg-gray-700 active:bg-gray-600"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500 active:bg-red-700"
+            className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-red-500 active:bg-red-700"
           >
             Discard
           </button>
@@ -163,7 +163,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, onUpdate, onComple
 
   return (
     <div
-      className={`overflow-hidden rounded-lg border px-2 py-2 ${
+      className={`overflow-hidden rounded-xl border px-2 py-2 ${
         set.completed
           ? 'border-green-800 bg-green-950/50'
           : 'border-gray-700 bg-gray-800'
@@ -355,7 +355,7 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSe
   const currentRest = exercise.restSeconds ?? 90;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 p-3">
+    <div className="overflow-hidden glass-card rounded-2xl p-3">
       {/* Exercise header */}
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">

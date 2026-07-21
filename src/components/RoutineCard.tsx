@@ -42,7 +42,7 @@ export default function RoutineCard({
   });
 
   return (
-    <div className="relative rounded-xl border border-gray-800 bg-gray-900 p-4 transition-colors">
+    <div className="relative glass-card rounded-2xl p-4 transition-colors">
       <Link
         to={`/routines/${id}/edit`}
         className="block active:bg-gray-800 transition-colors"

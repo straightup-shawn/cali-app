@@ -393,7 +393,7 @@ export default function SetRow({
 
   return (
     <div
-      className={`rounded-lg px-3 py-2 ${set.completed ? 'bg-green-950/50' : 'bg-gray-800'}`}
+      className={`rounded-xl px-3 py-2 ${set.completed ? 'bg-green-950/50' : 'bg-gray-800'}`}
     >
       <div className="flex items-center gap-3">
         {/* Delete set button */}

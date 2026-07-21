@@ -20,8 +20,8 @@ export default function AppShell() {
         isFullScreen
           ? ''
           : showWorkoutBar
-            ? 'pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-0'
-            : 'pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0'
+            ? 'animate-fade-in pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-0'
+            : 'animate-fade-in pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0'
       }>
         <Outlet />
       </main>

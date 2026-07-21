@@ -58,12 +58,12 @@ export function ResumeWorkoutPrompt() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="resume-workout-title"
     >
-      <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-xl">
+      <div className="w-full max-w-sm glass-card rounded-2xl p-6 shadow-xl animate-slide-up">
         <h2
           id="resume-workout-title"
           className="text-lg font-semibold text-gray-100"
@@ -90,14 +90,14 @@ export function ResumeWorkoutPrompt() {
           <button
             type="button"
             onClick={handleDiscard}
-            className="flex-1 rounded-lg border border-gray-600 px-4 py-3 text-sm font-medium text-gray-300 active:bg-gray-800 transition-colors"
+            className="flex-1 rounded-xl border border-gray-600 px-4 py-3 text-sm font-medium text-gray-300 active:bg-gray-800 transition-all duration-200"
           >
             Discard
           </button>
           <button
             type="button"
             onClick={handleResume}
-            className="flex-1 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-medium text-white active:bg-indigo-700 transition-colors"
+            className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-indigo-500/40 active:bg-indigo-700"
           >
             Resume
           </button>

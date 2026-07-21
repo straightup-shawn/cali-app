@@ -62,13 +62,13 @@ function QuickStartCard({ routines }: { routines: RoutineWithCount[] }) {
   }
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+    <section className="glass-card rounded-2xl p-4 shadow-lg shadow-black/20">
       <h2 className="text-sm font-semibold text-gray-100">Quick Start</h2>
 
       <button
         type="button"
         onClick={handleStartEmpty}
-        className="mt-3 w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm active:bg-indigo-700"
+        className="mt-3 w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-indigo-500/40 active:bg-indigo-700"
       >
         Start Empty Workout
       </button>
@@ -102,7 +102,7 @@ function RecentWorkouts({ workouts }: { workouts: WorkoutSummary[] }) {
   if (workouts.length === 0) return null;
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+    <section className="glass-card rounded-2xl p-4 shadow-lg shadow-black/20">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-100">Recent Workouts</h2>
         <Link to="/history" className="text-xs font-medium text-indigo-400">
@@ -164,7 +164,7 @@ function WeeklyStats({ workouts }: { workouts: WorkoutSummary[] }) {
   }, [workouts, weekStart]);
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+    <section className="glass-card rounded-2xl p-4 shadow-lg shadow-black/20">
       <h2 className="text-sm font-semibold text-gray-100">This Week</h2>
       <div className="mt-3 flex items-baseline gap-1">
         <span className="text-3xl font-bold text-indigo-400">
@@ -192,7 +192,7 @@ function WelcomeCard() {
   }
 
   return (
-    <section className="rounded-xl border border-indigo-800 bg-indigo-950/50 p-5 text-center">
+    <section className="glass-card rounded-2xl border-indigo-800 p-5 text-center">
       <h2 className="text-lg font-bold text-indigo-100">Welcome!</h2>
       <p className="mt-2 text-sm text-indigo-300">
         You're all set. Start your first workout to begin tracking your progress.
@@ -200,7 +200,7 @@ function WelcomeCard() {
       <button
         type="button"
         onClick={handleStart}
-        className="mt-4 inline-flex items-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm active:bg-indigo-700"
+        className="mt-4 inline-flex items-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-indigo-500/40 active:bg-indigo-700"
       >
         Start Your First Workout
       </button>
@@ -223,12 +223,12 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">Dashboard</h1>
       </header>
 
       {/* Content */}
-      <div className="flex-1 px-4 pt-4">
+      <div className="flex-1 px-4 pt-4 animate-slide-up">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-700 border-t-indigo-500" />

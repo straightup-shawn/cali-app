@@ -68,7 +68,7 @@ export default function ProfilePage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">Profile</h1>
       </header>
 
@@ -89,7 +89,7 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={() => signOut()}
-          className="w-full rounded-lg border border-red-800 bg-gray-900 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-950 active:bg-red-900"
+          className="w-full rounded-xl border border-red-800 bg-gray-900 px-4 py-2.5 text-sm font-semibold text-red-400 transition-all duration-200 hover:bg-red-950 active:bg-red-900"
         >
           Log Out
         </button>

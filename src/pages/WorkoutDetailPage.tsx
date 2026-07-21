@@ -117,8 +117,8 @@ function DeleteConfirmDialog({ open, onCancel, onConfirm, isDeleting }: DeleteCo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="fixed inset-0 bg-black/60" onClick={onCancel} aria-hidden="true" />
-      <div className="relative z-50 w-full max-w-sm rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-xl">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
+      <div className="relative z-50 w-full max-w-sm glass-card rounded-2xl p-6 shadow-xl animate-slide-up">
         <h3 className="text-lg font-bold text-gray-100">Delete Workout?</h3>
         <p className="mt-2 text-sm text-gray-400">
           This workout and all its data will be permanently deleted. This action cannot be undone.
@@ -128,7 +128,7 @@ function DeleteConfirmDialog({ open, onCancel, onConfirm, isDeleting }: DeleteCo
             type="button"
             onClick={onCancel}
             disabled={isDeleting}
-            className="flex-1 rounded-lg border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-700 active:bg-gray-600 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-300 transition-all duration-200 hover:bg-gray-700 active:bg-gray-600 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -136,7 +136,7 @@ function DeleteConfirmDialog({ open, onCancel, onConfirm, isDeleting }: DeleteCo
             type="button"
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500 active:bg-red-700 disabled:opacity-50"
+            className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-red-500 active:bg-red-700 disabled:opacity-50"
           >
             {isDeleting ? 'Deleting…' : 'Delete'}
           </button>
@@ -371,7 +371,7 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
   const exerciseType = (exercise.exercises?.exercise_type ?? 'bodyweight') as ExerciseType;
 
   return (
-    <div className={`rounded-xl border bg-gray-900 p-4 ${isMarkedForDelete ? 'border-red-700 opacity-50' : replacementName ? 'border-indigo-700' : 'border-gray-800'}`}>
+    <div className={`glass-card rounded-2xl p-4 ${isMarkedForDelete ? 'border-red-700 opacity-50' : replacementName ? 'border-indigo-700' : ''}`}>
       {/* Exercise header */}
       <div className="flex items-center gap-2">
         <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-100">
@@ -1043,7 +1043,7 @@ export default function WorkoutDetailPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <div className="flex items-center justify-between">
           <Link
             to="/history"

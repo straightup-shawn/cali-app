@@ -18,7 +18,7 @@ export default function RoutinesPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">Routines</h1>
       </header>
 
@@ -66,7 +66,7 @@ export default function RoutinesPage() {
             </p>
             <Link
               to="/routines/new"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 active:bg-indigo-700"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-indigo-500/40 hover:bg-indigo-500 active:bg-indigo-700"
             >
               <svg
                 className="h-4 w-4"

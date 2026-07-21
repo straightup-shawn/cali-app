@@ -302,7 +302,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon, className = '' }: StatCardProps) {
   return (
-    <div className={`rounded-xl border border-gray-800 bg-gray-900 p-4 ${className}`}>
+    <div className={`glass-card rounded-2xl p-4 ${className}`}>
       <div className="flex items-center gap-2">
         <span className="text-lg">{icon}</span>
         <span className="text-xs font-medium text-gray-400">{label}</span>

@@ -231,7 +231,7 @@ export default function RoutineFormPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 flex items-center justify-between glass-header px-4 py-3">
         <Link
           to="/routines"
           className="text-sm font-medium text-indigo-400 active:text-indigo-300"
@@ -394,7 +394,7 @@ function ExerciseListItem({
   onFieldChange,
 }: ExerciseListItemProps) {
   return (
-    <div className="rounded-xl border border-gray-800 bg-gray-900 p-3">
+    <div className="glass-card rounded-2xl p-3">
       {/* Exercise header row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">

@@ -72,7 +72,7 @@ export default function ExercisesPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gray-900 px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">Exercises</h1>
       </header>
 
@@ -98,7 +98,7 @@ export default function ExercisesPage() {
             placeholder="Search exercises..."
             value={searchInput}
             onChange={handleSearchChange}
-            className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="block h-11 w-full rounded-xl border border-gray-700 bg-gray-800 pl-10 pr-3 text-base text-white placeholder:text-gray-500 transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function ExercisesPage() {
         <select
           value={muscleGroup}
           onChange={(e) => setMuscleGroup(e.target.value)}
-          className="h-10 flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          className="h-10 flex-1 rounded-xl border border-gray-700 bg-gray-800 px-3 text-sm text-gray-200 transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           aria-label="Filter by muscle group"
         >
           <option value="">All Muscles</option>
@@ -122,7 +122,7 @@ export default function ExercisesPage() {
         <select
           value={exerciseType}
           onChange={(e) => setExerciseType(e.target.value)}
-          className="h-10 flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          className="h-10 flex-1 rounded-xl border border-gray-700 bg-gray-800 px-3 text-sm text-gray-200 transition-all duration-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           aria-label="Filter by exercise type"
         >
           <option value="">All Types</option>
