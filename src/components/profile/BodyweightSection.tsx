@@ -195,7 +195,7 @@ function BodyweightForm({
           value={date}
           max={today}
           onChange={(e) => setDate(e.target.value)}
-          className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="block w-full max-w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
 

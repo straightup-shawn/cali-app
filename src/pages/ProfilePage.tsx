@@ -72,7 +72,7 @@ export default function ProfilePage() {
         <h1 className="text-xl font-bold text-gray-100">Profile</h1>
       </header>
 
-      <div className="mx-auto w-full max-w-lg space-y-8 px-4 pt-6">
+      <div className="mx-auto w-full max-w-lg space-y-8 overflow-hidden px-4 pt-6">
         {/* User info section */}
         <section className="space-y-1">
           <h2 className="text-sm font-medium text-gray-300">Account</h2>
