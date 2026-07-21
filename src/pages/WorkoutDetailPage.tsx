@@ -939,46 +939,49 @@ export default function WorkoutDetailPage() {
       }
     }
 
-    await updateWorkout.mutateAsync({
-      workoutId: id,
-      name: editName !== workout.name ? editName : undefined,
-      sets: changedSets.length > 0 ? changedSets : undefined,
-      deleteSets: deletedSetIds.size > 0 ? Array.from(deletedSetIds) : undefined,
-      addSets: (() => {
-        const allNewSets: AddSetPayload[] = [];
-        for (const exercise of workout.workout_exercises ?? []) {
-          const exerciseNewSets = newSets[exercise.id];
-          if (!exerciseNewSets || exerciseNewSets.length === 0) continue;
-          // Count non-deleted existing sets to determine set_number offset
-          const existingCount = exercise.exercise_sets.filter((s) => !deletedSetIds.has(s.id)).length;
-          for (let i = 0; i < exerciseNewSets.length; i++) {
-            allNewSets.push({
-              workout_exercise_id: exercise.id,
-              set_number: existingCount + i + 1,
-              reps: exerciseNewSets[i].reps,
-              weight_kg: exerciseNewSets[i].weight_kg,
-              duration_seconds: exerciseNewSets[i].duration_seconds,
-              rpe: exerciseNewSets[i].rpe,
-            });
+    try {
+      await updateWorkout.mutateAsync({
+        workoutId: id,
+        name: editName !== workout.name ? editName : undefined,
+        sets: changedSets.length > 0 ? changedSets : undefined,
+        deleteSets: deletedSetIds.size > 0 ? Array.from(deletedSetIds) : undefined,
+        addSets: (() => {
+          const allNewSets: AddSetPayload[] = [];
+          for (const exercise of workout.workout_exercises ?? []) {
+            const exerciseNewSets = newSets[exercise.id];
+            if (!exerciseNewSets || exerciseNewSets.length === 0) continue;
+            const existingCount = exercise.exercise_sets.filter((s) => !deletedSetIds.has(s.id)).length;
+            for (let i = 0; i < exerciseNewSets.length; i++) {
+              allNewSets.push({
+                workout_exercise_id: exercise.id,
+                set_number: existingCount + i + 1,
+                reps: exerciseNewSets[i].reps,
+                weight_kg: exerciseNewSets[i].weight_kg,
+                duration_seconds: exerciseNewSets[i].duration_seconds,
+                rpe: exerciseNewSets[i].rpe,
+              });
+            }
           }
-        }
-        return allNewSets.length > 0 ? allNewSets : undefined;
-      })(),
-      deleteExercises: deletedExerciseIds.size > 0 ? Array.from(deletedExerciseIds) : undefined,
-      addExercises: addedExercises.length > 0
-        ? addedExercises.map(({ _name, ...rest }) => rest)
-        : undefined,
-      replaceExercises: replacedExercises.length > 0
-        ? replacedExercises.map(({ _name, ...rest }) => rest)
-        : undefined,
-    });
+          return allNewSets.length > 0 ? allNewSets : undefined;
+        })(),
+        deleteExercises: deletedExerciseIds.size > 0 ? Array.from(deletedExerciseIds) : undefined,
+        addExercises: addedExercises.length > 0
+          ? addedExercises.map(({ _name, ...rest }) => rest)
+          : undefined,
+        replaceExercises: replacedExercises.length > 0
+          ? replacedExercises.map(({ _name, ...rest }) => rest)
+          : undefined,
+      });
 
-    setIsEditing(false);
-    setDeletedExerciseIds(new Set());
-    setAddedExercises([]);
-    setReplacedExercises([]);
-    setDeletedSetIds(new Set());
-    setNewSets({});
+      setIsEditing(false);
+      setDeletedExerciseIds(new Set());
+      setAddedExercises([]);
+      setReplacedExercises([]);
+      setDeletedSetIds(new Set());
+      setNewSets({});
+    } catch (err) {
+      alert(`Save failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   }, [workout, id, editName, editSets, updateWorkout, deletedExerciseIds, addedExercises, replacedExercises, deletedSetIds, newSets]);
 
   const handleDeleteConfirm = useCallback(async () => {
