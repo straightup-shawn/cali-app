@@ -170,7 +170,7 @@ function BodyweightForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex gap-3">
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <label htmlFor="bw-weight" className="mb-1 block text-sm font-medium text-gray-300">
             Weight ({weightLabel})
           </label>
@@ -186,7 +186,7 @@ function BodyweightForm({
             className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white placeholder:text-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
-        <div className="flex-1">
+        <div className="w-[130px] shrink-0">
           <label htmlFor="bw-date" className="mb-1 block text-sm font-medium text-gray-300">
             Date
           </label>
@@ -196,7 +196,7 @@ function BodyweightForm({
             value={date}
             max={today}
             onChange={(e) => setDate(e.target.value)}
-            className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-base text-white transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="block w-full rounded-lg border border-gray-700 bg-gray-800 px-2 py-2.5 text-sm text-white transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       </div>
