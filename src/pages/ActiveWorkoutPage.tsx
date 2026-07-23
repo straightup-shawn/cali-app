@@ -797,7 +797,7 @@ export default function ActiveWorkoutPage() {
   const exerciseIds = workout.exercises.map((e) => e.exerciseId);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-gray-950 pb-24">
+    <div className={`relative flex min-h-screen flex-col bg-gray-950 ${restTimerVisible ? 'pb-40' : 'pb-24'}`}>
       {/* Timer bar header */}
       <WorkoutTimerBar
         seconds={elapsedSeconds}
