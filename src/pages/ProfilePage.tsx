@@ -682,29 +682,58 @@ function ThemePicker() {
 // SettingsTab — expanded with more options
 // =============================================================================
 
+// Module-level backfill state (persists across tab switches)
+let _backfillRunning = false;
+let _backfillProgress: BackfillProgress | null = null;
+let _backfillResult: { total: number; succeeded: number; failed: number } | null = null;
+const _backfillListeners = new Set<() => void>();
+
+function notifyBackfillListeners() {
+  _backfillListeners.forEach((fn) => fn());
+}
+
+function useBackfillState() {
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const listener = () => forceUpdate((n) => n + 1);
+    _backfillListeners.add(listener);
+    return () => { _backfillListeners.delete(listener); };
+  }, []);
+
+  return {
+    running: _backfillRunning,
+    progress: _backfillProgress,
+    result: _backfillResult,
+  };
+}
+
+async function runBackfillAnalysis() {
+  if (_backfillRunning) return;
+  _backfillRunning = true;
+  _backfillResult = null;
+  _backfillProgress = null;
+  notifyBackfillListeners();
+
+  try {
+    const result = await backfillExerciseClassifications((progress) => {
+      _backfillProgress = progress;
+      notifyBackfillListeners();
+    });
+    _backfillResult = result;
+  } catch {
+    _backfillResult = { total: 0, succeeded: 0, failed: -1 };
+  } finally {
+    _backfillRunning = false;
+    _backfillProgress = null;
+    notifyBackfillListeners();
+  }
+}
+
 function SettingsTab() {
   const { signOut } = useAuth();
   const [clearConfirm, setClearConfirm] = useState(false);
-  const [backfillRunning, setBackfillRunning] = useState(false);
-  const [backfillProgress, setBackfillProgress] = useState<BackfillProgress | null>(null);
-  const [backfillResult, setBackfillResult] = useState<{ total: number; succeeded: number; failed: number } | null>(null);
-
-  async function handleRunAnalysis() {
-    setBackfillRunning(true);
-    setBackfillResult(null);
-    setBackfillProgress(null);
-    try {
-      const result = await backfillExerciseClassifications((progress) => {
-        setBackfillProgress(progress);
-      });
-      setBackfillResult(result);
-    } catch {
-      setBackfillResult({ total: 0, succeeded: 0, failed: -1 });
-    } finally {
-      setBackfillRunning(false);
-      setBackfillProgress(null);
-    }
-  }
+  const { running: backfillRunning, progress: backfillProgress, result: backfillResult } = useBackfillState();
 
   function handleClearLocalData() {
     if (!clearConfirm) {
@@ -732,7 +761,7 @@ function SettingsTab() {
         </p>
         <button
           type="button"
-          onClick={handleRunAnalysis}
+          onClick={runBackfillAnalysis}
           disabled={backfillRunning}
           className="w-full rounded-xl border border-indigo-700 bg-indigo-950/50 px-4 py-2.5 text-sm font-semibold text-indigo-300 transition-all duration-200 hover:bg-indigo-900 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
