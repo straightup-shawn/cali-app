@@ -15,6 +15,7 @@ export interface DefaultClassification {
   resistance_model: string;
   volume_mode: string;
   movement_family: string;
+  muscle_groups: string[];
 }
 
 /**
@@ -22,72 +23,72 @@ export interface DefaultClassification {
  */
 const DEFAULTS: Record<string, DefaultClassification> = {
   // Push variants
-  'push-up': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'push up': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'pushup': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'diamond push-up': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'wide push-up': { bodyweight_fraction: 0.64, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'decline push-up': { bodyweight_fraction: 0.74, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'incline push-up': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'archer push-up': { bodyweight_fraction: 0.72, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'pike push-up': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push' },
-  'pseudo planche push-up': { bodyweight_fraction: 0.76, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
-  'hindu push-up': { bodyweight_fraction: 0.68, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push' },
+  'push-up': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'push up': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'pushup': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'diamond push-up': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['triceps', 'chest', 'shoulders'] },
+  'wide push-up': { bodyweight_fraction: 0.64, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'shoulders', 'triceps'] },
+  'decline push-up': { bodyweight_fraction: 0.74, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'shoulders', 'triceps'] },
+  'incline push-up': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'archer push-up': { bodyweight_fraction: 0.72, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'pike push-up': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['shoulders', 'triceps', 'chest'] },
+  'pseudo planche push-up': { bodyweight_fraction: 0.76, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'shoulders', 'triceps', 'core'] },
+  'hindu push-up': { bodyweight_fraction: 0.68, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'shoulders', 'triceps', 'core'] },
 
   // Pull variants
-  'pull-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
-  'pull up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
-  'chin-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
-  'chin up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
-  'muscle-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
-  'muscle up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
-  'australian pull-up': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_pull' },
-  'inverted row': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_pull' },
-  'negative pull-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull' },
+  'pull-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['back', 'biceps', 'forearms'] },
+  'pull up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['back', 'biceps', 'forearms'] },
+  'chin-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['biceps', 'back', 'forearms'] },
+  'chin up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['biceps', 'back', 'forearms'] },
+  'muscle-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['back', 'chest', 'triceps', 'biceps', 'shoulders'] },
+  'muscle up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['back', 'chest', 'triceps', 'biceps', 'shoulders'] },
+  'australian pull-up': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_pull', muscle_groups: ['back', 'biceps', 'forearms'] },
+  'inverted row': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_pull', muscle_groups: ['back', 'biceps', 'forearms'] },
+  'negative pull-up': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['back', 'biceps', 'forearms'] },
 
   // Dips
-  'dip': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push' },
-  'dips': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push' },
-  'ring dip': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push' },
-  'bench dip': { bodyweight_fraction: 0.60, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push' },
+  'dip': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'dips': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['chest', 'triceps', 'shoulders'] },
+  'ring dip': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['chest', 'triceps', 'shoulders', 'core'] },
+  'bench dip': { bodyweight_fraction: 0.60, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['triceps', 'chest', 'shoulders'] },
 
   // Squats & legs
-  'squat': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat' },
-  'bodyweight squat': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat' },
-  'pistol squat': { bodyweight_fraction: 0.95, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat' },
-  'bulgarian split squat': { bodyweight_fraction: 0.75, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge' },
-  'lunge': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge' },
-  'lunges': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge' },
-  'jump squat': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat' },
-  'calf raise': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other' },
-  'step-up': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge' },
-  'glute bridge': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'hinge' },
-  'hip thrust': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'hinge' },
+  'squat': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'bodyweight squat': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'pistol squat': { bodyweight_fraction: 0.95, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'hamstrings', 'core'] },
+  'bulgarian split squat': { bodyweight_fraction: 0.75, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'lunge': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'lunges': { bodyweight_fraction: 0.67, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'jump squat': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'calves'] },
+  'calf raise': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other', muscle_groups: ['calves'] },
+  'step-up': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'lunge', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'glute bridge': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'hinge', muscle_groups: ['glutes', 'hamstrings'] },
+  'hip thrust': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'hinge', muscle_groups: ['glutes', 'hamstrings'] },
 
   // Core
-  'plank': { bodyweight_fraction: 0.55, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core' },
-  'side plank': { bodyweight_fraction: 0.45, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core' },
-  'l-sit': { bodyweight_fraction: 0.60, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core' },
-  'hollow body hold': { bodyweight_fraction: 0.50, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core' },
-  'hanging leg raise': { bodyweight_fraction: 0.40, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
-  'leg raise': { bodyweight_fraction: 0.35, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
-  'crunch': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
-  'sit-up': { bodyweight_fraction: 0.35, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
-  'dragon flag': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
-  'ab wheel rollout': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
-  'mountain climber': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core' },
+  'plank': { bodyweight_fraction: 0.55, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core', muscle_groups: ['core', 'shoulders'] },
+  'side plank': { bodyweight_fraction: 0.45, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core', muscle_groups: ['obliques', 'core'] },
+  'l-sit': { bodyweight_fraction: 0.60, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core', muscle_groups: ['core', 'hip_flexors', 'triceps'] },
+  'hollow body hold': { bodyweight_fraction: 0.50, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core', muscle_groups: ['core', 'hip_flexors'] },
+  'hanging leg raise': { bodyweight_fraction: 0.40, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core', 'hip_flexors', 'forearms'] },
+  'leg raise': { bodyweight_fraction: 0.35, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core', 'hip_flexors'] },
+  'crunch': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core'] },
+  'sit-up': { bodyweight_fraction: 0.35, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core', 'hip_flexors'] },
+  'dragon flag': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core', 'back'] },
+  'ab wheel rollout': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core', 'shoulders'] },
+  'mountain climber': { bodyweight_fraction: 0.55, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'core', muscle_groups: ['core', 'hip_flexors', 'shoulders'] },
 
   // Handstand & advanced
-  'handstand push-up': { bodyweight_fraction: 0.95, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push' },
-  'handstand hold': { bodyweight_fraction: 0.95, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'vertical_push' },
-  'front lever': { bodyweight_fraction: 0.85, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_pull' },
-  'back lever': { bodyweight_fraction: 0.80, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other' },
-  'human flag': { bodyweight_fraction: 0.85, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other' },
-  'planche': { bodyweight_fraction: 0.95, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_push' },
+  'handstand push-up': { bodyweight_fraction: 0.95, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['shoulders', 'triceps', 'core'] },
+  'handstand hold': { bodyweight_fraction: 0.95, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'vertical_push', muscle_groups: ['shoulders', 'core', 'triceps'] },
+  'front lever': { bodyweight_fraction: 0.85, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_pull', muscle_groups: ['back', 'core', 'shoulders'] },
+  'back lever': { bodyweight_fraction: 0.80, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other', muscle_groups: ['back', 'shoulders', 'biceps', 'core'] },
+  'human flag': { bodyweight_fraction: 0.85, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other', muscle_groups: ['obliques', 'shoulders', 'back', 'core'] },
+  'planche': { bodyweight_fraction: 0.95, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_push', muscle_groups: ['shoulders', 'chest', 'core', 'biceps'] },
 
   // Other
-  'burpee': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other' },
-  'jumping jack': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'cardio' },
+  'burpee': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other', muscle_groups: ['chest', 'quads', 'core', 'shoulders'] },
+  'jumping jack': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'cardio', muscle_groups: ['calves', 'shoulders'] },
 };
 
 /**

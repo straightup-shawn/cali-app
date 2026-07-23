@@ -99,7 +99,7 @@ export async function backfillExerciseClassifications(
           result = getLocalClassification(exercise.name, exercise.exercise_type);
         }
 
-        // Save to database
+        // Save to database (including muscle_groups)
         const { error: updateError } = await supabase
           .from('exercises')
           .update({
@@ -111,6 +111,7 @@ export async function backfillExerciseClassifications(
             volume_mode: result.volume_mode,
             ai_confidence: result.confidence,
             ai_rationale: result.rationale,
+            muscle_groups: result.muscle_groups,
             classification_status: 'completed',
             analyzed_at: new Date().toISOString(),
           })
@@ -160,9 +161,28 @@ function getLocalClassification(name: string, exerciseType: string) {
     bodyweight_fraction_min: Math.max(0, fraction - 0.05),
     bodyweight_fraction_max: Math.min(1, fraction + 0.05),
     volume_mode: nameDefault?.volume_mode ?? 'repetitions',
+    muscle_groups: nameDefault?.muscle_groups ?? getMuscleGroupsByMovement(nameDefault?.movement_family ?? 'other'),
     confidence: 0.60,
     rationale: 'Estimated from exercise name and type (AI unavailable)',
   };
+}
+
+/**
+ * Fallback muscle group assignment based on movement family when no name match exists.
+ */
+function getMuscleGroupsByMovement(movementFamily: string): string[] {
+  switch (movementFamily) {
+    case 'horizontal_push': return ['chest', 'triceps', 'shoulders'];
+    case 'vertical_push': return ['shoulders', 'triceps'];
+    case 'horizontal_pull': return ['back', 'biceps'];
+    case 'vertical_pull': return ['back', 'biceps', 'forearms'];
+    case 'squat': return ['quads', 'glutes'];
+    case 'hinge': return ['glutes', 'hamstrings'];
+    case 'lunge': return ['quads', 'glutes'];
+    case 'core': return ['core'];
+    case 'isometric': return ['core'];
+    default: return [];
+  }
 }
 
 function delay(ms: number): Promise<void> {

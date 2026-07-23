@@ -67,6 +67,7 @@ export function useClassifyExercise() {
           volume_mode: nameDefault?.volume_mode ?? 'repetitions',
           confidence: 0.60,
           rationale: 'Estimated from exercise name and type (AI unavailable)',
+          muscle_groups: nameDefault?.muscle_groups ?? [],
         };
       }
 
@@ -82,6 +83,7 @@ export function useClassifyExercise() {
           volume_mode: result.volume_mode,
           ai_confidence: result.confidence,
           ai_rationale: result.rationale,
+          muscle_groups: result.muscle_groups ?? [],
           classification_status: 'completed',
           analyzed_at: new Date().toISOString(),
           user_overridden: false,

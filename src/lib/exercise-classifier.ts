@@ -47,6 +47,7 @@ export interface ClassificationResult {
   volume_mode: VolumeMode;
   confidence: number;
   rationale: string;
+  muscle_groups?: string[];
 }
 
 export interface ExerciseInput {
