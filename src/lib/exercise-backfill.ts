@@ -2,12 +2,12 @@
  * Exercise Classification Backfill
  *
  * Finds all exercises where classification_status is null or 'pending',
- * batches them (5 at a time with 1s delay between batches),
- * calls the classifier for each, and saves results.
+ * batches them, classifies each using AI (with local fallback), and saves results.
  */
 
 import { supabase } from '@/lib/supabase';
 import { classifyExercise } from '@/lib/exercise-classifier';
+import { getDefaultClassification, getDefaultFractionByType } from '@/lib/default-classifications';
 import type { ExerciseInput } from '@/lib/exercise-classifier';
 
 // =============================================================================
@@ -29,10 +29,8 @@ export type ProgressCallback = (progress: BackfillProgress) => void;
 
 /**
  * Classifies all exercises that haven't been analyzed yet.
- * Processes in batches of 5 with 1s delay between batches.
- *
- * @param onProgress - Optional callback for real-time progress updates
- * @returns Summary of results
+ * Tries AI first, falls back to built-in defaults if AI unavailable.
+ * Processes in batches of 5 with 500ms delay between batches.
  */
 export async function backfillExerciseClassifications(
   onProgress?: ProgressCallback,
@@ -52,14 +50,26 @@ export async function backfillExerciseClassifications(
   let succeeded = 0;
   let failed = 0;
 
-  const BATCH_SIZE = 5;
-  const BATCH_DELAY_MS = 1000;
-  const MAX_RETRIES = 2;
+  // Test if AI is available with the first exercise
+  let aiAvailable = true;
+  try {
+    const testInput: ExerciseInput = {
+      name: exercises[0].name,
+      exercise_type: exercises[0].exercise_type,
+      muscle_groups: exercises[0].muscle_groups ?? [],
+      instructions: exercises[0].instructions,
+    };
+    await classifyExercise(testInput);
+  } catch {
+    aiAvailable = false;
+  }
+
+  const BATCH_SIZE = 10;
+  const BATCH_DELAY_MS = aiAvailable ? 1000 : 100; // Fast when using local defaults
 
   for (let i = 0; i < exercises.length; i += BATCH_SIZE) {
     const batch = exercises.slice(i, i + BATCH_SIZE);
 
-    // Process batch concurrently
     const results = await Promise.allSettled(
       batch.map(async (exercise) => {
         onProgress?.({
@@ -69,12 +79,6 @@ export async function backfillExerciseClassifications(
           current: exercise.name,
         });
 
-        // Mark as classifying
-        await supabase
-          .from('exercises')
-          .update({ classification_status: 'classifying' })
-          .eq('id', exercise.id);
-
         const input: ExerciseInput = {
           name: exercise.name,
           exercise_type: exercise.exercise_type,
@@ -82,46 +86,37 @@ export async function backfillExerciseClassifications(
           instructions: exercise.instructions,
         };
 
-        // Retry logic
-        let lastError: Error | null = null;
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        let result;
+
+        if (aiAvailable) {
           try {
-            const result = await classifyExercise(input);
-
-            // Save to database
-            await supabase
-              .from('exercises')
-              .update({
-                resistance_model: result.resistance_model,
-                movement_family: result.movement_family,
-                bodyweight_fraction: result.bodyweight_fraction,
-                bodyweight_fraction_min: result.bodyweight_fraction_min,
-                bodyweight_fraction_max: result.bodyweight_fraction_max,
-                volume_mode: result.volume_mode,
-                ai_confidence: result.confidence,
-                ai_rationale: result.rationale,
-                classification_status: 'completed',
-                analyzed_at: new Date().toISOString(),
-              })
-              .eq('id', exercise.id);
-
-            return;
-          } catch (err) {
-            lastError = err instanceof Error ? err : new Error(String(err));
-            // Wait before retry
-            if (attempt < MAX_RETRIES) {
-              await delay(500 * (attempt + 1));
-            }
+            result = await classifyExercise(input);
+          } catch {
+            // Fall back to defaults for this exercise
+            result = getLocalClassification(exercise.name, exercise.exercise_type);
           }
+        } else {
+          result = getLocalClassification(exercise.name, exercise.exercise_type);
         }
 
-        // All retries exhausted — mark as failed
-        await supabase
+        // Save to database
+        const { error: updateError } = await supabase
           .from('exercises')
-          .update({ classification_status: 'failed' })
+          .update({
+            resistance_model: result.resistance_model,
+            movement_family: result.movement_family,
+            bodyweight_fraction: result.bodyweight_fraction,
+            bodyweight_fraction_min: result.bodyweight_fraction_min,
+            bodyweight_fraction_max: result.bodyweight_fraction_max,
+            volume_mode: result.volume_mode,
+            ai_confidence: result.confidence,
+            ai_rationale: result.rationale,
+            classification_status: 'completed',
+            analyzed_at: new Date().toISOString(),
+          })
           .eq('id', exercise.id);
 
-        throw lastError;
+        if (updateError) throw updateError;
       }),
     );
 
@@ -153,6 +148,22 @@ export async function backfillExerciseClassifications(
 // =============================================================================
 // Helpers
 // =============================================================================
+
+function getLocalClassification(name: string, exerciseType: string) {
+  const nameDefault = getDefaultClassification(name);
+  const fraction = nameDefault?.bodyweight_fraction ?? getDefaultFractionByType(exerciseType);
+
+  return {
+    resistance_model: nameDefault?.resistance_model ?? (fraction > 0 ? 'bodyweight' : 'external_load_only'),
+    movement_family: nameDefault?.movement_family ?? 'other',
+    bodyweight_fraction: fraction,
+    bodyweight_fraction_min: Math.max(0, fraction - 0.05),
+    bodyweight_fraction_max: Math.min(1, fraction + 0.05),
+    volume_mode: nameDefault?.volume_mode ?? 'repetitions',
+    confidence: 0.60,
+    rationale: 'Estimated from exercise name and type (AI unavailable)',
+  };
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
