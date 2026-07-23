@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useExercise, useUpdateExercise, useDeleteExercise } from '@/hooks/useExercises';
+import { useClassifyExercise, useOverrideClassification } from '@/hooks/useExerciseClassification';
 import type { ExerciseType } from '@/types';
 
 const TYPE_LABELS: Record<ExerciseType, string> = {
@@ -28,12 +29,17 @@ export default function ExerciseDetailPage() {
   const updateExercise = useUpdateExercise();
   const deleteExercise = useDeleteExercise();
 
+  const classifyExercise = useClassifyExercise();
+  const overrideClassification = useOverrideClassification();
+
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editType, setEditType] = useState<ExerciseType>('bodyweight');
   const [editMuscleGroups, setEditMuscleGroups] = useState('');
   const [editInstructions, setEditInstructions] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showFractionEdit, setShowFractionEdit] = useState(false);
+  const [editFraction, setEditFraction] = useState('');
 
   function startEditing() {
     if (!exercise) return;
@@ -239,6 +245,185 @@ export default function ExerciseDetailPage() {
             <p className="mt-1 text-sm text-gray-500">No instructions provided.</p>
           )}
         </section>
+
+        {/* AI Classification / Effective Resistance */}
+        {!isEditing && (
+          <section>
+            <h2 className="text-sm font-semibold text-gray-300">Estimated Bodyweight Contribution</h2>
+            <div className="mt-2 glass-card rounded-xl border border-gray-700/50 p-4">
+              {exercise.classification_status === 'classifying' && (
+                <div className="flex items-center gap-3">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-600 border-t-indigo-400" />
+                  <span className="text-sm text-gray-400">Analyzing...</span>
+                </div>
+              )}
+
+              {exercise.classification_status === 'failed' && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-red-400">Analysis failed</span>
+                  <button
+                    type="button"
+                    onClick={() => classifyExercise.mutate({
+                      exerciseId: exercise.id,
+                      name: exercise.name,
+                      exercise_type: exercise.exercise_type,
+                      muscle_groups: exercise.muscle_groups ?? [],
+                      instructions: exercise.instructions ?? null,
+                    })}
+                    disabled={classifyExercise.isPending}
+                    className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-500 transition-colors disabled:opacity-50"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {(exercise.classification_status === 'pending' || exercise.classification_status === null) && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Not yet analyzed</span>
+                  <button
+                    type="button"
+                    onClick={() => classifyExercise.mutate({
+                      exerciseId: exercise.id,
+                      name: exercise.name,
+                      exercise_type: exercise.exercise_type,
+                      muscle_groups: exercise.muscle_groups ?? [],
+                      instructions: exercise.instructions ?? null,
+                    })}
+                    disabled={classifyExercise.isPending}
+                    className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-500 transition-colors disabled:opacity-50"
+                  >
+                    {classifyExercise.isPending ? 'Analyzing...' : 'Analyze'}
+                  </button>
+                </div>
+              )}
+
+              {exercise.classification_status === 'completed' && exercise.bodyweight_fraction != null && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-lg font-bold text-white">
+                        ≈ {Math.round(exercise.bodyweight_fraction * 100)}%
+                      </p>
+                      {exercise.bodyweight_fraction_min != null && exercise.bodyweight_fraction_max != null && (
+                        <p className="text-xs text-gray-400">
+                          Likely range: {Math.round(exercise.bodyweight_fraction_min * 100)}–{Math.round(exercise.bodyweight_fraction_max * 100)}%
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {exercise.user_overridden && (
+                        <span className="rounded-full bg-amber-900/50 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+                          Manual
+                        </span>
+                      )}
+                      {exercise.ai_confidence != null && (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          exercise.ai_confidence >= 0.8
+                            ? 'bg-green-900/50 text-green-300'
+                            : exercise.ai_confidence >= 0.6
+                              ? 'bg-yellow-900/50 text-yellow-300'
+                              : 'bg-red-900/50 text-red-300'
+                        }`}>
+                          {exercise.ai_confidence >= 0.8 ? 'High' : exercise.ai_confidence >= 0.6 ? 'Medium' : 'Low'} confidence
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {exercise.ai_rationale && (
+                    <p className="text-xs text-gray-500 italic">{exercise.ai_rationale}</p>
+                  )}
+
+                  {exercise.resistance_model && (
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="rounded bg-gray-800 px-2 py-0.5 text-[10px] text-gray-400">
+                        {exercise.resistance_model.replace(/_/g, ' ')}
+                      </span>
+                      {exercise.movement_family && (
+                        <span className="rounded bg-gray-800 px-2 py-0.5 text-[10px] text-gray-400">
+                          {exercise.movement_family.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                      {exercise.volume_mode && (
+                        <span className="rounded bg-gray-800 px-2 py-0.5 text-[10px] text-gray-400">
+                          {exercise.volume_mode}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Edit / Reanalyze actions */}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditFraction(String(Math.round((exercise.bodyweight_fraction ?? 0) * 100)));
+                        setShowFractionEdit(true);
+                      }}
+                      className="rounded-full border border-gray-700 px-3 py-1 text-xs font-medium text-gray-300 hover:bg-gray-800 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => classifyExercise.mutate({
+                        exerciseId: exercise.id,
+                        name: exercise.name,
+                        exercise_type: exercise.exercise_type,
+                        muscle_groups: exercise.muscle_groups ?? [],
+                        instructions: exercise.instructions ?? null,
+                      })}
+                      disabled={classifyExercise.isPending}
+                      className="rounded-full border border-gray-700 px-3 py-1 text-xs font-medium text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    >
+                      {classifyExercise.isPending ? 'Analyzing...' : 'Reanalyze'}
+                    </button>
+                  </div>
+
+                  {/* Inline fraction edit */}
+                  {showFractionEdit && (
+                    <div className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 p-3">
+                      <label className="text-xs text-gray-400">BW %:</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        max={100}
+                        value={editFraction}
+                        onChange={(e) => setEditFraction(e.target.value)}
+                        className="h-8 w-16 rounded border border-gray-600 bg-gray-900 text-center text-sm text-white focus:border-indigo-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const val = parseInt(editFraction, 10);
+                          if (isNaN(val) || val < 0 || val > 100) return;
+                          await overrideClassification.mutateAsync({
+                            exerciseId: exercise.id,
+                            bodyweight_fraction: val / 100,
+                          });
+                          setShowFractionEdit(false);
+                        }}
+                        disabled={overrideClassification.isPending}
+                        className="rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowFractionEdit(false)}
+                        className="rounded px-2 py-1 text-xs text-gray-400 hover:text-gray-200"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Error display */}
         {(updateExercise.isError || deleteExercise.isError) && (

@@ -4,6 +4,9 @@ import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
+import { useBodyweightEntries } from '@/hooks/useBodyweight';
+import { useExercises } from '@/hooks/useExercises';
+import { calculateEffectiveResistance, calculateSetVolume, calculateIsometricLoad } from '@/lib/volume-calculator';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { initAudioContext } from '@/lib/audio-alert';
 import ExercisePicker from '@/components/ExercisePicker';
@@ -543,6 +546,29 @@ export default function ActiveWorkoutPage() {
   } = useActiveWorkout();
 
   const { preference, weightLabel } = useUnitPreference();
+  const { data: bodyweightEntries } = useBodyweightEntries();
+  const { data: allExercises } = useExercises();
+
+  // Get latest bodyweight for effective resistance calculations
+  const latestBodyweightKg = useMemo(() => {
+    if (!bodyweightEntries || bodyweightEntries.length === 0) return null;
+    return bodyweightEntries[0].weight_kg;
+  }, [bodyweightEntries]);
+
+  // Build a lookup map for exercise classifications
+  const exerciseClassificationMap = useMemo(() => {
+    const map = new Map<string, { bodyweight_fraction: number | null; resistance_model: string | null; volume_mode: string | null }>();
+    if (allExercises) {
+      for (const ex of allExercises) {
+        map.set(ex.id, {
+          bodyweight_fraction: ex.bodyweight_fraction ?? null,
+          resistance_model: ex.resistance_model ?? null,
+          volume_mode: ex.volume_mode ?? null,
+        });
+      }
+    }
+    return map;
+  }, [allExercises]);
 
   const {
     finishWorkout: doFinish,
@@ -554,21 +580,52 @@ export default function ActiveWorkoutPage() {
     result: finishResult,
   } = useFinishWorkout();
 
-  // Live volume: sum of (reps × weightKg) for all completed weighted sets
+  // Live volume: enhanced with bodyweight fractions from AI classification
   const liveVolumeDisplay = useMemo(() => {
     if (!workout) return null;
-    const totalKg = workout.exercises.reduce((sum, ex) => {
-      return sum + ex.sets.reduce((s2, set) => {
-        if (!set.completed || set.reps == null || set.weightKg == null) return s2;
-        return s2 + set.reps * set.weightKg;
-      }, 0);
-    }, 0);
+    const bw = latestBodyweightKg ?? 0;
+
+    let totalKg = 0;
+    for (const ex of workout.exercises) {
+      const classification = exerciseClassificationMap.get(ex.exerciseId);
+      const fraction = classification?.bodyweight_fraction ?? null;
+      const resistanceModel = classification?.resistance_model ?? null;
+      const volumeMode = classification?.volume_mode ?? 'repetitions';
+
+      for (const set of ex.sets) {
+        if (!set.completed) continue;
+
+        // If we have classification data, use effective resistance
+        if (fraction !== null && resistanceModel !== null && bw > 0) {
+          const effectiveR = calculateEffectiveResistance({
+            bodyweightKg: bw,
+            bodyweightFraction: fraction,
+            addedResistanceKg: set.weightKg ?? 0,
+            assistanceKg: ex.exerciseType === 'assisted' ? (set.weightKg ?? 0) : 0,
+            resistanceModel,
+          });
+
+          if (volumeMode === 'duration' && set.durationSeconds) {
+            // Convert isometric load to a comparable volume metric
+            totalKg += calculateIsometricLoad(effectiveR, set.durationSeconds) / 60;
+          } else if (set.reps != null) {
+            totalKg += calculateSetVolume(effectiveR, set.reps);
+          }
+        } else {
+          // Fallback: original simple calculation for weighted exercises
+          if (set.reps != null && set.weightKg != null) {
+            totalKg += set.reps * set.weightKg;
+          }
+        }
+      }
+    }
+
     if (totalKg === 0) return null;
     const displayValue = preference === 'imperial'
       ? Math.round(totalKg * 2.20462)
       : Math.round(totalKg);
     return formatVolume(displayValue, weightLabel);
-  }, [workout, preference, weightLabel]);
+  }, [workout, preference, weightLabel, latestBodyweightKg, exerciseClassificationMap]);
 
   // Timer - derive elapsed from persisted startedAt timestamp (survives refresh)
   const [elapsedSeconds, setElapsedSeconds] = useState(0);

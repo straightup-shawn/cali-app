@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCreateExercise } from '@/hooks/useExercises';
 import { useExercises } from '@/hooks/useExercises';
+import { useClassifyExercise } from '@/hooks/useExerciseClassification';
 import type { ExerciseType } from '@/types';
 
 const MUSCLE_GROUPS = [
@@ -50,6 +51,7 @@ type ExerciseFormData = z.infer<typeof exerciseFormSchema>;
 export default function ExerciseFormPage() {
   const navigate = useNavigate();
   const createExercise = useCreateExercise();
+  const classifyExercise = useClassifyExercise();
   const { data: exercises } = useExercises();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -98,6 +100,16 @@ export default function ExerciseFormPage() {
         instructions: data.instructions?.trim() || null,
         progresses_to: data.progresses_to || null,
       });
+
+      // Fire off AI classification asynchronously — don't block navigation
+      classifyExercise.mutate({
+        exerciseId: result.id,
+        name: data.name.trim(),
+        exercise_type: data.exercise_type,
+        muscle_groups: data.muscle_groups ?? [],
+        instructions: data.instructions?.trim() || null,
+      });
+
       navigate(`/exercises/${result.id}`);
     } catch (err) {
       if (err instanceof Error) {

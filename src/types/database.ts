@@ -50,6 +50,17 @@ export interface Database {
           progresses_to: string | null;
           is_system: boolean;
           created_at: string;
+          resistance_model: string | null;
+          movement_family: string | null;
+          bodyweight_fraction: number | null;
+          bodyweight_fraction_min: number | null;
+          bodyweight_fraction_max: number | null;
+          volume_mode: string | null;
+          ai_confidence: number | null;
+          ai_rationale: string | null;
+          classification_status: string | null;
+          analyzed_at: string | null;
+          user_overridden: boolean | null;
         };
         Insert: {
           id?: string;
@@ -61,6 +72,17 @@ export interface Database {
           progresses_to?: string | null;
           is_system?: boolean;
           created_at?: string;
+          resistance_model?: string | null;
+          movement_family?: string | null;
+          bodyweight_fraction?: number | null;
+          bodyweight_fraction_min?: number | null;
+          bodyweight_fraction_max?: number | null;
+          volume_mode?: string | null;
+          ai_confidence?: number | null;
+          ai_rationale?: string | null;
+          classification_status?: string | null;
+          analyzed_at?: string | null;
+          user_overridden?: boolean | null;
         };
         Update: {
           id?: string;
@@ -72,6 +94,17 @@ export interface Database {
           progresses_to?: string | null;
           is_system?: boolean;
           created_at?: string;
+          resistance_model?: string | null;
+          movement_family?: string | null;
+          bodyweight_fraction?: number | null;
+          bodyweight_fraction_min?: number | null;
+          bodyweight_fraction_max?: number | null;
+          volume_mode?: string | null;
+          ai_confidence?: number | null;
+          ai_rationale?: string | null;
+          classification_status?: string | null;
+          analyzed_at?: string | null;
+          user_overridden?: boolean | null;
         };
         Relationships: [];
       };
@@ -148,6 +181,7 @@ export interface Database {
           completed_at: string | null;
           duration_seconds: number | null;
           notes: string | null;
+          bodyweight_snapshot_kg: number | null;
         };
         Insert: {
           id?: string;
@@ -158,6 +192,7 @@ export interface Database {
           completed_at?: string | null;
           duration_seconds?: number | null;
           notes?: string | null;
+          bodyweight_snapshot_kg?: number | null;
         };
         Update: {
           id?: string;
@@ -168,6 +203,7 @@ export interface Database {
           completed_at?: string | null;
           duration_seconds?: number | null;
           notes?: string | null;
+          bodyweight_snapshot_kg?: number | null;
         };
         Relationships: [];
       };

@@ -6,6 +6,8 @@ import { useWorkouts } from '@/hooks/useWorkouts';
 import { uploadProfilePhoto } from '@/lib/storage';
 import { THEMES, getStoredTheme, setStoredTheme } from '@/lib/themes';
 import type { ThemeId } from '@/lib/themes';
+import { backfillExerciseClassifications } from '@/lib/exercise-backfill';
+import type { BackfillProgress } from '@/lib/exercise-backfill';
 import BodyweightSection from '@/components/profile/BodyweightSection';
 import type { UnitPreference } from '@/lib/units';
 
@@ -671,6 +673,26 @@ function ThemePicker() {
 function SettingsTab() {
   const { signOut } = useAuth();
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [backfillRunning, setBackfillRunning] = useState(false);
+  const [backfillProgress, setBackfillProgress] = useState<BackfillProgress | null>(null);
+  const [backfillResult, setBackfillResult] = useState<{ total: number; succeeded: number; failed: number } | null>(null);
+
+  async function handleRunAnalysis() {
+    setBackfillRunning(true);
+    setBackfillResult(null);
+    setBackfillProgress(null);
+    try {
+      const result = await backfillExerciseClassifications((progress) => {
+        setBackfillProgress(progress);
+      });
+      setBackfillResult(result);
+    } catch {
+      setBackfillResult({ total: 0, succeeded: 0, failed: -1 });
+    } finally {
+      setBackfillRunning(false);
+      setBackfillProgress(null);
+    }
+  }
 
   function handleClearLocalData() {
     if (!clearConfirm) {
@@ -689,6 +711,45 @@ function SettingsTab() {
       <DefaultRestDuration />
       <UnitPreferenceToggle />
       <BodyweightSection />
+
+      {/* Exercise AI Analysis */}
+      <section className="space-y-2">
+        <h2 className="text-sm font-medium text-gray-300">Exercise Analysis</h2>
+        <p className="text-xs text-gray-500">
+          Analyze all exercises to estimate bodyweight contributions for accurate volume tracking.
+        </p>
+        <button
+          type="button"
+          onClick={handleRunAnalysis}
+          disabled={backfillRunning}
+          className="w-full rounded-xl border border-indigo-700 bg-indigo-950/50 px-4 py-2.5 text-sm font-semibold text-indigo-300 transition-all duration-200 hover:bg-indigo-900 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {backfillRunning ? 'Analyzing...' : 'Run Analysis'}
+        </button>
+        {backfillRunning && backfillProgress && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs text-gray-400">
+              <span>{backfillProgress.current ? `Analyzing: ${backfillProgress.current}` : 'Processing...'}</span>
+              <span>{backfillProgress.completed}/{backfillProgress.total}</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-gray-800">
+              <div
+                className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+                style={{ width: `${(backfillProgress.completed / backfillProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+        {backfillResult && !backfillRunning && (
+          <p className="text-xs text-gray-400">
+            {backfillResult.failed === -1
+              ? '❌ Analysis failed. Please try again.'
+              : backfillResult.total === 0
+                ? '✓ All exercises are already analyzed.'
+                : `✓ Analyzed ${backfillResult.succeeded}/${backfillResult.total} exercises${backfillResult.failed > 0 ? ` (${backfillResult.failed} failed)` : ''}.`}
+          </p>
+        )}
+      </section>
 
       {/* About */}
       <section className="space-y-2">

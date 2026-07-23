@@ -2,8 +2,65 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { detectPersonalRecords, toCompletedExercises } from '@/lib/personal-records';
+import { calculateEffectiveResistance, calculateSetVolume as calcSetVol } from '@/lib/volume-calculator';
 import type { PRCheck } from '@/lib/personal-records';
 import type { ActiveWorkout, PersonalRecord } from '@/types';
+
+// =============================================================================
+// Types
+// =============================================================================
+
+export interface SaveWorkoutResult {
+  workoutId: string;
+  workoutName: string;
+  startedAt: string;
+  completedAt: string;
+  durationSeconds: number;
+  exerciseCount: number;
+  totalSets: number;
+  totalReps: number;
+  totalVolume: number;
+  newPRs: PRCheck[];
+}
+
+// =============================================================================
+// Helper: get latest bodyweight from DB
+// =============================================================================
+
+async function getLatestBodyweightKg(): Promise<number | null> {
+  const { data } = await supabase
+    .from('bodyweight_entries')
+    .select('weight_kg')
+    .order('entry_date', { ascending: false })
+    .limit(1);
+  if (data && data.length > 0) return Number(data[0].weight_kg);
+  return null;
+}
+
+// =============================================================================
+// Helper: get exercise classifications for volume calculation
+// =============================================================================
+
+async function getExerciseClassifications(exerciseIds: string[]): Promise<Map<string, { bodyweight_fraction: number | null; resistance_model: string | null; volume_mode: string | null }>> {
+  const map = new Map<string, { bodyweight_fraction: number | null; resistance_model: string | null; volume_mode: string | null }>();
+  if (exerciseIds.length === 0) return map;
+
+  const { data } = await supabase
+    .from('exercises')
+    .select('id, bodyweight_fraction, resistance_model, volume_mode')
+    .in('id', exerciseIds);
+
+  if (data) {
+    for (const ex of data) {
+      map.set(ex.id, {
+        bodyweight_fraction: ex.bodyweight_fraction != null ? Number(ex.bodyweight_fraction) : null,
+        resistance_model: ex.resistance_model,
+        volume_mode: ex.volume_mode,
+      });
+    }
+  }
+  return map;
+}
 
 // =============================================================================
 // Types
@@ -44,7 +101,10 @@ export function useSaveWorkout() {
         (new Date(completedAt).getTime() - startedAt.getTime()) / 1000
       );
 
-      // 1. Insert workout record
+      // Get bodyweight snapshot for this workout
+      const bodyweightSnapshotKg = await getLatestBodyweightKg();
+
+      // 1. Insert workout record (with bodyweight snapshot)
       const { data: savedWorkout, error: workoutError } = await supabase
         .from('workouts')
         .insert({
@@ -56,6 +116,7 @@ export function useSaveWorkout() {
           completed_at: completedAt,
           duration_seconds: durationSeconds,
           notes: null,
+          bodyweight_snapshot_kg: bodyweightSnapshotKg,
         })
         .select()
         .single();
@@ -152,10 +213,38 @@ export function useSaveWorkout() {
       );
       const totalSets = completedSetsAll.length;
       const totalReps = completedSetsAll.reduce((sum, s) => sum + (s.reps ?? 0), 0);
-      const totalVolume = completedSetsAll.reduce(
-        (sum, s) => sum + (s.reps ?? 0) * (s.weightKg ?? 0),
-        0
-      );
+
+      // Enhanced volume calculation using bodyweight fractions
+      const classifications = await getExerciseClassifications(exerciseIds);
+      const bw = bodyweightSnapshotKg ?? 0;
+
+      let totalVolume = 0;
+      for (const exercise of workout.exercises) {
+        const classification = classifications.get(exercise.exerciseId);
+        const fraction = classification?.bodyweight_fraction ?? null;
+        const resistanceModel = classification?.resistance_model ?? null;
+
+        for (const set of exercise.sets) {
+          if (!set.completed) continue;
+
+          if (fraction !== null && resistanceModel !== null && bw > 0) {
+            // Use effective resistance calculation
+            const effectiveR = calculateEffectiveResistance({
+              bodyweightKg: bw,
+              bodyweightFraction: fraction,
+              addedResistanceKg: set.weightKg ?? 0,
+              assistanceKg: exercise.exerciseType === 'assisted' ? (set.weightKg ?? 0) : 0,
+              resistanceModel,
+            });
+            if (set.reps != null) {
+              totalVolume += calcSetVol(effectiveR, set.reps);
+            }
+          } else {
+            // Fallback: simple reps × weight
+            totalVolume += (set.reps ?? 0) * (set.weightKg ?? 0);
+          }
+        }
+      }
 
       return {
         workoutId: savedWorkout.id,
