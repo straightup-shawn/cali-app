@@ -4,6 +4,7 @@ import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useWorkouts, type WorkoutSummary } from '@/hooks/useWorkouts';
 import { useRoutines, type RoutineWithCount } from '@/hooks/useRoutines';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
+import { useWeeklyVolume } from '@/hooks/useWeeklyVolume';
 import AIButton from '@/components/AIButton';
 
 // =============================================================================
@@ -201,6 +202,7 @@ function formatVolumeDisplay(value: number, unit: string): string {
 function WeeklyVolumeStats({ workouts }: { workouts: WorkoutSummary[] }) {
   const weekStart = useMemo(() => getStartOfWeek(), []);
   const { preference, weightLabel } = useUnitPreference();
+  const { data: weeklyVolumeKg } = useWeeklyVolume();
 
   const weeklyData = useMemo(() => {
     const thisWeek = workouts.filter((w) => {
@@ -210,23 +212,19 @@ function WeeklyVolumeStats({ workouts }: { workouts: WorkoutSummary[] }) {
 
     const count = thisWeek.length;
 
-    // Note: total_volume is not stored per-workout in the DB schema;
-    // it would require joining all exercise_sets. We show '—' for now.
-    const totalVolumeKg: number | null = null;
-
     const totalDurationSec = thisWeek.reduce((sum, w) => {
       return sum + (w.duration_seconds ?? 0);
     }, 0);
 
     const avgDurationSec = count > 0 ? Math.round(totalDurationSec / count) : 0;
 
-    return { count, totalVolumeKg, avgDurationSec };
+    return { count, avgDurationSec };
   }, [workouts, weekStart]);
 
-  const displayVolume = weeklyData.totalVolumeKg != null
+  const displayVolume = weeklyVolumeKg != null && weeklyVolumeKg > 0
     ? (preference === 'imperial'
-        ? Math.round(weeklyData.totalVolumeKg * 2.20462)
-        : Math.round(weeklyData.totalVolumeKg))
+        ? Math.round(weeklyVolumeKg * 2.20462)
+        : weeklyVolumeKg)
     : null;
 
   const avgDurationLabel = weeklyData.avgDurationSec > 0
@@ -249,7 +247,7 @@ function WeeklyVolumeStats({ workouts }: { workouts: WorkoutSummary[] }) {
               ? formatVolumeDisplay(displayVolume, weightLabel)
               : '—'}
           </span>
-          <span className="mt-0.5 text-xs text-gray-400">total volume</span>
+          <span className="mt-0.5 text-xs text-gray-400">≈ volume</span>
         </div>
         <div className="flex flex-col">
           <span className="text-2xl font-bold text-indigo-400">{avgDurationLabel}</span>

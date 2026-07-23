@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useWorkouts } from '@/hooks/useWorkouts';
+import { useUnitPreference } from '@/hooks/useUnitPreference';
+import { useWeeklyVolume } from '@/hooks/useWeeklyVolume';
 import { uploadProfilePhoto } from '@/lib/storage';
 import { THEMES, getStoredTheme, setStoredTheme } from '@/lib/themes';
 import type { ThemeId } from '@/lib/themes';
@@ -532,6 +534,8 @@ function PostsTab() {
 
 function StatsTab() {
   const { data: workouts, isLoading } = useWorkouts({ pageSize: 200 });
+  const { preference, weightLabel } = useUnitPreference();
+  const { data: weeklyVolumeKg } = useWeeklyVolume();
 
   const stats = useMemo(() => {
     if (!workouts) return null;
@@ -584,6 +588,13 @@ function StatsTab() {
 
   const s = stats ?? { total: 0, thisWeek: 0, streak: 0, avgDuration: 0 };
 
+  const volumeDisplay = weeklyVolumeKg != null && weeklyVolumeKg > 0
+    ? (() => {
+        const v = preference === 'imperial' ? Math.round(weeklyVolumeKg * 2.20462) : weeklyVolumeKg;
+        return v >= 1000 ? `≈${(v / 1000).toFixed(1).replace(/\.0$/, '')}k` : `≈${v}`;
+      })()
+    : '—';
+
   return (
     <div className="space-y-4 px-4 py-4">
       <div className="grid grid-cols-2 gap-3">
@@ -591,6 +602,7 @@ function StatsTab() {
         <StatCard label="This Week" value={String(s.thisWeek)} />
         <StatCard label="Current Streak" value={`${s.streak}d`} accent="orange" />
         <StatCard label="Avg Duration" value={formatDuration(s.avgDuration)} />
+        <StatCard label={`Week Volume (${weightLabel})`} value={volumeDisplay} />
       </div>
     </div>
   );

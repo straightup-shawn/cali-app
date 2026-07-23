@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
@@ -7,6 +7,9 @@ import { useUnitPreference } from '@/hooks/useUnitPreference';
 import { useAuth } from '@/context/AuthContext';
 import { uploadWorkoutPhoto } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
+import { useExercises } from '@/hooks/useExercises';
+import { useBodyweightEntries } from '@/hooks/useBodyweight';
+import { calculateEffectiveResistance, calculateSetVolume, calculateIsometricLoad } from '@/lib/volume-calculator';
 import ExercisePicker from '@/components/ExercisePicker';
 import ImageCropper from '@/components/ImageCropper';
 import type { ExerciseType } from '@/types';
@@ -804,7 +807,9 @@ export default function WorkoutDetailPage() {
   const navigate = useNavigate();
   const { data: workout, isLoading, error } = useWorkout(id);
   const { data: prRecords } = useWorkoutPersonalRecords(id);
-  const { formatWeight } = useUnitPreference();
+  const { formatWeight, preference, weightLabel } = useUnitPreference();
+  const { data: allExercises } = useExercises();
+  const { data: bodyweightEntries } = useBodyweightEntries();
 
   // Delete state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -1070,6 +1075,54 @@ export default function WorkoutDetailPage() {
   const records = prRecords ?? [];
   const exercises = workout.workout_exercises ?? [];
 
+  // Calculate session volume
+  const sessionVolumeDisplay = useMemo(() => {
+    const bw = bodyweightEntries?.[0]?.weight_kg ?? 0;
+    let totalKg = 0;
+
+    for (const we of exercises) {
+      const exData = allExercises?.find((e) => e.id === we.exercise_id);
+      const fraction = exData?.bodyweight_fraction ?? null;
+      const resistanceModel = exData?.resistance_model ?? null;
+      const volumeMode = exData?.volume_mode ?? 'repetitions';
+      const exerciseType = we.exercises?.exercise_type ?? 'bodyweight';
+
+      for (const set of we.exercise_sets) {
+        if (!set.completed) continue;
+
+        if (fraction !== null && resistanceModel !== null && bw > 0) {
+          const effectiveR = calculateEffectiveResistance({
+            bodyweightKg: bw,
+            bodyweightFraction: fraction,
+            addedResistanceKg: set.weight_kg ?? 0,
+            assistanceKg: exerciseType === 'assisted' ? (set.weight_kg ?? 0) : 0,
+            resistanceModel,
+          });
+
+          if (volumeMode === 'duration' && set.duration_seconds) {
+            totalKg += calculateIsometricLoad(effectiveR, set.duration_seconds) / 60;
+          } else if (set.reps != null) {
+            totalKg += calculateSetVolume(effectiveR, set.reps);
+          }
+        } else {
+          // Fallback: simple weight × reps for weighted exercises
+          if (set.reps != null && set.weight_kg != null) {
+            totalKg += set.reps * set.weight_kg;
+          }
+        }
+      }
+    }
+
+    if (totalKg === 0) return '—';
+    const displayValue = preference === 'imperial'
+      ? Math.round(totalKg * 2.20462)
+      : Math.round(totalKg);
+    if (displayValue >= 1000) {
+      return `${(displayValue / 1000).toFixed(1).replace(/\.0$/, '')}k ${weightLabel}`;
+    }
+    return `${displayValue} ${weightLabel}`;
+  }, [exercises, allExercises, bodyweightEntries, preference, weightLabel]);
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
@@ -1144,7 +1197,7 @@ export default function WorkoutDetailPage() {
       </header>
 
       {/* Workout summary stats */}
-      <div className="grid grid-cols-3 gap-3 px-4 pt-4">
+      <div className="grid grid-cols-2 gap-3 px-4 pt-4">
         <div className="rounded-lg border border-gray-800 bg-gray-900 p-3 text-center">
           <p className="text-lg font-bold text-gray-100">{exercises.length}</p>
           <p className="text-xs text-gray-400">Exercises</p>
@@ -1158,6 +1211,10 @@ export default function WorkoutDetailPage() {
         <div className="rounded-lg border border-gray-800 bg-gray-900 p-3 text-center">
           <p className="text-lg font-bold text-amber-400">{records.length}</p>
           <p className="text-xs text-gray-400">PRs</p>
+        </div>
+        <div className="rounded-lg border border-gray-800 bg-gray-900 p-3 text-center">
+          <p className="text-lg font-bold text-indigo-400">{sessionVolumeDisplay}</p>
+          <p className="text-xs text-gray-400">≈ Volume</p>
         </div>
       </div>
 
