@@ -346,6 +346,8 @@ const REST_DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300] as const;
 
 interface ExerciseSectionProps {
   exercise: ActiveWorkoutExercise;
+  index: number;
+  total: number;
   onUpdate: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   onComplete: (exerciseId: string, setId: string) => void;
   onUncomplete: (exerciseId: string, setId: string) => void;
@@ -353,6 +355,8 @@ interface ExerciseSectionProps {
   onDeleteSet: (exerciseId: string, setId: string) => void;
   onRemove: (exerciseId: string) => void;
   onRestDurationChange: (exerciseId: string, seconds: number) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
 const TYPE_LABELS: Record<ExerciseType, string> = {
@@ -371,7 +375,7 @@ const TYPE_COLORS: Record<ExerciseType, string> = {
   static_hold: 'bg-red-900/50 text-red-300',
 };
 
-function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSet, onDeleteSet, onRemove, onRestDurationChange }: ExerciseSectionProps) {
+function ExerciseSection({ exercise, index, total, onUpdate, onComplete, onUncomplete, onAddSet, onDeleteSet, onRemove, onRestDurationChange, onMoveUp, onMoveDown }: ExerciseSectionProps) {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRestPicker, setShowRestPicker] = useState(false);
   const { data: previousPerformance } = usePreviousPerformance(exercise.exerciseId);
@@ -382,6 +386,32 @@ function ExerciseSection({ exercise, onUpdate, onComplete, onUncomplete, onAddSe
     <div className="overflow-hidden glass-card rounded-2xl p-3">
       {/* Exercise header */}
       <div className="flex items-start justify-between">
+        {/* Reorder arrows */}
+        <div className="flex flex-col gap-0.5 mr-2 shrink-0">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={index === 0}
+            className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-800 active:bg-gray-700 transition-colors disabled:opacity-20"
+            aria-label="Move exercise up"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={index === total - 1}
+            className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-800 active:bg-gray-700 transition-colors disabled:opacity-20"
+            aria-label="Move exercise down"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-gray-100">
             {exercise.exerciseName}
@@ -537,6 +567,7 @@ export default function ActiveWorkoutPage() {
     workout,
     addExercise,
     removeExercise,
+    reorderExercises,
     addSet,
     deleteSet,
     updateSet,
@@ -743,13 +774,15 @@ export default function ActiveWorkoutPage() {
       {/* Exercise list */}
       <div className="flex-1 space-y-4 px-4 pt-4">
         {workout.exercises.length > 0 ? (
-          workout.exercises.map((exercise) => (
+          workout.exercises.map((exercise, index) => (
             <ExerciseSection
               key={exercise.id}
               exercise={{
                 ...exercise,
                 restSeconds: exerciseRestDurations[exercise.id] ?? exercise.restSeconds,
               }}
+              index={index}
+              total={workout.exercises.length}
               onUpdate={updateSet}
               onComplete={(exerciseId, setId) => {
                 completeSet(exerciseId, setId);
@@ -765,6 +798,8 @@ export default function ActiveWorkoutPage() {
               onDeleteSet={deleteSet}
               onRemove={removeExercise}
               onRestDurationChange={handleRestDurationChange}
+              onMoveUp={() => reorderExercises(index, index - 1)}
+              onMoveDown={() => reorderExercises(index, index + 1)}
             />
           ))
         ) : (
