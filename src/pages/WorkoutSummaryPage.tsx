@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { uploadWorkoutPhoto } from '@/lib/storage';
 import { useAuth } from '@/context/AuthContext';
+import { useUnitPreference } from '@/hooks/useUnitPreference';
 import type { SaveWorkoutResult } from '@/hooks/useSaveWorkout';
 import type { PRCheck } from '@/lib/personal-records';
 import type { RecordType } from '@/types';
@@ -73,6 +74,7 @@ export default function WorkoutSummaryPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const summaryData = location.state as SaveWorkoutResult | null;
+  const { preference, weightLabel } = useUnitPreference();
 
   const [notes, setNotes] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -87,6 +89,14 @@ export default function WorkoutSummaryPage() {
   }
 
   const { workoutId, workoutName, startedAt, durationSeconds, exerciseCount, totalSets, totalReps, totalVolume, newPRs } = summaryData;
+
+  // Convert volume from kg to user's preferred unit
+  const displayVolume = preference === 'imperial'
+    ? Math.round(totalVolume * 2.20462)
+    : Math.round(totalVolume);
+  const volumeLabel = displayVolume >= 1000
+    ? `${(displayVolume / 1000).toFixed(1).replace(/\.0$/, '')}k ${weightLabel}`
+    : `${displayVolume.toLocaleString()} ${weightLabel}`;
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -160,7 +170,7 @@ export default function WorkoutSummaryPage() {
         {totalVolume > 0 && (
           <StatCard
             label="Volume"
-            value={`${totalVolume.toLocaleString()} kg`}
+            value={volumeLabel}
             icon="📊"
             className="col-span-2"
           />

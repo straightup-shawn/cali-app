@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 
 interface RoutineCardProps {
   id: string;
@@ -19,6 +20,38 @@ export default function RoutineCard({
   onDuplicate,
 }: RoutineCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const { startWorkout, discardWorkout } = useActiveWorkout();
+  const navigate = useNavigate();
+
+  async function handleStartWorkout(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setStarting(true);
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data: fullRoutine } = await supabase
+        .from('routines')
+        .select(`
+          *,
+          routine_exercises(
+            *,
+            exercises(id, name, exercise_type, muscle_groups)
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      discardWorkout();
+      startWorkout(fullRoutine ? (fullRoutine as any) : undefined);
+    } catch {
+      discardWorkout();
+      startWorkout();
+    } finally {
+      setStarting(false);
+      navigate('/workout/active');
+    }
+  }
 
   function handleDelete() {
     setMenuOpen(false);
@@ -48,7 +81,7 @@ export default function RoutineCard({
         className="block active:bg-gray-800 transition-colors"
         aria-label={`View routine: ${name}`}
       >
-        <div className="flex items-start justify-between gap-2 pr-8">
+        <div className="flex items-start justify-between gap-2 pr-20">
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-base font-medium text-gray-100">
               {name}
@@ -63,6 +96,23 @@ export default function RoutineCard({
           </div>
         </div>
       </Link>
+
+      {/* Play button — start workout from this routine */}
+      <button
+        type="button"
+        onClick={handleStartWorkout}
+        disabled={starting}
+        className="absolute right-14 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+        aria-label={`Start workout from ${name}`}
+      >
+        {starting ? (
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        ) : (
+          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
 
       {/* Context menu button */}
       <button

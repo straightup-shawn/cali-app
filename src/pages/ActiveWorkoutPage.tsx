@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
 import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
+import { useUnitPreference } from '@/hooks/useUnitPreference';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { initAudioContext } from '@/lib/audio-alert';
 import ExercisePicker from '@/components/ExercisePicker';
@@ -26,16 +27,28 @@ function formatTime(totalSeconds: number): string {
 }
 
 // =============================================================================
+// Volume formatting helper
+// =============================================================================
+
+function formatVolume(value: number, unit: string): string {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k ${unit}`;
+  }
+  return `${value} ${unit}`;
+}
+
+// =============================================================================
 // WorkoutTimerBar
 // =============================================================================
 
 interface WorkoutTimerBarProps {
   seconds: number;
   workoutName: string;
+  volumeDisplay: string | null;
   onMenuToggle: () => void;
 }
 
-function WorkoutTimerBar({ seconds, workoutName, onMenuToggle }: WorkoutTimerBarProps) {
+function WorkoutTimerBar({ seconds, workoutName, volumeDisplay, onMenuToggle }: WorkoutTimerBarProps) {
   return (
     <header className="sticky top-0 z-10 glass-header px-4 py-3">
       <div className="flex items-center justify-between">
@@ -43,7 +56,14 @@ function WorkoutTimerBar({ seconds, workoutName, onMenuToggle }: WorkoutTimerBar
           <h1 className="truncate text-lg font-bold text-gray-100">
             {workoutName}
           </h1>
-          <p className="text-sm font-mono text-indigo-400">{formatTime(seconds)}</p>
+          <div className="flex items-center gap-3">
+            <p className="text-sm font-mono text-indigo-400">{formatTime(seconds)}</p>
+            {volumeDisplay && (
+              <p className="text-sm font-medium text-gray-400">
+                Vol: <span className="text-white">{volumeDisplay}</span>
+              </p>
+            )}
+          </div>
         </div>
         <button
           type="button"
@@ -522,6 +542,8 @@ export default function ActiveWorkoutPage() {
     discardWorkout,
   } = useActiveWorkout();
 
+  const { preference, weightLabel } = useUnitPreference();
+
   const {
     finishWorkout: doFinish,
     isFinishing: finishing,
@@ -531,6 +553,22 @@ export default function ActiveWorkoutPage() {
     error: finishError,
     result: finishResult,
   } = useFinishWorkout();
+
+  // Live volume: sum of (reps × weightKg) for all completed weighted sets
+  const liveVolumeDisplay = useMemo(() => {
+    if (!workout) return null;
+    const totalKg = workout.exercises.reduce((sum, ex) => {
+      return sum + ex.sets.reduce((s2, set) => {
+        if (!set.completed || set.reps == null || set.weightKg == null) return s2;
+        return s2 + set.reps * set.weightKg;
+      }, 0);
+    }, 0);
+    if (totalKg === 0) return null;
+    const displayValue = preference === 'imperial'
+      ? Math.round(totalKg * 2.20462)
+      : Math.round(totalKg);
+    return formatVolume(displayValue, weightLabel);
+  }, [workout, preference, weightLabel]);
 
   // Timer - derive elapsed from persisted startedAt timestamp (survives refresh)
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -631,6 +669,7 @@ export default function ActiveWorkoutPage() {
       <WorkoutTimerBar
         seconds={elapsedSeconds}
         workoutName={workout.name}
+        volumeDisplay={liveVolumeDisplay}
         onMenuToggle={() => setMenuOpen((o) => !o)}
       />
 

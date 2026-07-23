@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useWorkouts, type WorkoutSummary } from '@/hooks/useWorkouts';
 import { useRoutines, type RoutineWithCount } from '@/hooks/useRoutines';
+import { useUnitPreference } from '@/hooks/useUnitPreference';
 
 // =============================================================================
 // Helpers
@@ -48,7 +49,7 @@ function getStartOfWeek(): Date {
 // =============================================================================
 
 function StartRoutineButton({ routine }: { routine: RoutineWithCount }) {
-  const { startWorkout } = useActiveWorkout();
+  const { startWorkout, discardWorkout } = useActiveWorkout();
   const navigate = useNavigate();
   const [starting, setStarting] = useState(false);
 
@@ -68,8 +69,10 @@ function StartRoutineButton({ routine }: { routine: RoutineWithCount }) {
         .eq('id', routine.id)
         .single();
 
+      discardWorkout();
       startWorkout(fullRoutine ? (fullRoutine as any) : undefined);
     } catch {
+      discardWorkout();
       startWorkout();
     } finally {
       setStarting(false);
@@ -184,29 +187,73 @@ function RecentWorkouts({ workouts }: { workouts: WorkoutSummary[] }) {
 }
 
 // =============================================================================
-// WeeklyStats
+// WeeklyVolumeStats
 // =============================================================================
 
-function WeeklyStats({ workouts }: { workouts: WorkoutSummary[] }) {
-  const weekStart = useMemo(() => getStartOfWeek(), []);
+function formatVolumeDisplay(value: number, unit: string): string {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k ${unit}`;
+  }
+  return `${value} ${unit}`;
+}
 
-  const workoutsThisWeek = useMemo(() => {
-    return workouts.filter((w) => {
+function WeeklyVolumeStats({ workouts }: { workouts: WorkoutSummary[] }) {
+  const weekStart = useMemo(() => getStartOfWeek(), []);
+  const { preference, weightLabel } = useUnitPreference();
+
+  const weeklyData = useMemo(() => {
+    const thisWeek = workouts.filter((w) => {
       if (!w.completed_at) return false;
       return new Date(w.completed_at) >= weekStart;
-    }).length;
+    });
+
+    const count = thisWeek.length;
+
+    // Note: total_volume is not stored per-workout in the DB schema;
+    // it would require joining all exercise_sets. We show '—' for now.
+    const totalVolumeKg: number | null = null;
+
+    const totalDurationSec = thisWeek.reduce((sum, w) => {
+      return sum + (w.duration_seconds ?? 0);
+    }, 0);
+
+    const avgDurationSec = count > 0 ? Math.round(totalDurationSec / count) : 0;
+
+    return { count, totalVolumeKg, avgDurationSec };
   }, [workouts, weekStart]);
+
+  const displayVolume = weeklyData.totalVolumeKg != null
+    ? (preference === 'imperial'
+        ? Math.round(weeklyData.totalVolumeKg * 2.20462)
+        : Math.round(weeklyData.totalVolumeKg))
+    : null;
+
+  const avgDurationLabel = weeklyData.avgDurationSec > 0
+    ? formatDuration(weeklyData.avgDurationSec)
+    : '—';
 
   return (
     <section className="glass-card rounded-2xl p-4 shadow-lg shadow-black/20">
       <h2 className="text-sm font-semibold text-gray-100">This Week</h2>
-      <div className="mt-3 flex items-baseline gap-1">
-        <span className="text-3xl font-bold text-indigo-400">
-          {workoutsThisWeek}
-        </span>
-        <span className="text-sm text-gray-400">
-          workout{workoutsThisWeek !== 1 ? 's' : ''} completed
-        </span>
+      <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold text-indigo-400">{weeklyData.count}</span>
+          <span className="mt-0.5 text-xs text-gray-400">
+            workout{weeklyData.count !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold text-indigo-400">
+            {displayVolume != null
+              ? formatVolumeDisplay(displayVolume, weightLabel)
+              : '—'}
+          </span>
+          <span className="mt-0.5 text-xs text-gray-400">total volume</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold text-indigo-400">{avgDurationLabel}</span>
+          <span className="mt-0.5 text-xs text-gray-400">avg duration</span>
+        </div>
       </div>
     </section>
   );
@@ -275,7 +322,7 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-4">
             <QuickStartCard routines={routines ?? []} />
-            <WeeklyStats workouts={workouts ?? []} />
+            <WeeklyVolumeStats workouts={workouts ?? []} />
             <RecentWorkouts workouts={recentWorkouts} />
           </div>
         )}
