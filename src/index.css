@@ -132,3 +132,75 @@
 .ring-accent {
   --tw-ring-color: var(--accent);
 }
+
+/* =============================================================================
+   Global theme overrides — remap all hardcoded Tailwind indigo classes to
+   CSS custom properties so the theme picker affects the ENTIRE app.
+   ============================================================================= */
+
+/* --- Background colors --- */
+.bg-indigo-600 { background-color: var(--accent) !important; }
+.bg-indigo-500 { background-color: var(--accent-light) !important; }
+.bg-indigo-700 { background-color: var(--accent-dark) !important; }
+.bg-indigo-800 { background-color: color-mix(in srgb, var(--accent-dark) 70%, black) !important; }
+.bg-indigo-900 { background-color: color-mix(in srgb, var(--accent-dark) 40%, black) !important; }
+.bg-indigo-900\/50 { background-color: color-mix(in srgb, var(--accent-dark) 20%, transparent) !important; }
+.bg-indigo-950\/50 { background-color: color-mix(in srgb, var(--accent) 15%, transparent) !important; }
+.bg-indigo-950\/30 { background-color: color-mix(in srgb, var(--accent) 10%, transparent) !important; }
+.bg-indigo-950\/20 { background-color: color-mix(in srgb, var(--accent) 8%, transparent) !important; }
+.bg-indigo-600\/20 { background-color: color-mix(in srgb, var(--accent) 20%, transparent) !important; }
+.bg-indigo-400 { background-color: var(--accent-light) !important; }
+
+/* --- Text colors --- */
+.text-indigo-100 { color: color-mix(in srgb, var(--accent-light) 90%, white) !important; }
+.text-indigo-200 { color: color-mix(in srgb, var(--accent-light) 80%, white) !important; }
+.text-indigo-200\/80 { color: color-mix(in srgb, var(--accent-light) 65%, white) !important; }
+.text-indigo-300 { color: var(--accent-light) !important; }
+.text-indigo-400 { color: var(--accent-light) !important; }
+.text-indigo-500 { color: var(--accent) !important; }
+.text-indigo-600 { color: var(--accent) !important; }
+
+/* --- Border colors --- */
+.border-indigo-500 { border-color: var(--accent) !important; }
+.border-indigo-600 { border-color: var(--accent) !important; }
+.border-indigo-600\/50 { border-color: color-mix(in srgb, var(--accent) 50%, transparent) !important; }
+.border-indigo-700 { border-color: var(--accent-dark) !important; }
+.border-indigo-800 { border-color: color-mix(in srgb, var(--accent-dark) 60%, transparent) !important; }
+.border-b-indigo-500 { border-bottom-color: var(--accent) !important; }
+
+/* --- Ring colors --- */
+.ring-indigo-500 { --tw-ring-color: var(--accent) !important; }
+.ring-indigo-500\/30 { --tw-ring-color: var(--accent-glow) !important; }
+
+/* --- Shadow colors --- */
+.shadow-indigo-500\/20 { --tw-shadow-color: var(--accent-glow) !important; }
+.shadow-indigo-500\/40 { --tw-shadow-color: var(--accent-glow-hover) !important; }
+
+/* --- Hover states --- */
+.hover\:bg-indigo-500:hover { background-color: var(--accent-light) !important; }
+.hover\:bg-indigo-600:hover { background-color: var(--accent) !important; }
+.hover\:bg-indigo-900:hover { background-color: color-mix(in srgb, var(--accent-dark) 40%, black) !important; }
+.hover\:bg-indigo-950\/50:hover { background-color: color-mix(in srgb, var(--accent) 15%, transparent) !important; }
+.hover\:bg-indigo-800:hover { background-color: color-mix(in srgb, var(--accent-dark) 70%, black) !important; }
+.hover\:text-indigo-300:hover { color: var(--accent-light) !important; }
+.hover\:text-indigo-400:hover { color: var(--accent-light) !important; }
+.hover\:text-indigo-500:hover { color: var(--accent) !important; }
+.hover\:border-indigo-500:hover { border-color: var(--accent) !important; }
+.hover\:border-indigo-600:hover { border-color: var(--accent) !important; }
+.hover\:shadow-indigo-500\/40:hover { --tw-shadow-color: var(--accent-glow-hover) !important; }
+
+/* --- Active states --- */
+.active\:bg-indigo-700:active { background-color: var(--accent-dark) !important; }
+.active\:bg-indigo-800:active { background-color: color-mix(in srgb, var(--accent-dark) 70%, black) !important; }
+.active\:bg-indigo-900\/40:active { background-color: color-mix(in srgb, var(--accent-dark) 25%, transparent) !important; }
+.active\:bg-indigo-950\/50:active { background-color: color-mix(in srgb, var(--accent) 15%, transparent) !important; }
+
+/* --- Focus states --- */
+.focus\:border-indigo-500:focus { border-color: var(--accent) !important; }
+.focus\:ring-indigo-500:focus { --tw-ring-color: var(--accent) !important; }
+.focus\:ring-indigo-500\/30:focus { --tw-ring-color: var(--accent-glow) !important; }
+
+/* --- Gradient stops --- */
+.to-indigo-600\/90 { --tw-gradient-to: color-mix(in srgb, var(--accent) 90%, transparent) !important; }
+.from-indigo-600 { --tw-gradient-from: var(--accent) !important; }
+.from-indigo-600\/90 { --tw-gradient-from: color-mix(in srgb, var(--accent) 90%, transparent) !important; }

@@ -132,7 +132,7 @@ export default function RestTimerOverlay({
           onClick={toggleExpanded}
         >
           {/* Timer icon */}
-          <div className={`flex-shrink-0 ${completed ? 'text-green-400' : 'text-blue-400'}`}>
+          <div className={`flex-shrink-0 ${completed ? 'text-green-400' : 'text-indigo-400'}`}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
@@ -218,7 +218,7 @@ export default function RestTimerOverlay({
         <div className="h-1 w-full overflow-hidden rounded-b-2xl bg-gray-700/50">
           <div
             className={`h-full transition-all duration-1000 ease-linear ${
-              completed ? 'bg-green-400' : 'bg-blue-400'
+              completed ? 'bg-green-400' : 'bg-indigo-400'
             }`}
             style={{ width: `${progress * 100}%` }}
           />
