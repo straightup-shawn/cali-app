@@ -8,7 +8,7 @@ export default function AIButton() {
   return (
     <Link
       to="/ai-coach"
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-400 transition-all active:scale-90 active:bg-indigo-600/30"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-accent bg-accent-glow transition-all active:scale-90"
       aria-label="AI Coach"
     >
       <svg

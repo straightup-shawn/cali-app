@@ -126,7 +126,7 @@ export default function BottomNavigation() {
                     {/* Active indicator dot */}
                     <span
                       className={`mt-0.5 h-1 w-1 rounded-full transition-all duration-200 ${
-                        isActive ? 'bg-indigo-400 opacity-100' : 'opacity-0'
+                        isActive ? 'dot-accent opacity-100' : 'opacity-0'
                       }`}
                     />
                   </>

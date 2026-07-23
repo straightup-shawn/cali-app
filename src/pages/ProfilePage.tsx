@@ -4,6 +4,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { uploadProfilePhoto } from '@/lib/storage';
+import { THEMES, getStoredTheme, setStoredTheme } from '@/lib/themes';
+import type { ThemeId } from '@/lib/themes';
 import BodyweightSection from '@/components/profile/BodyweightSection';
 import type { UnitPreference } from '@/lib/units';
 
@@ -100,7 +102,8 @@ function ProfileAvatar({ initials }: { initials: string }) {
           }}
         />
       ) : (
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-600 text-3xl font-bold text-white shadow-lg shadow-indigo-500/20">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent text-3xl font-bold text-white shadow-lg"
+          style={{ boxShadow: '0 10px 15px -3px var(--accent-glow)' }}>
           {initials}
         </div>
       )}
@@ -228,7 +231,7 @@ function UnitPreferenceToggle() {
           aria-pressed={current === 'metric'}
           className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
             current === 'metric'
-              ? 'bg-indigo-600 text-white shadow-sm'
+              ? 'btn-accent shadow-sm'
               : 'text-gray-400 hover:text-gray-200'
           } disabled:opacity-50`}
         >
@@ -241,7 +244,7 @@ function UnitPreferenceToggle() {
           aria-pressed={current === 'imperial'}
           className={`flex-1 rounded-md px-4 py-2.5 text-sm font-medium transition-all ${
             current === 'imperial'
-              ? 'bg-indigo-600 text-white shadow-sm'
+              ? 'btn-accent shadow-sm'
               : 'text-gray-400 hover:text-gray-200'
           } disabled:opacity-50`}
         >
@@ -283,7 +286,7 @@ function DefaultRestDuration() {
             disabled={updateProfile.isPending}
             className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-all ${
               current === s
-                ? 'bg-indigo-600 text-white shadow-sm'
+                ? 'btn-accent shadow-sm'
                 : 'border border-gray-700 bg-gray-800 text-gray-400 hover:text-gray-200'
             } disabled:opacity-50`}
           >
@@ -400,7 +403,7 @@ function PhotoCarousel({ photoUrls, workoutName }: { photoUrls: string[]; workou
           <div
             key={idx}
             className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              idx === currentIndex ? 'bg-indigo-400' : 'bg-white/40'
+              idx === currentIndex ? 'dot-accent' : 'bg-white/40'
             }`}
           />
         ))}
@@ -477,7 +480,7 @@ function PostsTab() {
                   }}
                 />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
                   {getInitials(user?.email)}
                 </div>
               )}
@@ -594,18 +597,70 @@ function StatsTab() {
 function StatCard({
   label,
   value,
-  accent = 'indigo',
+  accent = 'theme',
 }: {
   label: string;
   value: string;
-  accent?: 'indigo' | 'orange';
+  accent?: 'theme' | 'orange';
 }) {
-  const colorClass = accent === 'orange' ? 'text-orange-400' : 'text-indigo-400';
+  const colorClass = accent === 'orange' ? 'text-orange-400' : 'text-accent';
   return (
     <div className="glass-card flex flex-col rounded-2xl p-4 shadow-lg shadow-black/20">
       <span className={`text-2xl font-bold ${colorClass}`}>{value}</span>
       <span className="mt-0.5 text-xs text-gray-400">{label}</span>
     </div>
+  );
+}
+
+// =============================================================================
+// ThemePicker — color theme selector circles
+// =============================================================================
+
+function ThemePicker() {
+  const [current, setCurrent] = useState<ThemeId>(getStoredTheme());
+
+  function handleSelect(id: ThemeId) {
+    setStoredTheme(id);
+    setCurrent(id);
+  }
+
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium text-gray-300">Theme</h2>
+      <div className="flex flex-wrap gap-3">
+        {Object.values(THEMES).map((theme) => (
+          <button
+            key={theme.id}
+            type="button"
+            onClick={() => handleSelect(theme.id as ThemeId)}
+            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+              current === theme.id
+                ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-950 scale-110'
+                : 'hover:scale-105'
+            }`}
+            style={{ backgroundColor: theme.accent }}
+            aria-label={`${theme.name} theme`}
+            aria-pressed={current === theme.id}
+          >
+            {current === theme.id && (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-5 w-5 text-white"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -629,6 +684,7 @@ function SettingsTab() {
 
   return (
     <div className="space-y-6 px-4 py-4">
+      <ThemePicker />
       <DisplayNameSetting />
       <DefaultRestDuration />
       <UnitPreferenceToggle />
@@ -718,7 +774,7 @@ export default function ProfilePage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'border-b-2 border-indigo-500 text-indigo-400'
+                  ? 'border-b-2 border-accent text-accent'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >

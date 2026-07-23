@@ -2,8 +2,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
+import { applyTheme, getStoredTheme } from '@/lib/themes';
 import App from './App';
 import './index.css';
+
+// Apply persisted color theme immediately to avoid flash
+applyTheme(getStoredTheme());
 
 const queryClient = new QueryClient({
   defaultOptions: {
