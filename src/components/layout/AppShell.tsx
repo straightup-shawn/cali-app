@@ -21,9 +21,9 @@ export default function AppShell() {
           ? ''
           : showWorkoutBar
             // floating pill (~80px) + workout bar (~64px) + extra breathing room
-            ? 'animate-fade-in pb-36'
-            // floating pill height (~80px) + generous breathing room = pb-28
-            : 'animate-fade-in pb-28'
+            ? 'animate-fade-in pb-44'
+            // floating pill height + safe area + generous breathing room
+            : 'animate-fade-in pb-32'
       }>
         <Outlet />
       </main>

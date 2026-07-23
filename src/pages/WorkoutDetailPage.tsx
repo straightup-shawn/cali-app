@@ -1071,7 +1071,7 @@ export default function WorkoutDetailPage() {
   const exercises = workout.workout_exercises ?? [];
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
+    <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
       <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <div className="flex items-center justify-between">
