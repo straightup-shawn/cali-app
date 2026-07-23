@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { useBodyweightEntries } from '@/hooks/useBodyweight';
 import { calculateEffectiveResistance, calculateSetVolume, calculateIsometricLoad } from '@/lib/volume-calculator';
+import { getDefaultClassification, getDefaultFractionByType } from '@/lib/default-classifications';
 
 function getStartOfWeek(): string {
   const now = new Date();
@@ -20,6 +21,7 @@ interface WeeklyWorkoutData {
     exercise_id: string;
     exercises: {
       id: string;
+      name: string;
       exercise_type: string;
       bodyweight_fraction: number | null;
       resistance_model: string | null;
@@ -57,7 +59,7 @@ export function useWeeklyVolume() {
             id,
             workout_exercises(
               exercise_id,
-              exercises(id, exercise_type, bodyweight_fraction, resistance_model, volume_mode),
+              exercises(id, name, exercise_type, bodyweight_fraction, resistance_model, volume_mode),
               exercise_sets(reps, weight_kg, duration_seconds, completed)
             )
           `)
@@ -93,6 +95,18 @@ export function useWeeklyVolume() {
                   totalKg += calculateIsometricLoad(effectiveR, set.duration_seconds) / 60;
                 } else if (set.reps != null) {
                   totalKg += calculateSetVolume(effectiveR, set.reps);
+                }
+              } else if (bw > 0 && set.reps != null) {
+                // Fallback: use name-based defaults
+                const exerciseName = exData?.name ?? '';
+                const nameDefault = getDefaultClassification(exerciseName);
+                const defaultFraction = nameDefault?.bodyweight_fraction ?? getDefaultFractionByType(exerciseType);
+
+                if (defaultFraction > 0) {
+                  const effectiveR = Math.max(0, bw * defaultFraction + (set.weight_kg ?? 0) - (exerciseType === 'assisted' ? (set.weight_kg ?? 0) : 0));
+                  totalKg += effectiveR * set.reps;
+                } else if (set.weight_kg != null) {
+                  totalKg += set.reps * set.weight_kg;
                 }
               } else {
                 if (set.reps != null && set.weight_kg != null) {
