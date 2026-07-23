@@ -14,8 +14,7 @@
   }
 
   html {
-    /* Ensure safe-area insets are respected on notched devices */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    /* Safe area handled by glass-header for top, and bottom nav for bottom */
   }
 
   body {
@@ -70,6 +69,7 @@
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: env(safe-area-inset-top);
   }
 }
 
