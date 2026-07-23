@@ -2,7 +2,7 @@ const NIM_API_KEY = import.meta.env.VITE_NVIDIA_NIM_API_KEY;
 const NIM_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 const MODEL = 'meta/llama-3.1-70b-instruct';
 
-const SYSTEM_PROMPT = `You are a calisthenics and fitness routine builder AI. When a user asks for a routine, respond with ONLY a JSON object (no markdown, no explanation) in this exact format:
+export const SYSTEM_PROMPT = `You are a calisthenics and fitness routine builder AI. When a user asks for a routine, respond with ONLY a JSON object (no markdown, no explanation) in this exact format:
 
 {
   "routine_name": "Routine Name",
@@ -77,4 +77,17 @@ export function parseRoutineFromResponse(content: string): GeneratedRoutine | nu
   } catch {
     return null;
   }
+}
+
+export const CONTEXT_WINDOW_SIZE = 20;
+
+export function buildContextMessages(
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  systemPrompt: string
+): { role: string; content: string }[] {
+  const recent = messages.slice(-CONTEXT_WINDOW_SIZE);
+  return [
+    { role: 'system', content: systemPrompt },
+    ...recent.map(m => ({ role: m.role, content: m.content })),
+  ];
 }
