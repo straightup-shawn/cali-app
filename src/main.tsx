@@ -9,6 +9,16 @@ import './index.css';
 // Apply persisted color theme immediately to avoid flash
 applyTheme(getStoredTheme());
 
+// Hide splash screen once app is ready
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  if (splash) {
+    splash.style.opacity = '0';
+    splash.style.transition = 'opacity 0.4s ease-out';
+    setTimeout(() => splash.remove(), 400);
+  }
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,3 +37,6 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 );
+
+// Remove splash after a short delay to ensure first paint
+setTimeout(hideSplash, 600);
