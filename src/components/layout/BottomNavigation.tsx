@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 // =============================================================================
@@ -27,7 +28,6 @@ function WorkoutIcon({ className }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      {/* Dumbbell / bolt icon */}
       <path
         fillRule="evenodd"
         d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z"
@@ -81,20 +81,85 @@ const navItems = [
 ];
 
 // =============================================================================
-// BottomNavigation — floating pill navbar
+// Pages where nav should be completely hidden
+// =============================================================================
+
+function shouldHideNav(pathname: string): boolean {
+  // Active workout (full-screen)
+  if (pathname === '/workout/active') return true;
+  // Workout detail / editing history
+  if (pathname.startsWith('/history/')) return true;
+  // AI Coach page
+  if (pathname === '/ai-coach') return true;
+  return false;
+}
+
+// =============================================================================
+// Auto-hide timeout (ms)
+// =============================================================================
+
+const HIDE_DELAY = 3000;
+
+// =============================================================================
+// BottomNavigation — floating pill navbar with auto-hide
 // =============================================================================
 
 export default function BottomNavigation() {
   const location = useLocation();
+  const [visible, setVisible] = useState(true);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Hide on the active workout page (full-screen experience)
-  if (location.pathname === '/workout/active') {
+  // Reset visibility on route change
+  useEffect(() => {
+    setVisible(true);
+    startHideTimer();
+    return () => clearHideTimer();
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Listen for touch/scroll activity to show nav
+  useEffect(() => {
+    function handleActivity() {
+      setVisible(true);
+      startHideTimer();
+    }
+
+    window.addEventListener('touchstart', handleActivity, { passive: true });
+    window.addEventListener('scroll', handleActivity, { passive: true });
+    window.addEventListener('pointermove', handleActivity, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', handleActivity);
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('pointermove', handleActivity);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function startHideTimer() {
+    clearHideTimer();
+    hideTimerRef.current = setTimeout(() => {
+      setVisible(false);
+    }, HIDE_DELAY);
+  }
+
+  function clearHideTimer() {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }
+
+  // Completely hidden on certain pages
+  if (shouldHideNav(location.pathname)) {
     return null;
   }
 
   return (
     <nav
-      className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 md:hidden"
+      className={`fixed left-1/2 z-50 -translate-x-1/2 md:hidden transition-all duration-500 ease-out ${
+        visible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-4 pointer-events-none'
+      }`}
       style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
       aria-label="Main navigation"
     >
@@ -123,7 +188,6 @@ export default function BottomNavigation() {
                 {({ isActive }) => (
                   <>
                     <Icon className={isLarge ? 'h-7 w-7' : 'h-6 w-6'} />
-                    {/* Active indicator dot */}
                     <span
                       className={`mt-0.5 h-1 w-1 rounded-full transition-all duration-200 ${
                         isActive ? 'dot-accent opacity-100' : 'opacity-0'
