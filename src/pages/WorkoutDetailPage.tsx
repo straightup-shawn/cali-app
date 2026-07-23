@@ -833,6 +833,8 @@ export default function WorkoutDetailPage() {
   const [deletedSetIds, setDeletedSetIds] = useState<Set<string>>(new Set());
   const [newSets, setNewSets] = useState<Record<string, EditSetValues[]>>({});
 
+  // @ts-expect-error -- kept for potential future use; edit now navigates to /history/:id/edit
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleStartEdit = useCallback(() => {
     if (!workout) return;
     setEditName(workout.name);
@@ -1154,7 +1156,7 @@ export default function WorkoutDetailPage() {
               <>
                 <button
                   type="button"
-                  onClick={handleStartEdit}
+                  onClick={() => navigate(`/history/${id}/edit`)}
                   className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 active:bg-indigo-700"
                 >
                   Edit
