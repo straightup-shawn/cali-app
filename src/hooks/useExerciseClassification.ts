@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { classifyExercise } from '@/lib/exercise-classifier';
+import { getDefaultClassification, getDefaultFractionByType } from '@/lib/default-classifications';
 import type { ExerciseInput } from '@/lib/exercise-classifier';
 
 // =============================================================================
@@ -49,7 +50,25 @@ export function useClassifyExercise() {
           instructions: input.instructions,
         };
 
-        const result = await classifyExercise(exerciseInput);
+        let result;
+        try {
+          result = await classifyExercise(exerciseInput);
+        } catch {
+          // AI call failed (likely CORS) — use built-in defaults
+          const nameDefault = getDefaultClassification(input.name);
+          const fraction = nameDefault?.bodyweight_fraction ?? getDefaultFractionByType(input.exercise_type);
+
+          result = {
+            resistance_model: nameDefault?.resistance_model ?? (fraction > 0 ? 'bodyweight' : 'external_load_only'),
+            movement_family: nameDefault?.movement_family ?? 'other',
+            bodyweight_fraction: fraction,
+            bodyweight_fraction_min: Math.max(0, fraction - 0.05),
+            bodyweight_fraction_max: Math.min(1, fraction + 0.05),
+            volume_mode: nameDefault?.volume_mode ?? 'repetitions',
+            confidence: 0.60,
+            rationale: 'Estimated from exercise name and type (AI unavailable)',
+          };
+        }
 
         // Save classification results
         const { error } = await supabase

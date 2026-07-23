@@ -7,6 +7,7 @@ import { useUnitPreference } from '@/hooks/useUnitPreference';
 import { useBodyweightEntries } from '@/hooks/useBodyweight';
 import { useExercises } from '@/hooks/useExercises';
 import { calculateEffectiveResistance, calculateSetVolume, calculateIsometricLoad } from '@/lib/volume-calculator';
+import { getDefaultClassification, getDefaultFractionByType } from '@/lib/default-classifications';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { initAudioContext } from '@/lib/audio-alert';
 import ExercisePicker from '@/components/ExercisePicker';
@@ -676,8 +677,20 @@ export default function ActiveWorkoutPage() {
           } else if (set.reps != null) {
             totalKg += calculateSetVolume(effectiveR, set.reps);
           }
+        } else if (bw > 0 && set.reps != null) {
+          // Fallback: use default classifications from exercise name or type
+          const nameDefault = getDefaultClassification(ex.exerciseName);
+          const defaultFraction = nameDefault?.bodyweight_fraction ?? getDefaultFractionByType(ex.exerciseType);
+
+          if (defaultFraction > 0) {
+            const effectiveR = Math.max(0, bw * defaultFraction + (set.weightKg ?? 0) - (ex.exerciseType === 'assisted' ? (set.weightKg ?? 0) : 0));
+            totalKg += effectiveR * set.reps;
+          } else if (set.weightKg != null) {
+            // weighted: just weight × reps
+            totalKg += set.reps * set.weightKg;
+          }
         } else {
-          // Fallback: original simple calculation for weighted exercises
+          // No bodyweight available: simple weight × reps
           if (set.reps != null && set.weightKg != null) {
             totalKg += set.reps * set.weightKg;
           }
