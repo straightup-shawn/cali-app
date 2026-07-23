@@ -15,13 +15,15 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Main content area — enough bottom padding to clear nav + safe area + optional workout bar */}
+      {/* Main content area — enough bottom padding to clear floating pill nav + safe area */}
       <main className={
         isFullScreen
           ? ''
           : showWorkoutBar
-            ? 'animate-fade-in pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-0'
-            : 'animate-fade-in pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0'
+            // floating pill (~80px) + workout bar (~64px) + extra breathing room
+            ? 'animate-fade-in pb-36'
+            // floating pill height (~80px) + generous breathing room = pb-28
+            : 'animate-fade-in pb-28'
       }>
         <Outlet />
       </main>
@@ -29,7 +31,7 @@ export default function AppShell() {
       {/* Active workout mini-player bar — above bottom nav */}
       <ActiveWorkoutBar />
 
-      {/* Bottom navigation — mobile only, hidden on desktop */}
+      {/* Bottom navigation — floating pill, mobile only */}
       <BottomNavigation />
     </div>
   );

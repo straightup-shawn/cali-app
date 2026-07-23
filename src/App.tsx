@@ -24,6 +24,7 @@ const WorkoutSummaryPage = lazy(() => import('@/pages/WorkoutSummaryPage'));
 const HistoryPage = lazy(() => import('@/pages/HistoryPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const WorkoutHubPage = lazy(() => import('@/pages/WorkoutHubPage'));
 
 /** Activates the sync manager hook within the component tree */
 function SyncManager() {
@@ -58,6 +59,8 @@ export default function App() {
             {/* App shell wraps all main app pages with bottom navigation */}
             <Route element={<AppShell />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              {/* Workout hub — primary nav tab */}
+              <Route path="/workout" element={<WorkoutHubPage />} />
               <Route path="/exercises" element={<ExercisesPage />} />
               <Route path="/exercises/new" element={<ExerciseFormPage />} />
               <Route path="/exercises/:id" element={<ExerciseDetailPage />} />
