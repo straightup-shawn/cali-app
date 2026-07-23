@@ -16,7 +16,6 @@
   html {
     /* Ensure safe-area insets are respected on notched devices */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    overflow-x: hidden;
   }
 
   body {
@@ -25,8 +24,6 @@
     overscroll-behavior-y: contain;
     /* Force dark color scheme */
     color-scheme: dark;
-    /* Prevent horizontal overflow on mobile */
-    overflow-x: hidden;
     /* Prevent iOS input zoom (font-size >= 16px prevents Safari auto-zoom) */
     -webkit-text-size-adjust: 100%;
   }
