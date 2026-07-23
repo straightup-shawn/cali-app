@@ -10,19 +10,35 @@ import type { ExerciseType } from '@/types';
 import type { ClassificationResult } from '@/lib/exercise-classifier';
 
 const MUSCLE_GROUPS = [
+  // Upper body - front
   'chest',
-  'back',
-  'shoulders',
-  'triceps',
+  'upper_chest',
+  'front_delts',
+  'side_delts',
+  'rear_delts',
   'biceps',
+  'triceps',
   'forearms',
-  'core',
-  'quads',
-  'glutes',
-  'hamstrings',
-  'hip_flexors',
+  // Upper body - back
+  'lats',
+  'upper_back',
+  'lower_back',
+  'traps',
+  'rhomboids',
+  // Core
+  'abs',
   'obliques',
+  'transverse_abs',
+  'hip_flexors',
+  'erector_spinae',
+  // Lower body
+  'quads',
+  'hamstrings',
+  'glutes',
+  'adductors',
+  'abductors',
   'calves',
+  'tibialis',
 ] as const;
 
 const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [

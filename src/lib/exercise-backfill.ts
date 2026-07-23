@@ -172,15 +172,15 @@ function getLocalClassification(name: string, exerciseType: string) {
  */
 function getMuscleGroupsByMovement(movementFamily: string): string[] {
   switch (movementFamily) {
-    case 'horizontal_push': return ['chest', 'triceps', 'shoulders'];
-    case 'vertical_push': return ['shoulders', 'triceps'];
-    case 'horizontal_pull': return ['back', 'biceps'];
-    case 'vertical_pull': return ['back', 'biceps', 'forearms'];
-    case 'squat': return ['quads', 'glutes'];
-    case 'hinge': return ['glutes', 'hamstrings'];
-    case 'lunge': return ['quads', 'glutes'];
-    case 'core': return ['core'];
-    case 'isometric': return ['core'];
+    case 'horizontal_push': return ['chest', 'triceps', 'front_delts'];
+    case 'vertical_push': return ['front_delts', 'side_delts', 'triceps'];
+    case 'horizontal_pull': return ['upper_back', 'lats', 'biceps', 'rear_delts'];
+    case 'vertical_pull': return ['lats', 'biceps', 'forearms', 'upper_back'];
+    case 'squat': return ['quads', 'glutes', 'hamstrings'];
+    case 'hinge': return ['glutes', 'hamstrings', 'erector_spinae'];
+    case 'lunge': return ['quads', 'glutes', 'hamstrings'];
+    case 'core': return ['abs', 'obliques'];
+    case 'isometric': return ['abs', 'transverse_abs'];
     default: return [];
   }
 }
