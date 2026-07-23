@@ -33,11 +33,17 @@
     color-scheme: dark;
     /* Prevent iOS input zoom (font-size >= 16px prevents Safari auto-zoom) */
     -webkit-text-size-adjust: 100%;
+    /* Disable long-press context menu (makes it feel like a native app) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   /* Prevent iOS Safari from zooming on input focus (inputs must be >= 16px) */
   input, select, textarea {
     font-size: 16px;
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   /* Ensure all interactive elements have fast touch feedback */
