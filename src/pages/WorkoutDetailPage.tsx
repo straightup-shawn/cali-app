@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { uploadWorkoutPhoto } from '@/lib/storage';
 import { supabase } from '@/lib/supabase';
 import ExercisePicker from '@/components/ExercisePicker';
+import ImageCropper from '@/components/ImageCropper';
 import type { ExerciseType } from '@/types';
 import type { PersonalRecordRow } from '@/hooks/usePersonalRecords';
 import type { Database } from '@/types/database';
@@ -576,23 +577,35 @@ interface NotesPhotoSectionProps {
   isEditing: boolean;
 }
 
+/** Extract all photo URLs from notes (multiple 📷 lines) */
+function extractAllPhotoUrls(notes: string | null): string[] {
+  if (!notes) return [];
+  const matches = notes.matchAll(/📷\s*(https?:\/\/\S+)/g);
+  return Array.from(matches, (m) => m[1]);
+}
+
+/** Remove all photo lines from notes to get plain text */
+function extractTextNotes(notes: string | null): string {
+  if (!notes) return '';
+  return notes.replace(/📷\s*https?:\/\/\S+/g, '').trim();
+}
+
 function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [saving, setSaving] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [localPhotoUrl, setLocalPhotoUrl] = useState<string | null>(null);
   const [localNotes, setLocalNotes] = useState<string | null>(null);
+  const [cropperFile, setCropperFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use local state if we just updated, otherwise use prop
   const currentNotes = localNotes ?? notes;
 
-  // Extract photo URL and text from notes
-  const photoUrl = localPhotoUrl ?? currentNotes?.match(/📷 (https?:\/\/\S+)/)?.[1] ?? null;
-  const textNotes = currentNotes?.replace(/📷 https?:\/\/\S+/g, '').trim() ?? '';
+  // Extract all photo URLs and text from notes
+  const photoUrls = extractAllPhotoUrls(currentNotes);
+  const textNotes = extractTextNotes(currentNotes);
 
   const handleStartEditNotes = () => {
     setNotesValue(textNotes);
@@ -602,8 +615,8 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
   const handleSaveNotes = async () => {
     setSaving(true);
     try {
-      const photoPart = photoUrl ? `\n\n📷 ${photoUrl}` : '';
-      const finalNotes = notesValue.trim() + photoPart;
+      const photoLines = photoUrls.map((url) => `📷 ${url}`).join('\n');
+      const finalNotes = [notesValue.trim(), photoLines].filter(Boolean).join('\n\n');
       await supabase.from('workouts').update({ notes: finalNotes || null }).eq('id', workoutId);
       setLocalNotes(finalNotes || null);
       setEditingNotes(false);
@@ -614,13 +627,14 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
     setSaving(false);
   };
 
-  const handleDeletePhoto = async () => {
+  const handleDeletePhoto = async (urlToRemove: string) => {
     setSaving(true);
     try {
-      const newNotes = textNotes || null;
-      await supabase.from('workouts').update({ notes: newNotes }).eq('id', workoutId);
-      setLocalPhotoUrl(null);
-      setLocalNotes(newNotes);
+      const remainingUrls = photoUrls.filter((u) => u !== urlToRemove);
+      const photoLines = remainingUrls.map((url) => `📷 ${url}`).join('\n');
+      const finalNotes = [textNotes, photoLines].filter(Boolean).join('\n\n') || null;
+      await supabase.from('workouts').update({ notes: finalNotes }).eq('id', workoutId);
+      setLocalNotes(finalNotes);
       queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
     } catch (err) {
       alert(`Delete photo failed: ${err instanceof Error ? err.message : 'Unknown'}`);
@@ -628,72 +642,88 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
     setSaving(false);
   };
 
-  const handleAddPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
+    setCropperFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
-    // Show preview immediately
-    const reader = new FileReader();
-    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
+  const handleCropComplete = async (croppedFile: File) => {
+    setCropperFile(null);
+    if (!user) return;
 
     setSaving(true);
     try {
-      const url = await uploadWorkoutPhoto(workoutId, user.id, file);
-      const photoPart = `📷 ${url}`;
-      const finalNotes = textNotes ? `${textNotes}\n\n${photoPart}` : photoPart;
+      const url = await uploadWorkoutPhoto(workoutId, user.id, croppedFile);
+      const newPhotoUrls = [...photoUrls, url];
+      const photoLines = newPhotoUrls.map((u) => `📷 ${u}`).join('\n');
+      const finalNotes = [textNotes, photoLines].filter(Boolean).join('\n\n');
       const { error: updateError } = await supabase.from('workouts').update({ notes: finalNotes }).eq('id', workoutId);
       if (updateError) throw updateError;
-      setLocalPhotoUrl(url);
       setLocalNotes(finalNotes);
-      // Keep photoPreview showing until the query refetches
       await queryClient.invalidateQueries({ queryKey: ['workouts', workoutId] });
-      // Only clear preview after refetch
-      setPhotoPreview(null);
     } catch (err) {
-      // Keep the preview so user sees something failed
       alert(`Photo upload failed: ${err instanceof Error ? err.message : 'Unknown'}`);
     }
     setSaving(false);
   };
 
-  const displayPhoto = photoPreview ?? localPhotoUrl ?? currentNotes?.match(/📷 (https?:\/\/\S+)/)?.[1] ?? null;
+  const handleCropCancel = () => {
+    setCropperFile(null);
+  };
 
   return (
     <div className="mx-4 mt-4 space-y-3">
-      {/* Photo section */}
+      {/* Image Cropper Modal */}
+      {cropperFile && (
+        <ImageCropper
+          imageFile={cropperFile}
+          onCrop={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+
+      {/* Photo section — horizontal gallery */}
       <div className="rounded-lg border border-gray-800 bg-gray-900 p-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-gray-400 uppercase">Photo</p>
-          <div className="flex gap-2">
-            {displayPhoto && (
-              <button
-                type="button"
-                onClick={handleDeletePhoto}
-                disabled={saving}
-                className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
-              >
-                Remove
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={saving}
-              className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50"
-            >
-              {displayPhoto ? 'Replace' : 'Add Photo'}
-            </button>
-          </div>
+          <p className="text-xs font-medium text-gray-400 uppercase">Photos</p>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={saving}
+            className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50"
+          >
+            Add Photo
+          </button>
         </div>
-        {displayPhoto && (
-          <img
-            src={displayPhoto}
-            alt="Workout photo"
-            className="mt-2 w-full rounded-lg object-cover max-h-64"
-          />
-        )}
-        {!displayPhoto && (
+        {photoUrls.length > 0 ? (
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+            {photoUrls.map((url, idx) => (
+              <div key={idx} className="relative shrink-0">
+                <img
+                  src={url}
+                  alt={`Workout photo ${idx + 1}`}
+                  className="h-40 w-40 rounded-lg object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDeletePhoto(url)}
+                  disabled={saving}
+                  className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 disabled:opacity-50"
+                  aria-label={`Remove photo ${idx + 1}`}
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -711,7 +741,7 @@ function NotesPhotoSection({ workoutId, notes }: NotesPhotoSectionProps) {
           type="file"
           accept="image/*"
           capture="environment"
-          onChange={handleAddPhoto}
+          onChange={handleFileSelect}
           className="hidden"
         />
       </div>

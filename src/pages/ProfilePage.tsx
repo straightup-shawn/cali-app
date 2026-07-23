@@ -19,11 +19,11 @@ const REST_PRESETS = [30, 60, 90, 120, 180] as const;
 // Helpers
 // =============================================================================
 
-/** Extract a photo URL from a note string containing "📷 http..." */
-function extractPhotoUrl(notes: string | null): string | null {
-  if (!notes) return null;
-  const match = notes.match(/📷\s*(https?:\/\/\S+)/);
-  return match ? match[1] : null;
+/** Extract ALL photo URLs from a note string containing multiple "📷 http..." lines */
+function extractPhotoUrls(notes: string | null): string[] {
+  if (!notes) return [];
+  const matches = notes.matchAll(/📷\s*(https?:\/\/\S+)/g);
+  return Array.from(matches, (m) => m[1]);
 }
 
 function getInitials(email: string | undefined): string {
@@ -344,18 +344,92 @@ function DisplayNameSetting() {
 }
 
 // =============================================================================
-// PostsTab — Instagram-style 3-column photo grid
+// PhotoCarousel — horizontal carousel with dots for multi-photo posts
+// =============================================================================
+
+function PhotoCarousel({ photoUrls, workoutName }: { photoUrls: string[]; workoutName: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, clientWidth } = scrollRef.current;
+    const newIndex = Math.round(scrollLeft / clientWidth);
+    setCurrentIndex(newIndex);
+  };
+
+  if (photoUrls.length === 1) {
+    return (
+      <img
+        src={photoUrls[0]}
+        alt={workoutName}
+        loading="lazy"
+        className="w-full object-cover"
+        style={{ maxHeight: '500px' }}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).style.display = 'none';
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide"
+      >
+        {photoUrls.map((url, idx) => (
+          <img
+            key={idx}
+            src={url}
+            alt={`${workoutName} photo ${idx + 1}`}
+            loading="lazy"
+            className="w-full shrink-0 snap-center object-cover"
+            style={{ maxHeight: '500px' }}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ))}
+      </div>
+      {/* Dots indicator */}
+      <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+        {photoUrls.map((_, idx) => (
+          <div
+            key={idx}
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              idx === currentIndex ? 'bg-indigo-400' : 'bg-white/40'
+            }`}
+          />
+        ))}
+      </div>
+      {/* Counter badge */}
+      <div className="absolute top-3 right-3 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
+        {currentIndex + 1}/{photoUrls.length}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// PostsTab — Instagram-style stacked feed cards
 // =============================================================================
 
 function PostsTab() {
-  // Fetch all workouts and extract those with photos
+  const { user } = useAuth();
+  const { data: profile } = useProfile();
   const { data: workouts, isLoading } = useWorkouts({ pageSize: 100 });
+
+  const displayName = profile?.display_name ?? user?.email?.split('@')[0] ?? 'User';
+  const avatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
 
   const photoWorkouts = useMemo(() => {
     if (!workouts) return [];
     return workouts
-      .map((w) => ({ ...w, photoUrl: extractPhotoUrl(w.notes) }))
-      .filter((w) => w.photoUrl !== null) as (typeof workouts[0] & { photoUrl: string })[];
+      .map((w) => ({ ...w, photoUrls: extractPhotoUrls(w.notes) }))
+      .filter((w) => w.photoUrls.length > 0);
   }, [workouts]);
 
   if (isLoading) {
@@ -376,34 +450,73 @@ function PostsTab() {
         </div>
         <p className="text-sm font-medium text-gray-400">No workout photos yet</p>
         <p className="mt-1 text-xs text-gray-600">
-          Add photos by including 📷 followed by an image URL in workout notes.
+          Add photos when finishing a workout to see them here.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-3 gap-0.5">
-      {photoWorkouts.map((w) => (
-        <Link
-          key={w.id}
-          to={`/history/${w.id}`}
-          className="relative aspect-square overflow-hidden bg-gray-800"
-          aria-label={`${w.name} — ${formatDate(w.completed_at ?? w.started_at)}`}
-        >
-          <img
-            src={w.photoUrl}
-            alt={w.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-200 active:scale-95"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
-            }}
-          />
-          {/* Overlay gradient on hover/focus */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity active:opacity-100" />
-        </Link>
-      ))}
+    <div className="space-y-4 pb-4">
+      {photoWorkouts.map((w) => {
+        const workoutDate = w.completed_at ?? w.started_at;
+        const exerciseCount = (w as any).exercise_count ?? 0;
+        const duration = w.duration_seconds;
+
+        return (
+          <div key={w.id} className="border-b border-gray-800 bg-gray-950">
+            {/* Post header — avatar, name, date */}
+            <div className="flex items-center gap-3 px-4 py-3">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-8 w-8 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                  {getInitials(user?.email)}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-gray-100">{displayName}</p>
+                <p className="text-xs text-gray-500">{formatDate(workoutDate)}</p>
+              </div>
+            </div>
+
+            {/* Photo(s) — full width with carousel if multiple */}
+            <PhotoCarousel photoUrls={w.photoUrls} workoutName={w.name} />
+
+            {/* Post footer — workout info */}
+            <div className="px-4 py-3">
+              <Link
+                to={`/history/${w.id}`}
+                className="text-sm font-semibold text-gray-100 hover:text-indigo-400"
+              >
+                {w.name}
+              </Link>
+              <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                {exerciseCount > 0 && (
+                  <span>{exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}</span>
+                )}
+                {duration !== null && duration > 0 && (
+                  <span>{formatDuration(duration)}</span>
+                )}
+              </div>
+              {/* Plain text notes (without photo URLs) */}
+              {w.notes && (() => {
+                const textOnly = w.notes.replace(/📷\s*https?:\/\/\S+/g, '').trim();
+                return textOnly ? (
+                  <p className="mt-2 text-sm text-gray-400 line-clamp-2">{textOnly}</p>
+                ) : null;
+              })()}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

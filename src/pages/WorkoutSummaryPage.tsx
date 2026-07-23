@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { uploadWorkoutPhoto } from '@/lib/storage';
 import { useAuth } from '@/context/AuthContext';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
+import ImageCropper from '@/components/ImageCropper';
 import type { SaveWorkoutResult } from '@/hooks/useSaveWorkout';
 import type { PRCheck } from '@/lib/personal-records';
 import type { RecordType } from '@/types';
@@ -77,9 +78,10 @@ export default function WorkoutSummaryPage() {
   const { preference, weightLabel } = useUnitPreference();
 
   const [notes, setNotes] = useState('');
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [cropperFile, setCropperFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // If no summary data, redirect to dashboard
@@ -101,33 +103,54 @@ export default function WorkoutSummaryPage() {
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Show the cropper first
+    setCropperFile(file);
+    // Reset the input so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
-    setPhotoFile(file);
+  const handleCropComplete = (croppedFile: File) => {
+    setCropperFile(null);
+    setPhotoFiles((prev) => [...prev, croppedFile]);
+    // Generate preview
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setPhotoPreview(ev.target?.result as string);
+      setPhotoPreviews((prev) => [...prev, ev.target?.result as string]);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(croppedFile);
+  };
+
+  const handleCropCancel = () => {
+    setCropperFile(null);
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotoFiles((prev) => prev.filter((_, i) => i !== index));
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDone = async () => {
     setSaving(true);
     try {
-      let photoUrl: string | null = null;
+      const photoUrls: string[] = [];
 
-      // Upload photo if one was selected
-      if (photoFile && user) {
-        try {
-          photoUrl = await uploadWorkoutPhoto(workoutId, user.id, photoFile);
-        } catch {
-          // Photo upload failed — non-critical, continue
+      // Upload all photos
+      if (photoFiles.length > 0 && user) {
+        for (const file of photoFiles) {
+          try {
+            const url = await uploadWorkoutPhoto(workoutId, user.id, file);
+            photoUrls.push(url);
+          } catch {
+            // Photo upload failed — non-critical, continue with remaining
+          }
         }
       }
 
-      // Build notes content (include photo URL if uploaded)
+      // Build notes content (include photo URLs if uploaded)
       let finalNotes = notes.trim();
-      if (photoUrl) {
-        finalNotes = `${finalNotes}${finalNotes ? '\n\n' : ''}📷 ${photoUrl}`;
+      if (photoUrls.length > 0) {
+        const photoLines = photoUrls.map((url) => `📷 ${url}`).join('\n');
+        finalNotes = `${finalNotes}${finalNotes ? '\n\n' : ''}${photoLines}`;
       }
 
       // Save notes to workout
@@ -147,6 +170,15 @@ export default function WorkoutSummaryPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 px-4 py-6 pb-28">
+      {/* Image Cropper Modal */}
+      {cropperFile && (
+        <ImageCropper
+          imageFile={cropperFile}
+          onCrop={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       {/* Celebration header */}
       <div className="text-center">
         <div className="text-5xl">💪</div>
@@ -216,31 +248,45 @@ export default function WorkoutSummaryPage() {
         </div>
       )}
 
-      {/* Photo upload area */}
+      {/* Photo upload area — multi-photo */}
       <div className="mt-6">
-        <label className="text-sm font-medium text-gray-300">Progress Photo</label>
+        <label className="text-sm font-medium text-gray-300">Progress Photos</label>
         <div className="mt-2">
-          {photoPreview ? (
-            <div className="relative overflow-hidden rounded-xl border border-gray-700">
-              <img
-                src={photoPreview}
-                alt="Workout progress"
-                className="h-48 w-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setPhotoPreview(null);
-                  setPhotoFile(null);
-                  if (fileInputRef.current) fileInputRef.current.value = '';
-                }}
-                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-                aria-label="Remove photo"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+          {photoPreviews.length > 0 ? (
+            <div className="space-y-3">
+              {/* Photo previews grid */}
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {photoPreviews.map((preview, index) => (
+                  <div key={index} className="relative shrink-0 overflow-hidden rounded-xl border border-gray-700">
+                    <img
+                      src={preview}
+                      alt={`Progress photo ${index + 1}`}
+                      className="h-32 w-32 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePhoto(index)}
+                      className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                      aria-label={`Remove photo ${index + 1}`}
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                {/* Add More button */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-32 w-32 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-700 text-gray-400 hover:border-indigo-500 hover:text-indigo-400"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span className="text-xs">Add More</span>
+                </button>
+              </div>
             </div>
           ) : (
             <button
@@ -254,8 +300,8 @@ export default function WorkoutSummaryPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span className="text-sm font-medium">Add Photo</span>
-              <span className="text-xs text-gray-500">Optional — tap to take or choose a photo</span>
+              <span className="text-sm font-medium">Add Photos</span>
+              <span className="text-xs text-gray-500">Optional — tap to take or choose photos</span>
             </button>
           )}
           <input
