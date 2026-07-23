@@ -10,6 +10,8 @@ interface RestTimerOverlayProps {
   onClose: () => void;
   /** Whether the overlay is visible */
   visible: boolean;
+  /** If true, renders inline (no fixed positioning) */
+  inline?: boolean;
 }
 
 /**
@@ -35,6 +37,7 @@ export default function RestTimerOverlay({
   defaultSeconds,
   onClose,
   visible,
+  inline = false,
 }: RestTimerOverlayProps) {
   const [completed, setCompleted] = useState(false);
   const [totalDuration, setTotalDuration] = useState(defaultSeconds);
@@ -102,6 +105,114 @@ export default function RestTimerOverlay({
   // Progress fraction (1 = full, 0 = done)
   const progress = totalDuration > 0 ? seconds / totalDuration : 0;
 
+  // Inline mode: render within parent layout, no fixed positioning
+  if (inline) {
+    return (
+      <div
+        className={`w-full transition-all duration-300 ease-out rounded-xl ${
+          completed
+            ? 'glass-card ring-2 ring-green-400/50'
+            : 'glass-card'
+        }`}
+        role="timer"
+        aria-label="Rest timer"
+        aria-live="polite"
+      >
+        {/* Main bar content */}
+        <div
+          className="flex items-center gap-3 px-4 cursor-pointer select-none"
+          style={{ height: '44px' }}
+          onClick={toggleExpanded}
+        >
+          {/* Timer icon */}
+          <div className={`flex-shrink-0 ${completed ? 'text-green-400' : 'text-indigo-400'}`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+
+          {/* Countdown display */}
+          <span
+            className={`text-base font-bold tabular-nums font-mono ${
+              completed ? 'text-green-400 animate-pulse' : 'text-white'
+            }`}
+          >
+            {completed ? 'Done!' : formatTime(seconds)}
+          </span>
+
+          <div className="flex-1" />
+
+          {/* Expand indicator */}
+          {!completed && (
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`text-gray-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          )}
+
+          {/* Skip button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSkip();
+            }}
+            className="flex-shrink-0 rounded-lg bg-white/10 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-white/20 active:bg-white/30"
+          >
+            {completed ? 'Dismiss' : 'Skip'}
+          </button>
+        </div>
+
+        {/* Expanded adjustment buttons */}
+        <div
+          className={`overflow-hidden transition-all duration-200 ease-out ${
+            expanded && !completed ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="flex items-center justify-center gap-3 px-4 pb-2">
+            <button
+              type="button"
+              onClick={() => handleAdjust(-15)}
+              className="flex h-7 items-center justify-center rounded-full bg-gray-700 px-3 text-xs font-semibold text-white transition-colors hover:bg-gray-600"
+              aria-label="Subtract 15 seconds"
+            >
+              −15s
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAdjust(15)}
+              className="flex h-7 items-center justify-center rounded-full bg-gray-700 px-3 text-xs font-semibold text-white transition-colors hover:bg-gray-600"
+              aria-label="Add 15 seconds"
+            >
+              +15s
+            </button>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="h-1 w-full overflow-hidden rounded-b-xl bg-gray-700/50">
+          <div
+            className={`h-full transition-all duration-1000 ease-linear ${
+              completed ? 'bg-green-400' : 'bg-indigo-400'
+            }`}
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Fixed mode (original behavior)
   return (
     <>
       {/* Collapse when tapping outside (only when expanded) */}

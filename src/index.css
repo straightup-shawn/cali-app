@@ -204,3 +204,72 @@
 .to-indigo-600\/90 { --tw-gradient-to: color-mix(in srgb, var(--accent) 90%, transparent) !important; }
 .from-indigo-600 { --tw-gradient-from: var(--accent) !important; }
 .from-indigo-600\/90 { --tw-gradient-from: color-mix(in srgb, var(--accent) 90%, transparent) !important; }
+
+/* =============================================================================
+   Extended theme overrides — apply accent to green/gray interactive elements
+   so the entire app feel changes per theme (not just indigo-coded buttons)
+   ============================================================================= */
+
+/* --- Completed set checkmarks / green accents become theme-tinted --- */
+.bg-green-500 { background-color: color-mix(in srgb, var(--accent) 85%, #22c55e) !important; }
+.hover\:bg-green-600:hover { background-color: color-mix(in srgb, var(--accent-dark) 75%, #16a34a) !important; }
+.active\:bg-green-700:active { background-color: color-mix(in srgb, var(--accent-dark) 60%, #15803d) !important; }
+.text-green-400 { color: color-mix(in srgb, var(--accent-light) 50%, #4ade80) !important; }
+.text-green-300 { color: color-mix(in srgb, var(--accent-light) 40%, #86efac) !important; }
+.border-green-800 { border-color: color-mix(in srgb, var(--accent-dark) 50%, #166534) !important; }
+.bg-green-950\/50 { background-color: color-mix(in srgb, var(--accent) 12%, rgba(5, 46, 22, 0.5)) !important; }
+.ring-green-400\/50 { --tw-ring-color: color-mix(in srgb, var(--accent-light) 50%, rgba(74, 222, 128, 0.5)) !important; }
+.hover\:border-green-500:hover { border-color: color-mix(in srgb, var(--accent) 60%, #22c55e) !important; }
+.hover\:text-green-400:hover { color: color-mix(in srgb, var(--accent-light) 50%, #4ade80) !important; }
+
+/* --- Input focus rings become theme-colored --- */
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent) !important;
+  --tw-ring-color: var(--accent-glow) !important;
+}
+
+/* --- Glass card subtle border glow on hover --- */
+.glass-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 15%, rgba(255, 255, 255, 0.08));
+}
+
+/* --- Bottom navigation active dot / pill --- */
+.dot-accent, .bg-accent {
+  background-color: var(--accent-light) !important;
+}
+
+/* --- Scrollbar track for WebKit (subtle accent tint) --- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.1));
+  border-radius: 2px;
+}
+
+/* --- Dashed border "add" buttons pick up theme on hover --- */
+.border-dashed {
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+/* --- glass-header border-bottom accent tint --- */
+.glass-header {
+  border-bottom-color: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.05)) !important;
+}
+
+/* --- glass-nav border-top accent tint --- */
+.glass-nav {
+  border-top-color: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.06)) !important;
+}
+
+/* --- Font mono timer text uses accent --- */
+.font-mono.text-indigo-400 {
+  color: var(--accent-light) !important;
+}
+

@@ -796,8 +796,19 @@ export default function ActiveWorkoutPage() {
         </button>
       </div>
 
-      {/* Fixed bottom: Finish button */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-800 bg-gray-900 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      {/* Fixed bottom: Rest timer + Finish button */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-gray-800 bg-gray-900 px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        {/* Rest timer inline (above Finish) */}
+        {restTimerVisible && (
+          <div className="mb-2">
+            <RestTimerOverlay
+              defaultSeconds={restTimerDuration}
+              onClose={() => setRestTimerVisible(false)}
+              visible={restTimerVisible}
+              inline
+            />
+          </div>
+        )}
         <FinishWorkoutButton onFinish={handleFinish} disabled={finishing} />
         {finishError && (
           <p className="mt-2 text-center text-sm text-red-400">{finishError}</p>
@@ -825,12 +836,7 @@ export default function ActiveWorkoutPage() {
         excludeIds={exerciseIds}
       />
 
-      {/* Rest timer overlay - auto-shows after completing a set */}
-      <RestTimerOverlay
-        defaultSeconds={restTimerDuration}
-        onClose={() => setRestTimerVisible(false)}
-        visible={restTimerVisible}
-      />
+      {/* Rest timer is now rendered inline in the fixed bottom bar above */}
 
       {/* Finish error display */}
       {finishError && (
