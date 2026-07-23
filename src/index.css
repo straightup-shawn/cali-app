@@ -29,6 +29,8 @@
     @apply m-0 min-h-screen bg-gray-950 text-gray-100 antialiased;
     /* Prevent pull-to-refresh interference on mobile */
     overscroll-behavior-y: contain;
+    /* Prevent overscroll bounce that shows blank space */
+    overscroll-behavior: none;
     /* Force dark color scheme */
     color-scheme: dark;
     /* Prevent iOS input zoom (font-size >= 16px prevents Safari auto-zoom) */
@@ -37,6 +39,19 @@
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+  }
+
+  html {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  #root {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Prevent iOS Safari from zooming on input focus (inputs must be >= 16px) */
