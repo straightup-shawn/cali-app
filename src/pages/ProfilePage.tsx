@@ -823,6 +823,81 @@ function SettingsTab() {
       >
         Log Out
       </button>
+
+      {/* Hidden dev tools — triple tap the version text to reveal */}
+      <DevTools />
+    </div>
+  );
+}
+
+// =============================================================================
+// DevTools — hidden section, revealed by triple-tapping version text
+// =============================================================================
+
+function DevTools() {
+  const [revealed, setRevealed] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const [fixResult, setFixResult] = useState<string | null>(null);
+  const [fixing, setFixing] = useState(false);
+
+  function handleVersionTap() {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    if (newCount >= 5) {
+      setRevealed(true);
+      setTapCount(0);
+    }
+    // Reset after 2s of no taps
+    setTimeout(() => setTapCount(0), 2000);
+  }
+
+  async function handleFixSets() {
+    setFixing(true);
+    setFixResult(null);
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
+        .from('exercise_sets')
+        .update({ completed: true })
+        .eq('completed', false)
+        .select('id');
+
+      if (error) throw error;
+      setFixResult(`✓ Fixed ${data?.length ?? 0} sets to completed`);
+    } catch (err) {
+      setFixResult(`✗ ${err instanceof Error ? err.message : 'Failed'}`);
+    } finally {
+      setFixing(false);
+    }
+  }
+
+  return (
+    <div className="mt-8 border-t border-gray-800 pt-4">
+      <p
+        className="text-center text-[10px] text-gray-700 active:text-gray-500"
+        onClick={handleVersionTap}
+      >
+        Isometrix v1.0
+      </p>
+
+      {revealed && (
+        <div className="mt-3 space-y-2 rounded-xl border border-gray-800 bg-gray-900/50 p-3">
+          <p className="text-xs font-semibold text-gray-400">Dev Tools</p>
+
+          <button
+            type="button"
+            onClick={handleFixSets}
+            disabled={fixing}
+            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-300 active:bg-gray-700 disabled:opacity-50"
+          >
+            {fixing ? 'Fixing...' : 'Mark all past sets as completed'}
+          </button>
+
+          {fixResult && (
+            <p className="text-xs text-gray-400">{fixResult}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
