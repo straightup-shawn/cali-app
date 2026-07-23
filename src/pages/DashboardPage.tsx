@@ -4,6 +4,7 @@ import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useWorkouts, type WorkoutSummary } from '@/hooks/useWorkouts';
 import { useRoutines, type RoutineWithCount } from '@/hooks/useRoutines';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
+import AIButton from '@/components/AIButton';
 
 // =============================================================================
 // Helpers
@@ -305,7 +306,10 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col bg-gray-950 pb-20">
       {/* Header */}
       <header className="sticky top-0 z-10 glass-header px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-100">Dashboard</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-100">Dashboard</h1>
+          <AIButton />
+        </div>
       </header>
 
       {/* Content */}

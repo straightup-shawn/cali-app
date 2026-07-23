@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useRoutines, type RoutineWithCount } from '@/hooks/useRoutines';
+import AIButton from '@/components/AIButton';
 
 // =============================================================================
 // Icons
@@ -118,7 +119,10 @@ export default function WorkoutHubPage() {
     <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
       <header className="sticky top-0 z-10 glass-header px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-100">Workout</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-100">Workout</h1>
+          <AIButton />
+        </div>
       </header>
 
       <div className="flex-1 space-y-4 px-4 pt-4 animate-slide-up">
