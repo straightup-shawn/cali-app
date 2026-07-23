@@ -136,7 +136,7 @@ function HeaderMenu({ open, onClose, onDiscard }: HeaderMenuProps) {
   return (
     <>
       <div className="fixed inset-0 z-20" onClick={onClose} aria-hidden="true" />
-      <div className="absolute right-4 top-14 z-30 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
+      <div className="fixed right-4 top-24 z-30 w-48 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
         <button
           type="button"
           onClick={onDiscard}
