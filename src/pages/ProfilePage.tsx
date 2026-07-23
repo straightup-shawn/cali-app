@@ -1,10 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useWorkouts } from '@/hooks/useWorkouts';
+import { uploadProfilePhoto } from '@/lib/storage';
 import BodyweightSection from '@/components/profile/BodyweightSection';
 import type { UnitPreference } from '@/lib/units';
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+const AVATAR_STORAGE_KEY = 'calisthenics-log:avatar-url';
+
+const REST_PRESETS = [30, 60, 90, 120, 180] as const;
 
 // =============================================================================
 // Helpers
@@ -37,6 +46,161 @@ function formatDuration(seconds: number | null): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+// =============================================================================
+// ProfileAvatar — tappable avatar with upload
+// =============================================================================
+
+function ProfileAvatar({ initials }: { initials: string }) {
+  const { user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() =>
+    localStorage.getItem(AVATAR_STORAGE_KEY),
+  );
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleTap() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploading(true);
+    try {
+      const url = await uploadProfilePhoto(user.id, file);
+      localStorage.setItem(AVATAR_STORAGE_KEY, url);
+      setAvatarUrl(url);
+    } catch (err) {
+      console.error('Failed to upload avatar:', err);
+    } finally {
+      setUploading(false);
+      // Reset the input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleTap}
+      className="relative h-20 w-20 shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-950"
+      aria-label="Change profile photo"
+    >
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt="Profile"
+          className="h-20 w-20 rounded-full object-cover"
+          onError={() => {
+            localStorage.removeItem(AVATAR_STORAGE_KEY);
+            setAvatarUrl(null);
+          }}
+        />
+      ) : (
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-600 text-3xl font-bold text-white shadow-lg shadow-indigo-500/20">
+          {initials}
+        </div>
+      )}
+      {/* Camera overlay */}
+      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity hover:opacity-100 active:opacity-100">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white" aria-hidden="true">
+          <path d="M12 9a3.75 3.75 0 1 0 0 7.5A3.75 3.75 0 0 0 12 9Z" />
+          <path fillRule="evenodd" d="M9.344 3.071a49.52 49.52 0 0 1 5.312 0c.967.052 1.83.585 2.332 1.39l.821 1.317c.2.32.58.529.984.529h.806a2.25 2.25 0 0 1 2.25 2.25v9.193a2.25 2.25 0 0 1-2.25 2.25H4.401a2.25 2.25 0 0 1-2.25-2.25V8.557a2.25 2.25 0 0 1 2.25-2.25h.806c.404 0 .784-.21.984-.53l.821-1.316a2.06 2.06 0 0 1 2.332-1.39ZM12 10.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" clipRule="evenodd" />
+        </svg>
+      </div>
+      {/* Uploading spinner */}
+      {uploading && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60">
+          <span className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+        </div>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+        aria-hidden="true"
+      />
+    </button>
+  );
+}
+
+// =============================================================================
+// EditableDisplayName — inline editing of display name
+// =============================================================================
+
+function EditableDisplayName({ displayName }: { displayName: string }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(displayName);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const updateProfile = useUpdateProfile();
+
+  useEffect(() => {
+    setValue(displayName);
+  }, [displayName]);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editing]);
+
+  async function save() {
+    setEditing(false);
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === displayName) {
+      setValue(displayName);
+      return;
+    }
+    try {
+      await updateProfile.mutateAsync({ display_name: trimmed });
+    } catch {
+      setValue(displayName);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') {
+      save();
+    } else if (e.key === 'Escape') {
+      setValue(displayName);
+      setEditing(false);
+    }
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={save}
+        onKeyDown={handleKeyDown}
+        className="w-full truncate rounded border border-indigo-500 bg-gray-800 px-2 py-1 text-base font-semibold text-gray-100 outline-none"
+        maxLength={50}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      className="flex items-center gap-1.5 text-left focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded"
+      aria-label="Edit display name"
+    >
+      <span className="truncate text-base font-semibold text-gray-100">{displayName}</span>
+      <svg className="h-3.5 w-3.5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+      </svg>
+    </button>
+  );
 }
 
 // =============================================================================
@@ -89,6 +253,92 @@ function UnitPreferenceToggle() {
           Failed to update preference. Please try again.
         </p>
       )}
+    </section>
+  );
+}
+
+// =============================================================================
+// DefaultRestDuration — preset buttons for rest timer default
+// =============================================================================
+
+function DefaultRestDuration() {
+  const { data: profile } = useProfile();
+  const updateProfile = useUpdateProfile();
+  const current = profile?.default_rest_seconds ?? 60;
+
+  async function handleSelect(seconds: number) {
+    if (seconds === current) return;
+    await updateProfile.mutateAsync({ default_rest_seconds: seconds });
+  }
+
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium text-gray-300">Default Rest Duration</h2>
+      <div className="flex flex-wrap gap-2">
+        {REST_PRESETS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => handleSelect(s)}
+            disabled={updateProfile.isPending}
+            className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-all ${
+              current === s
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'border border-gray-700 bg-gray-800 text-gray-400 hover:text-gray-200'
+            } disabled:opacity-50`}
+          >
+            {s >= 60 ? `${s / 60}m` : `${s}s`}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
+// DisplayNameSetting — text field in settings
+// =============================================================================
+
+function DisplayNameSetting() {
+  const { data: profile } = useProfile();
+  const { user } = useAuth();
+  const updateProfile = useUpdateProfile();
+  const displayName = profile?.display_name ?? user?.email?.split('@')[0] ?? '';
+  const [value, setValue] = useState(displayName);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setValue(displayName);
+  }, [displayName]);
+
+  async function handleSave() {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === displayName) return;
+    try {
+      await updateProfile.mutateAsync({ display_name: trimmed });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      setValue(displayName);
+    }
+  }
+
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium text-gray-300">Display Name</h2>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={handleSave}
+          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+          maxLength={50}
+          className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white placeholder:text-gray-500 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          placeholder="Your display name"
+        />
+        {saved && <span className="self-center text-xs text-green-400">Saved</span>}
+      </div>
     </section>
   );
 }
@@ -247,16 +497,54 @@ function StatCard({
 }
 
 // =============================================================================
-// SettingsTab
+// SettingsTab — expanded with more options
 // =============================================================================
 
 function SettingsTab() {
   const { signOut } = useAuth();
+  const [clearConfirm, setClearConfirm] = useState(false);
+
+  function handleClearLocalData() {
+    if (!clearConfirm) {
+      setClearConfirm(true);
+      return;
+    }
+    localStorage.clear();
+    setClearConfirm(false);
+    window.location.reload();
+  }
 
   return (
     <div className="space-y-6 px-4 py-4">
+      <DisplayNameSetting />
+      <DefaultRestDuration />
       <UnitPreferenceToggle />
       <BodyweightSection />
+
+      {/* About */}
+      <section className="space-y-2">
+        <h2 className="text-sm font-medium text-gray-300">About</h2>
+        <p className="text-sm text-gray-400">Calisthenics Log v1.0.0</p>
+      </section>
+
+      {/* Clear Local Data */}
+      <section className="space-y-2">
+        <h2 className="text-sm font-medium text-gray-300">Clear Local Data</h2>
+        <button
+          type="button"
+          onClick={handleClearLocalData}
+          className={`w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+            clearConfirm
+              ? 'border-red-600 bg-red-950 text-red-300 hover:bg-red-900'
+              : 'border-gray-700 bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+          }`}
+        >
+          {clearConfirm ? 'Tap again to confirm clear' : 'Clear Local Data'}
+        </button>
+        <p className="text-xs text-gray-600">Clears cached data from this device. Your account data is safe in the cloud.</p>
+      </section>
+
+      {/* Log Out */}
       <button
         type="button"
         onClick={() => signOut()}
@@ -298,13 +586,11 @@ export default function ProfilePage() {
       {/* User info section */}
       <div className="px-4 pt-6 pb-4">
         <div className="flex items-center gap-4">
-          {/* Avatar circle */}
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-2xl font-bold text-white shadow-lg shadow-indigo-500/20">
-            {initials}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-base font-semibold text-gray-100">{displayName}</p>
-            <p className="truncate text-sm text-gray-400">{user?.email}</p>
+          {/* Tappable avatar with upload */}
+          <ProfileAvatar initials={initials} />
+          <div className="min-w-0 flex-1">
+            <EditableDisplayName displayName={displayName} />
+            <p className="mt-0.5 truncate text-sm text-gray-400">{user?.email}</p>
           </div>
         </div>
       </div>
