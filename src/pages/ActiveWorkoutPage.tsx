@@ -766,7 +766,7 @@ export default function ActiveWorkoutPage() {
   );
 
   // If no workout is active and not showing PRs, auto-navigate to dashboard
-  if (!workout && !showPRCelebration) {
+  if (!workout && !showPRCelebration && !finishing) {
     // Use effect to navigate instead of rendering a dead-end
     navigate('/dashboard', { replace: true });
     return null;
