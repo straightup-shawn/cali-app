@@ -120,7 +120,7 @@ export default function RestTimerOverlay({
             ? 'glass-card rounded-2xl shadow-2xl ring-2 ring-green-400/50'
             : 'glass-card rounded-2xl shadow-2xl'
         }`}
-        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 100px)' }}
+        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 70px)' }}
         role="timer"
         aria-label="Rest timer"
         aria-live="polite"
