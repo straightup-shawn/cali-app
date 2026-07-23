@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useFinishWorkout } from '@/hooks/useFinishWorkout';
@@ -30,14 +30,48 @@ function formatTime(totalSeconds: number): string {
 }
 
 // =============================================================================
-// Volume formatting helper
+// AnimatedVolume — counts up smoothly when volume changes
 // =============================================================================
 
-function formatVolume(value: number, unit: string): string {
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k ${unit}`;
-  }
-  return `${value} ${unit}`;
+function AnimatedVolume({ value, unit }: { value: number; unit: string }) {
+  const [displayed, setDisplayed] = useState(0);
+  const prevRef = useRef(0);
+  const animRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const from = prevRef.current;
+    const to = value;
+    if (from === to) return;
+
+    const duration = 600; // ms
+    const startTime = performance.now();
+
+    function animate(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(from + (to - from) * eased);
+      setDisplayed(current);
+
+      if (progress < 1) {
+        animRef.current = requestAnimationFrame(animate);
+      } else {
+        prevRef.current = to;
+      }
+    }
+
+    animRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, [value]);
+
+  const label = displayed >= 1000
+    ? `${(displayed / 1000).toFixed(1).replace(/\.0$/, '')}k ${unit}`
+    : `${displayed} ${unit}`;
+
+  return <span className="text-white">{label}</span>;
 }
 
 // =============================================================================
@@ -47,11 +81,12 @@ function formatVolume(value: number, unit: string): string {
 interface WorkoutTimerBarProps {
   seconds: number;
   workoutName: string;
-  volumeDisplay: string | null;
+  volumeValue: number;
+  volumeUnit: string;
   onMenuToggle: () => void;
 }
 
-function WorkoutTimerBar({ seconds, workoutName, volumeDisplay, onMenuToggle }: WorkoutTimerBarProps) {
+function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, onMenuToggle }: WorkoutTimerBarProps) {
   return (
     <header className="sticky top-0 z-10 glass-header px-4 py-3">
       <div className="flex items-center justify-between">
@@ -61,9 +96,9 @@ function WorkoutTimerBar({ seconds, workoutName, volumeDisplay, onMenuToggle }: 
           </h1>
           <div className="flex items-center gap-3">
             <p className="text-sm font-mono text-indigo-400">{formatTime(seconds)}</p>
-            {volumeDisplay && (
+            {volumeValue > 0 && (
               <p className="text-sm font-medium text-gray-400">
-                Vol: <span className="text-white">{volumeDisplay}</span>
+                Vol: <AnimatedVolume value={volumeValue} unit={volumeUnit} />
               </p>
             )}
           </div>
@@ -612,8 +647,8 @@ export default function ActiveWorkoutPage() {
   } = useFinishWorkout();
 
   // Live volume: enhanced with bodyweight fractions from AI classification
-  const liveVolumeDisplay = useMemo(() => {
-    if (!workout) return null;
+  const liveVolumeValue = useMemo(() => {
+    if (!workout) return 0;
     const bw = latestBodyweightKg ?? 0;
 
     let totalKg = 0;
@@ -637,7 +672,6 @@ export default function ActiveWorkoutPage() {
           });
 
           if (volumeMode === 'duration' && set.durationSeconds) {
-            // Convert isometric load to a comparable volume metric
             totalKg += calculateIsometricLoad(effectiveR, set.durationSeconds) / 60;
           } else if (set.reps != null) {
             totalKg += calculateSetVolume(effectiveR, set.reps);
@@ -651,12 +685,10 @@ export default function ActiveWorkoutPage() {
       }
     }
 
-    if (totalKg === 0) return null;
-    const displayValue = preference === 'imperial'
+    return preference === 'imperial'
       ? Math.round(totalKg * 2.20462)
       : Math.round(totalKg);
-    return formatVolume(displayValue, weightLabel);
-  }, [workout, preference, weightLabel, latestBodyweightKg, exerciseClassificationMap]);
+  }, [workout, preference, latestBodyweightKg, exerciseClassificationMap]);
 
   // Timer - derive elapsed from persisted startedAt timestamp (survives refresh)
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -757,7 +789,8 @@ export default function ActiveWorkoutPage() {
       <WorkoutTimerBar
         seconds={elapsedSeconds}
         workoutName={workout.name}
-        volumeDisplay={liveVolumeDisplay}
+        volumeValue={liveVolumeValue}
+        volumeUnit={weightLabel}
         onMenuToggle={() => setMenuOpen((o) => !o)}
       />
 
