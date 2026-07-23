@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
-import { useTimer } from '@/hooks/useTimer';
 
 /**
  * Formats seconds into MM:SS (or HH:MM:SS if over an hour).
@@ -21,54 +20,26 @@ function formatTime(totalSeconds: number): string {
 }
 
 /**
- * Finds the current exercise — the first exercise that has at least one incomplete set.
- */
-function getCurrentExerciseName(
-  exercises: { exerciseName: string; sets: { completed: boolean }[] }[],
-): string | null {
-  for (const exercise of exercises) {
-    const hasIncomplete = exercise.sets.some((s) => !s.completed);
-    if (hasIncomplete) {
-      return exercise.exerciseName;
-    }
-  }
-  return null;
-}
-
-/**
- * ActiveWorkoutBar — a persistent mini-player style bar that appears above the
- * bottom navigation whenever a workout is in progress.
- *
- * Shows: workout name, elapsed time, current exercise, and a resume button.
- * Hidden on /workout/active (user is already there) and when no workout is active.
+ * ActiveWorkoutBar — a small floating pill that hovers above the nav bar
+ * when a workout is in progress. Shows workout name + elapsed time.
+ * Tapping it navigates back to the active workout.
  */
 export default function ActiveWorkoutBar() {
   const { workout } = useActiveWorkout();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isPaused = workout?.isPaused ?? false;
+  // Live elapsed timer derived from startedAt (survives navigations)
+  const [elapsed, setElapsed] = useState(0);
 
-  const { seconds, isRunning, start, pause } = useTimer({
-    mode: 'countup',
-    initialSeconds: workout?.elapsedSeconds ?? 0,
-  });
-
-  // Auto-start timer when component mounts and workout is not paused
   useEffect(() => {
-    if (workout && !isPaused && !isRunning) {
-      start();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Sync pause/resume with workout state
-  useEffect(() => {
-    if (isPaused && isRunning) {
-      pause();
-    } else if (!isPaused && !isRunning && workout) {
-      start();
-    }
-  }, [isPaused]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!workout || workout.isPaused) return;
+    const startTime = new Date(workout.startedAt).getTime();
+    const tick = () => setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [workout?.startedAt, workout?.isPaused]);
 
   // Don't render if no workout is active
   if (!workout) return null;
@@ -76,62 +47,42 @@ export default function ActiveWorkoutBar() {
   // Don't render on the active workout page (user is already there)
   if (location.pathname === '/workout/active') return null;
 
-  const currentExercise = getCurrentExerciseName(workout.exercises);
-
   return (
     <button
       type="button"
       onClick={() => navigate('/workout/active')}
-      className="fixed left-4 right-4 z-50 flex items-center justify-between gap-3 rounded-full border border-white/10 bg-gray-900/90 shadow-2xl shadow-black/50 backdrop-blur-xl px-4 py-2.5 transition-transform active:scale-[0.98] md:hidden"
-      style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+      className="fixed left-1/2 z-50 -translate-x-1/2 flex items-center gap-3 rounded-full border border-indigo-500/30 bg-gray-900/95 px-5 py-2 shadow-lg shadow-indigo-500/10 backdrop-blur-xl transition-all duration-200 active:scale-95 md:hidden"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' }}
       aria-label="Resume active workout"
     >
-      {/* Left section: workout info */}
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-semibold text-white">
-            {workout.name}
-          </span>
-          {isPaused && (
-            <span className="shrink-0 rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-medium text-yellow-400">
-              Paused
-            </span>
-          )}
-        </div>
-        {currentExercise && (
-          <span className="truncate text-xs text-indigo-200/80">
-            {currentExercise}
-          </span>
-        )}
-      </div>
+      {/* Pulsing dot to indicate active */}
+      <span className="relative flex h-2 w-2 shrink-0">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+      </span>
 
-      {/* Center: elapsed time */}
-      <div className="shrink-0">
-        <span
-          className={`font-mono text-sm font-semibold tabular-nums ${
-            isPaused ? 'text-yellow-400' : 'text-emerald-400'
-          }`}
-        >
-          {formatTime(seconds)}
-        </span>
-      </div>
+      {/* Workout name */}
+      <span className="max-w-[140px] truncate text-sm font-medium text-white">
+        {workout.name}
+      </span>
 
-      {/* Right: resume chevron */}
-      <div className="shrink-0 text-white/70">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="h-5 w-5"
-          aria-hidden="true"
-        >
-          <path
-            fillRule="evenodd"
-            d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </div>
+      {/* Separator dot */}
+      <span className="h-1 w-1 shrink-0 rounded-full bg-gray-600" />
+
+      {/* Elapsed time */}
+      <span className="font-mono text-sm font-semibold tabular-nums text-indigo-400">
+        {formatTime(elapsed)}
+      </span>
+
+      {/* Chevron */}
+      <svg
+        className="h-4 w-4 shrink-0 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+      </svg>
     </button>
   );
 }
