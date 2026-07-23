@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWorkout, useDeleteWorkout, useUpdateWorkout, type WorkoutExerciseWithSets, type UpdateSetPayload, type AddSetPayload, type AddExercisePayload, type ReplaceExercisePayload } from '@/hooks/useWorkouts';
@@ -1075,8 +1075,8 @@ export default function WorkoutDetailPage() {
   const records = prRecords ?? [];
   const exercises = workout.workout_exercises ?? [];
 
-  // Calculate session volume
-  const sessionVolumeDisplay = useMemo(() => {
+  // Calculate session volume (moved to after hooks are all called)
+  const sessionVolumeDisplay = (() => {
     const bw = bodyweightEntries?.[0]?.weight_kg ?? 0;
     let totalKg = 0;
 
@@ -1121,7 +1121,7 @@ export default function WorkoutDetailPage() {
       return `${(displayValue / 1000).toFixed(1).replace(/\.0$/, '')}k ${weightLabel}`;
     }
     return `${displayValue} ${weightLabel}`;
-  }, [exercises, allExercises, bodyweightEntries, preference, weightLabel]);
+  })();
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
