@@ -74,34 +74,57 @@ function formatTime(isoDate: string): string {
 }
 
 /**
- * Checks if a given set achieved a PR for the exercise in this workout.
+ * Checks if a given set is THE specific set that achieved a PR for the exercise.
+ * Only marks the first matching set (by set_number) to avoid showing trophy on every identical set.
  */
 function setHasPR(
   set: ExerciseSetRow,
   exerciseId: string,
   prRecords: PersonalRecordRow[],
+  allSetsForExercise: ExerciseSetRow[],
 ): boolean {
   if (!set.completed) return false;
 
   return prRecords.some((pr) => {
     if (pr.exerciseId !== exerciseId) return false;
 
+    let matches = false;
     switch (pr.recordType) {
       case 'max_reps':
-        return set.reps !== null && set.reps >= pr.value;
+        matches = set.reps !== null && set.reps >= pr.value;
+        break;
       case 'max_weight':
-        return set.weight_kg !== null && set.weight_kg >= pr.value;
+        matches = set.weight_kg !== null && set.weight_kg >= pr.value;
+        break;
       case 'max_volume':
-        return (
+        matches = (
           set.reps !== null &&
           set.weight_kg !== null &&
           set.reps * set.weight_kg >= pr.value
         );
+        break;
       case 'longest_hold':
-        return set.duration_seconds !== null && set.duration_seconds >= pr.value;
+        matches = set.duration_seconds !== null && set.duration_seconds >= pr.value;
+        break;
       default:
         return false;
     }
+
+    if (!matches) return false;
+
+    // Only show trophy on the FIRST set that achieves this PR (lowest set_number)
+    const firstMatchingSet = allSetsForExercise.find((s) => {
+      if (!s.completed) return false;
+      switch (pr.recordType) {
+        case 'max_reps': return s.reps !== null && s.reps >= pr.value;
+        case 'max_weight': return s.weight_kg !== null && s.weight_kg >= pr.value;
+        case 'max_volume': return s.reps !== null && s.weight_kg !== null && s.reps * s.weight_kg >= pr.value;
+        case 'longest_hold': return s.duration_seconds !== null && s.duration_seconds >= pr.value;
+        default: return false;
+      }
+    });
+
+    return firstMatchingSet?.id === set.id;
   });
 }
 
@@ -453,7 +476,7 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
                 key={set.id}
                 set={set}
                 exerciseType={exerciseType}
-                isPR={setHasPR(set, exercise.exercise_id, prRecords)}
+                isPR={setHasPR(set, exercise.exercise_id, prRecords, exercise.exercise_sets)}
                 formatWeight={formatWeight}
               />
             )
