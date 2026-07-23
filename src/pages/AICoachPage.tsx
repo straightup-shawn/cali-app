@@ -93,7 +93,7 @@ export default function AICoachPage() {
   const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
 
   // Hooks
-  const { data: sessions, isLoading: sessionsLoading } = useChatSessions();
+  const { data: sessions, isLoading: sessionsLoading, isError: sessionsError } = useChatSessions();
   const { data: messages, isLoading: messagesLoading } = useChatMessages(activeSessionId);
   const createSessionMutation = useCreateSession();
   const deleteSessionMutation = useDeleteSession();
@@ -262,7 +262,7 @@ export default function AICoachPage() {
   // ─── Loading: sessions still loading ───────────────────────────────────────
   if (sessionsLoading) {
     return (
-      <div className="flex h-full items-center justify-center bg-gray-950">
+      <div className="flex min-h-screen items-center justify-center bg-gray-950 pt-20">
         <div className="flex flex-col items-center gap-3">
           <svg className="h-8 w-8 animate-spin text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -273,10 +273,28 @@ export default function AICoachPage() {
     );
   }
 
+  // ─── Error: chat tables don't exist or network issue ───────────────────────
+  if (sessionsError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-6 pt-20">
+        <p className="text-center text-sm text-gray-400">
+          Chat sessions are unavailable. Please run the migration <code className="text-indigo-400">00004_chat_sessions.sql</code> in your Supabase SQL Editor.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard')}
+          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
   // ─── Loading: creating first session ───────────────────────────────────────
   if (!activeSessionId) {
     return (
-      <div className="flex h-full items-center justify-center bg-gray-950">
+      <div className="flex min-h-screen items-center justify-center bg-gray-950 pt-20">
         <div className="flex flex-col items-center gap-3">
           <svg className="h-8 w-8 animate-spin text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -296,7 +314,7 @@ export default function AICoachPage() {
   const showWelcome = !messagesLoading && displayMessages.length === 0;
 
   return (
-    <div className="flex h-full flex-col bg-gray-950">
+    <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header */}
       <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <div className="flex items-center justify-between">
