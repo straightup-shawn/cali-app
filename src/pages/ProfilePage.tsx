@@ -979,6 +979,7 @@ function DevTools() {
   const [tapCount, setTapCount] = useState(0);
   const [fixResult, setFixResult] = useState<string | null>(null);
   const [fixing, setFixing] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   function handleVersionTap() {
     const newCount = tapCount + 1;
@@ -1011,6 +1012,22 @@ function DevTools() {
     }
   }
 
+  async function handleUpdateApp() {
+    setUpdating(true);
+    try {
+      // Unregister all service workers
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((r) => r.unregister()));
+      // Clear all caches
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      // Hard reload
+      window.location.reload();
+    } catch {
+      window.location.reload();
+    }
+  }
+
   return (
     <div className="mt-8 border-t border-gray-800 pt-4">
       <p
@@ -1023,6 +1040,15 @@ function DevTools() {
       {revealed && (
         <div className="mt-3 space-y-2 rounded-xl border border-gray-800 bg-gray-900/50 p-3">
           <p className="text-xs font-semibold text-gray-400">Dev Tools</p>
+
+          <button
+            type="button"
+            onClick={handleUpdateApp}
+            disabled={updating}
+            className="w-full rounded-lg border border-indigo-700 bg-indigo-950/50 px-3 py-2 text-xs font-medium text-indigo-300 active:bg-indigo-900 disabled:opacity-50"
+          >
+            {updating ? 'Updating...' : '⬆ Update App to Latest'}
+          </button>
 
           <button
             type="button"
