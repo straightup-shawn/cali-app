@@ -364,7 +364,15 @@ input:focus, select:focus, textarea:focus {
 
 .light-mode .bg-gray-950 { background-color: var(--bg-primary) !important; }
 .light-mode .bg-gray-900 { background-color: var(--bg-secondary) !important; }
-.light-mode .bg-gray-800 { background-color: #e5e7eb !important; }
+.light-mode .bg-gray-800 { background-color: #f3f4f6 !important; }
+.light-mode .bg-gray-800\/60 { background-color: rgba(243, 244, 246, 0.8) !important; }
+.light-mode .hover\:bg-gray-800:hover { background-color: #e5e7eb !important; }
+.light-mode .hover\:bg-gray-900:hover { background-color: #f3f4f6 !important; }
+.light-mode .active\:bg-gray-700:active { background-color: #e5e7eb !important; }
+.light-mode .hover\:bg-gray-700:hover { background-color: #e5e7eb !important; }
+
+/* Light mode text on secondary surfaces */
+.light-mode .text-gray-200 { color: #374151 !important; }
 .light-mode .bg-gray-900\/50 { background-color: rgba(249, 250, 251, 0.5) !important; }
 .light-mode .text-gray-100 { color: var(--text-primary) !important; }
 .light-mode .text-gray-200 { color: var(--text-primary) !important; }
@@ -381,8 +389,8 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-red-600.text-white,
 .light-mode .bg-green-600 .text-white,
 .light-mode .bg-green-500 .text-white { color: #ffffff !important; }
-.light-mode .border-gray-700 { border-color: #d1d5db !important; }
-.light-mode .border-gray-800 { border-color: #e5e7eb !important; }
+.light-mode .border-gray-700 { border-color: #e5e7eb !important; }
+.light-mode .border-gray-800 { border-color: #f3f4f6 !important; }
 .light-mode .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
 .light-mode .border-white\/\[0\.15\] { border-color: rgba(0,0,0,0.08) !important; }
 
