@@ -132,7 +132,7 @@ function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
   const badge = stateBadges[state];
 
   return (
-    <div className="fixed inset-0 z-50 transition-opacity duration-300 opacity-100 pointer-events-auto">
+    <div className="fixed inset-0 z-[60] transition-opacity duration-300 opacity-100 pointer-events-auto">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
