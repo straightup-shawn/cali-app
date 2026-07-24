@@ -43,5 +43,5 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
-// Remove splash after animation completes (~3s total)
-setTimeout(hideSplash, 3200);
+// Remove splash after logo fades in
+setTimeout(hideSplash, 1200);
