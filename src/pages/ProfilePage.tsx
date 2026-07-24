@@ -265,6 +265,61 @@ function UnitPreferenceToggle() {
 }
 
 // =============================================================================
+// BodyMeasurements — height and body fat percentage
+// =============================================================================
+
+const HEIGHT_KEY = 'isometrix:height_cm';
+const BODYFAT_KEY = 'isometrix:bodyfat_pct';
+
+function BodyMeasurements() {
+  const [height, setHeight] = useState(() => localStorage.getItem(HEIGHT_KEY) ?? '');
+  const [bodyFat, setBodyFat] = useState(() => localStorage.getItem(BODYFAT_KEY) ?? '');
+
+  function saveHeight(val: string) {
+    setHeight(val);
+    if (val) localStorage.setItem(HEIGHT_KEY, val);
+    else localStorage.removeItem(HEIGHT_KEY);
+  }
+
+  function saveBodyFat(val: string) {
+    setBodyFat(val);
+    if (val) localStorage.setItem(BODYFAT_KEY, val);
+    else localStorage.removeItem(BODYFAT_KEY);
+  }
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-medium text-gray-300">Body Measurements</h2>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Height (cm)</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="175"
+            value={height}
+            onChange={(e) => saveHeight(e.target.value)}
+            className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Body Fat (%)</label>
+          <input
+            type="number"
+            inputMode="decimal"
+            placeholder="15"
+            value={bodyFat}
+            onChange={(e) => saveBodyFat(e.target.value)}
+            className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
+      </div>
+      <p className="text-xs text-gray-600">Approximate values for future body composition tracking.</p>
+    </section>
+  );
+}
+
+// =============================================================================
 // DefaultRestDuration — preset buttons for rest timer default
 // =============================================================================
 
@@ -754,6 +809,7 @@ function SettingsTab() {
       <DefaultRestDuration />
       <UnitPreferenceToggle />
       <BodyweightSection />
+      <BodyMeasurements />
 
       {/* Exercise AI Analysis */}
       <section className="space-y-2">
@@ -812,8 +868,7 @@ function SettingsTab() {
 
       {/* About */}
       <section className="space-y-2">
-        <h2 className="text-sm font-medium text-gray-300">About</h2>
-        <p className="text-sm text-gray-400">Calisthenics Log v1.0.0</p>
+        <p className="text-sm italic text-gray-500 text-center">"Move a little every day."</p>
       </section>
 
       {/* Clear Local Data */}
