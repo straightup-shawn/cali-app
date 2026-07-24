@@ -340,7 +340,7 @@ export default function AICoachPage() {
       </header>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 pb-28 pt-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-20 pt-4 overscroll-none">
         <div className="space-y-4">
           {/* Loading messages spinner */}
           {messagesLoading && (
