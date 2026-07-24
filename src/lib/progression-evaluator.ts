@@ -282,6 +282,29 @@ export function topologicalSort(nodes: SkillNode[]): SkillNode[] {
 // Main Evaluator
 // =============================================================================
 
+/**
+ * Recursively collect all prerequisite node IDs for a given node (entire chain).
+ */
+function getAllPrerequisiteIds(node: SkillNode, allNodes: SkillNode[]): Set<string> {
+  const result = new Set<string>();
+  const nodeMap = new Map<string, SkillNode>();
+  for (const n of allNodes) nodeMap.set(n.id, n);
+
+  function collect(n: SkillNode) {
+    for (const group of n.prerequisites) {
+      for (const reqId of group.requiredNodeIds) {
+        if (!result.has(reqId)) {
+          result.add(reqId);
+          const reqNode = nodeMap.get(reqId);
+          if (reqNode) collect(reqNode);
+        }
+      }
+    }
+  }
+  collect(node);
+  return result;
+}
+
 const STATE_ORDER: Record<NodeState, number> = {
   locked: 0,
   available: 1,
@@ -397,6 +420,36 @@ export function evaluateWorkout(input: EvaluationInput): EvaluationOutput {
 
       // Update the states map for cascading within same evaluation pass
       stateMap.set(node.id, newState);
+    }
+  }
+
+  // 4. CASCADE: If a higher-tier node is unlocked/mastered, auto-unlock all
+  //    lower-tier prerequisite nodes in the same path (the user can clearly do them)
+  for (const node of sortedNodes) {
+    const nodeState = stateMap.get(node.id) ?? 'locked';
+    if (STATE_ORDER[nodeState] >= STATE_ORDER['unlocked']) {
+      // Find all prerequisite nodes recursively and unlock them
+      const prereqIds = getAllPrerequisiteIds(node, nodes);
+      for (const prereqId of prereqIds) {
+        const prereqState = stateMap.get(prereqId) ?? 'locked';
+        if (STATE_ORDER[prereqState] < STATE_ORDER['unlocked']) {
+          const prereqNode = nodes.find((n) => n.id === prereqId);
+          if (prereqNode) {
+            transitions.push({
+              nodeId: prereqId,
+              fromState: prereqState,
+              toState: 'unlocked',
+            });
+            stateMap.set(prereqId, 'unlocked');
+            // Award momentum for cascade unlocks
+            momentumEntries.push({
+              sourceType: 'node_unlock',
+              sourceId: prereqId,
+              points: prereqNode.momentumReward,
+            });
+          }
+        }
+      }
     }
   }
 
