@@ -253,3 +253,73 @@ INSERT INTO skill_node_prerequisites (id, node_id, required_node_id, group_id, g
 ('d0000006-0000-0000-0000-000000000002', 'c0000006-0000-0000-0000-000000000003', 'c0000006-0000-0000-0000-000000000002', 1, 'and')
 
 ON CONFLICT (id) DO NOTHING;
+
+
+-- =============================================================================
+-- SKILL NODES — Planche Path (path 7, 3 nodes)
+-- Uses existing exercises: Planche (a0000007-0000-0000-0000-000000000002)
+-- and shared exercises from other paths
+-- Node IDs: c0000007-0000-0000-0000-00000000000Y
+-- =============================================================================
+
+INSERT INTO skill_nodes (id, path_id, exercise_id, name, description, tier, sort_order, unlock_criteria, mastery_criteria, momentum_reward) VALUES
+('c0000007-0000-0000-0000-000000000001', 'b0000001-0000-0000-0000-000000000007', 'a0000004-0000-0000-0000-000000000002',
+ 'Plank Hold', 'Build wrist and shoulder endurance', 1, 1,
+ '{"type": "hold", "min_hold_seconds": 60}', NULL, 10),
+
+('c0000007-0000-0000-0000-000000000002', 'b0000001-0000-0000-0000-000000000007', 'a0000004-0000-0000-0000-000000000004',
+ 'Hollow Body Hold', 'Protracted shoulder position', 2, 2,
+ '{"type": "hold", "min_hold_seconds": 30}', NULL, 15),
+
+('c0000007-0000-0000-0000-000000000003', 'b0000001-0000-0000-0000-000000000007', 'a0000007-0000-0000-0000-000000000002',
+ 'Planche', 'Full planche hold', 5, 3,
+ '{"type": "hold", "min_hold_seconds": 3}', NULL, 30)
+ON CONFLICT (id) DO NOTHING;
+
+-- =============================================================================
+-- SKILL NODES — Front Lever Path (path 8, 2 nodes)
+-- Uses existing exercise: Front Lever (a0000004-0000-0000-0000-000000000007)
+-- Node IDs: c0000008-0000-0000-0000-00000000000Y
+-- =============================================================================
+
+INSERT INTO skill_nodes (id, path_id, exercise_id, name, description, tier, sort_order, unlock_criteria, mastery_criteria, momentum_reward) VALUES
+('c0000008-0000-0000-0000-000000000001', 'b0000001-0000-0000-0000-000000000008', 'a0000002-0000-0000-0000-000000000002',
+ 'Active Hang', 'Foundation for lever work', 1, 1,
+ '{"type": "hold", "min_hold_seconds": 30}', NULL, 10),
+
+('c0000008-0000-0000-0000-000000000002', 'b0000001-0000-0000-0000-000000000008', 'a0000004-0000-0000-0000-000000000007',
+ 'Front Lever', 'Full front lever hold', 5, 2,
+ '{"type": "hold", "min_hold_seconds": 5}', NULL, 30)
+ON CONFLICT (id) DO NOTHING;
+
+-- =============================================================================
+-- SKILL NODES — Flexibility Path (path 9, 3 nodes)
+-- Uses existing exercises for flexibility-related holds
+-- Node IDs: c0000009-0000-0000-0000-00000000000Y
+-- =============================================================================
+
+INSERT INTO skill_nodes (id, path_id, exercise_id, name, description, tier, sort_order, unlock_criteria, mastery_criteria, momentum_reward) VALUES
+('c0000009-0000-0000-0000-000000000001', 'b0000001-0000-0000-0000-000000000009', 'a0000004-0000-0000-0000-000000000001',
+ 'Dead Bug', 'Hip mobility and core control', 1, 1,
+ '{"type": "sets_at_reps", "min_sets": 3, "min_reps": 10}', NULL, 10),
+
+('c0000009-0000-0000-0000-000000000002', 'b0000001-0000-0000-0000-000000000009', 'a0000004-0000-0000-0000-000000000004',
+ 'Hollow Body Hold', 'Spinal flexibility and compression', 2, 2,
+ '{"type": "hold", "min_hold_seconds": 30}', NULL, 15),
+
+('c0000009-0000-0000-0000-000000000003', 'b0000001-0000-0000-0000-000000000009', 'a0000004-0000-0000-0000-000000000005',
+ 'L-Sit', 'Active compression flexibility', 3, 3,
+ '{"type": "hold", "min_hold_seconds": 15}', NULL, 20)
+ON CONFLICT (id) DO NOTHING;
+
+-- Prerequisites for new paths
+INSERT INTO skill_node_prerequisites (id, node_id, required_node_id, group_id, group_logic) VALUES
+-- Planche path
+('d0000007-0000-0000-0000-000000000001', 'c0000007-0000-0000-0000-000000000002', 'c0000007-0000-0000-0000-000000000001', 1, 'and'),
+('d0000007-0000-0000-0000-000000000002', 'c0000007-0000-0000-0000-000000000003', 'c0000007-0000-0000-0000-000000000002', 1, 'and'),
+-- Front Lever path
+('d0000008-0000-0000-0000-000000000001', 'c0000008-0000-0000-0000-000000000002', 'c0000008-0000-0000-0000-000000000001', 1, 'and'),
+-- Flexibility path
+('d0000009-0000-0000-0000-000000000001', 'c0000009-0000-0000-0000-000000000002', 'c0000009-0000-0000-0000-000000000001', 1, 'and'),
+('d0000009-0000-0000-0000-000000000002', 'c0000009-0000-0000-0000-000000000003', 'c0000009-0000-0000-0000-000000000002', 1, 'and')
+ON CONFLICT (id) DO NOTHING;
