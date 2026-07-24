@@ -15,9 +15,29 @@
     <div id="root"></div>
     <!-- Splash screen -->
     <div id="splash" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0f;">
-      <img src="/branding/wordmark-light.png" alt="Isometrix" style="width:200px;height:auto;opacity:0;animation:splashFade 0.6s ease-out 0.2s forwards;" />
+      <img src="/branding/wordmark-light.png" alt="Isometrix" id="splash-logo" style="width:200px;height:auto;opacity:0;animation:splashFade 0.6s ease-out 0.2s forwards;" />
       <style>@keyframes splashFade{to{opacity:1}}</style>
     </div>
+    <script>
+      // Apply saved color mode before app loads to avoid flash
+      (function() {
+        var mode = localStorage.getItem('isometrix:color-mode') || 'dark';
+        var root = document.documentElement;
+        var splash = document.getElementById('splash');
+        var logo = document.getElementById('splash-logo');
+        if (mode === 'light') {
+          root.classList.add('light-mode');
+          root.classList.remove('dark-mode');
+          splash.style.background = '#ffffff';
+          logo.src = '/branding/wordmark-dark.png';
+          document.querySelector('meta[name="theme-color"]').content = '#ffffff';
+          document.querySelector('meta[name="color-scheme"]').content = 'light';
+          document.body.style.backgroundColor = '#ffffff';
+        } else {
+          root.classList.add('dark-mode');
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

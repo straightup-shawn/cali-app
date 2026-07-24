@@ -944,7 +944,11 @@ function SettingsTab() {
 
       {/* Branding */}
       <section className="flex flex-col items-center gap-3 py-6">
-        <img src="/branding/wordmark-light.png" alt="Isometrix" className="w-40 opacity-80" />
+        <img
+          src={getStoredMode() === 'light' ? '/branding/wordmark-dark.png' : '/branding/wordmark-light.png'}
+          alt="Isometrix"
+          className="w-40 opacity-80"
+        />
         <p className="text-sm italic text-gray-500">"Move a little every day."</p>
       </section>
 

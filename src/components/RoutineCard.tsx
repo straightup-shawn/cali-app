@@ -75,7 +75,7 @@ export default function RoutineCard({
   });
 
   return (
-    <div className="relative glass-card rounded-2xl p-4 transition-colors">
+    <div className="relative glass-card rounded-2xl p-4 transition-colors" style={{ overflow: 'visible' }}>
       <Link
         to={`/routines/${id}/edit`}
         className="block active:bg-gray-800 transition-colors"
@@ -146,7 +146,13 @@ export default function RoutineCard({
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute right-3 top-12 z-20 w-40 rounded-lg border border-gray-700 bg-gray-800 py-1 shadow-lg">
+          <div
+            className="absolute right-3 top-12 z-20 w-40 rounded-lg border py-1 shadow-lg"
+            style={{
+              backgroundColor: 'var(--bg-input)',
+              borderColor: 'var(--border-primary)',
+            }}
+          >
             <button
               type="button"
               onClick={handleDuplicate}

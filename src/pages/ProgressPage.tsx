@@ -142,13 +142,17 @@ function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
 
       {/* Panel */}
       <div
-        className="fixed bottom-0 inset-x-0 rounded-t-2xl bg-gray-900/95 backdrop-blur-xl max-h-[70vh] overflow-y-auto transition-transform duration-300 ease-out translate-y-0 pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 inset-x-0 rounded-t-2xl backdrop-blur-xl max-h-[70vh] overflow-y-auto transition-transform duration-300 ease-out translate-y-0 pb-[env(safe-area-inset-bottom)]"
+        style={{ backgroundColor: 'var(--bg-secondary)' }}
         role="dialog"
         aria-modal="true"
         aria-label={`${node.name} details`}
       >
         {/* Handle bar */}
-        <div className="sticky top-0 z-10 flex justify-center pt-3 pb-2 bg-gray-900/95 backdrop-blur-xl rounded-t-2xl">
+        <div
+          className="sticky top-0 z-10 flex justify-center pt-3 pb-2 backdrop-blur-xl rounded-t-2xl"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}
+        >
           <div className="w-10 h-1 rounded-full bg-gray-600" />
         </div>
 
@@ -187,7 +191,7 @@ function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
           </div>
 
           {/* Unlock criteria */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4 mb-4">
+          <div className="rounded-xl border p-4 mb-4" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
               Unlock Criteria
             </h3>
@@ -198,7 +202,7 @@ function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
 
           {/* Mastery criteria (if exists) */}
           {node.masteryCriteria && (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4 mb-4">
+            <div className="rounded-xl border p-4 mb-4" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
                 Mastery Criteria
               </h3>
@@ -209,7 +213,7 @@ function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
           )}
 
           {/* Progress indicator */}
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-xl border p-4" style={{ borderColor: 'var(--border-primary)', backgroundColor: 'var(--bg-card)' }}>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
               Progress
             </h3>
