@@ -1,8 +1,8 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useTimer } from '@/hooks/useTimer';
 import { sendTimerNotification } from '@/lib/notifications';
 import { playTimerAlert } from '@/lib/audio-alert';
-import { scheduleTimerPush, cancelTimerPush } from '@/lib/push-subscription';
+import { scheduleTimerPush, cancelTimerPush, subscribeToPush, isPushSubscribed } from '@/lib/push-subscription';
 
 interface RestTimerOverlayProps {
   /** Default countdown duration in seconds (from profile or exercise override) */
@@ -62,6 +62,9 @@ export default function RestTimerOverlay({
     onComplete: handleComplete,
   });
 
+  // Track if we've attempted push subscription
+  const pushAttemptedRef = useRef(false);
+
   // Auto-start timer when overlay becomes visible
   useEffect(() => {
     if (visible) {
@@ -71,6 +74,18 @@ export default function RestTimerOverlay({
       reset(defaultSeconds);
       // Small delay to allow reset to settle before starting
       const id = setTimeout(() => start(), 50);
+
+      // Subscribe to push if not already (this runs in user-gesture context
+      // since the timer was triggered by completing a set)
+      if (!pushAttemptedRef.current) {
+        pushAttemptedRef.current = true;
+        isPushSubscribed().then((subscribed) => {
+          if (!subscribed) {
+            subscribeToPush();
+          }
+        });
+      }
+
       // Schedule server-side push for when timer completes (iOS background support)
       scheduleTimerPush(defaultSeconds);
       return () => clearTimeout(id);

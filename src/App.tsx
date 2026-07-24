@@ -37,11 +37,11 @@ function SyncManager() {
   return null;
 }
 
-/** Subscribe to push notifications after auth */
+/** Subscribe to push notifications after auth — only if already granted */
 function PushSubscriber() {
   const { user } = useAuth();
   useEffect(() => {
-    if (user) {
+    if (user && 'Notification' in window && Notification.permission === 'granted') {
       import('@/lib/push-subscription').then(({ subscribeToPush }) => {
         subscribeToPush();
       });
