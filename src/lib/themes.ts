@@ -1,4 +1,5 @@
 export const THEMES = {
+  // === Original vibrant palettes ===
   indigo: {
     id: 'indigo',
     name: 'Indigo',
@@ -52,6 +53,63 @@ export const THEMES = {
     accentDark: '#7c3aed',
     accentGlow: 'rgba(139, 92, 246, 0.2)',
     accentGlowHover: 'rgba(139, 92, 246, 0.4)',
+  },
+
+  // === Premium palettes ===
+
+  // Midnight Monochrome — luxury, clean, no color
+  monochrome: {
+    id: 'monochrome',
+    name: 'Midnight',
+    accent: '#e4e4e7',
+    accentLight: '#f4f4f5',
+    accentDark: '#a1a1aa',
+    accentGlow: 'rgba(228, 228, 231, 0.12)',
+    accentGlowHover: 'rgba(228, 228, 231, 0.25)',
+  },
+
+  // Earth & Stone — warm neutrals, copper accent
+  earth: {
+    id: 'earth',
+    name: 'Earth',
+    accent: '#c2956b',
+    accentLight: '#d4a574',
+    accentDark: '#a67b5b',
+    accentGlow: 'rgba(194, 149, 107, 0.18)',
+    accentGlowHover: 'rgba(194, 149, 107, 0.35)',
+  },
+
+  // Neon Minimal — electric mint, very sharp
+  neon: {
+    id: 'neon',
+    name: 'Neon',
+    accent: '#00ffaa',
+    accentLight: '#33ffbb',
+    accentDark: '#00cc88',
+    accentGlow: 'rgba(0, 255, 170, 0.15)',
+    accentGlowHover: 'rgba(0, 255, 170, 0.30)',
+  },
+
+  // Soft Gradient — muted lavender/teal
+  lavender: {
+    id: 'lavender',
+    name: 'Lavender',
+    accent: '#a78bfa',
+    accentLight: '#c4b5fd',
+    accentDark: '#7c3aed',
+    accentGlow: 'rgba(167, 139, 250, 0.15)',
+    accentGlowHover: 'rgba(167, 139, 250, 0.30)',
+  },
+
+  // Carbon Fiber — gunmetal silver, stealth premium
+  carbon: {
+    id: 'carbon',
+    name: 'Carbon',
+    accent: '#94a3b8',
+    accentLight: '#cbd5e1',
+    accentDark: '#64748b',
+    accentGlow: 'rgba(148, 163, 184, 0.12)',
+    accentGlowHover: 'rgba(148, 163, 184, 0.25)',
   },
 } as const;
 
