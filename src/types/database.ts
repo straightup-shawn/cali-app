@@ -13,6 +13,7 @@ export interface Database {
         Row: {
           id: string;
           display_name: string | null;
+          avatar_url: string | null;
           unit_preference: string;
           default_rest_seconds: number;
           onboarding_complete: boolean;
@@ -22,6 +23,7 @@ export interface Database {
         Insert: {
           id: string;
           display_name?: string | null;
+          avatar_url?: string | null;
           unit_preference?: string;
           default_rest_seconds?: number;
           onboarding_complete?: boolean;
@@ -31,6 +33,7 @@ export interface Database {
         Update: {
           id?: string;
           display_name?: string | null;
+          avatar_url?: string | null;
           unit_preference?: string;
           default_rest_seconds?: number;
           onboarding_complete?: boolean;

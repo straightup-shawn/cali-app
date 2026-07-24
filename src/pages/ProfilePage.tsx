@@ -17,7 +17,7 @@ import type { UnitPreference } from '@/lib/units';
 // Constants
 // =============================================================================
 
-const AVATAR_STORAGE_KEY = 'isometrix:avatar-url';
+const AVATAR_STORAGE_KEY = 'isometrix:avatar-url'; // Legacy fallback
 
 const REST_PRESETS = [30, 60, 90, 120, 180] as const;
 
@@ -70,11 +70,20 @@ function formatDuration(seconds: number | null): string {
 
 function ProfileAvatar({ initials }: { initials: string }) {
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() =>
+    // Use profile avatar_url from DB, fall back to localStorage legacy
     localStorage.getItem(AVATAR_STORAGE_KEY),
   );
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync from profile data when it loads
+  useEffect(() => {
+    if (profile?.avatar_url) {
+      setAvatarUrl(profile.avatar_url);
+    }
+  }, [profile?.avatar_url]);
 
   function handleTap() {
     fileInputRef.current?.click();
@@ -87,13 +96,16 @@ function ProfileAvatar({ initials }: { initials: string }) {
     setUploading(true);
     try {
       const url = await uploadProfilePhoto(user.id, file);
+      // Save to both localStorage (immediate) and Supabase (persistent)
       localStorage.setItem(AVATAR_STORAGE_KEY, url);
       setAvatarUrl(url);
+      // Persist to profiles table
+      const { supabase: sb } = await import('@/lib/supabase');
+      await sb.from('profiles').update({ avatar_url: url } as any).eq('id', user.id);
     } catch (err) {
       console.error('Failed to upload avatar:', err);
     } finally {
       setUploading(false);
-      // Reset the input so the same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
@@ -495,7 +507,7 @@ function PostsTab() {
   const { data: workouts, isLoading } = useWorkouts({ pageSize: 100 });
 
   const displayName = profile?.display_name ?? user?.user_metadata?.username ?? user?.email?.split('@')[0] ?? 'User';
-  const avatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
+  const avatarUrl = profile?.avatar_url ?? localStorage.getItem(AVATAR_STORAGE_KEY);
 
   const photoWorkouts = useMemo(() => {
     if (!workouts) return [];

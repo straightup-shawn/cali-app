@@ -7,6 +7,7 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export interface ProfileUpdate {
   display_name?: string | null;
+  avatar_url?: string | null;
   unit_preference?: string;
   default_rest_seconds?: number;
   onboarding_complete?: boolean;
