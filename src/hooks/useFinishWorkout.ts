@@ -3,7 +3,10 @@ import { useActiveWorkout } from '@/context/ActiveWorkoutContext';
 import { useSaveWorkout, type SaveWorkoutResult } from '@/hooks/useSaveWorkout';
 import { addToPendingSync } from '@/lib/sync';
 import { showSyncToast } from '@/components/SyncToast';
+import { isProgressionEnabled } from '@/lib/feature-flags';
+import { useProgressionEval } from '@/hooks/useProgression';
 import type { PRCheck } from '@/lib/personal-records';
+import type { WorkoutEvalInput } from '@/types/progression';
 
 // =============================================================================
 // Types
@@ -31,6 +34,7 @@ export interface FinishWorkoutState {
 export function useFinishWorkout() {
   const { finishWorkout: contextFinish } = useActiveWorkout();
   const saveWorkoutMutation = useSaveWorkout();
+  const progressionEval = useProgressionEval();
   const [state, setState] = useState<FinishWorkoutState>({
     isFinishing: false,
     error: null,
@@ -67,7 +71,30 @@ export function useFinishWorkout() {
       // Step 3: Save to Supabase + detect PRs
       const result = await saveWorkoutMutation.mutateAsync(workoutData);
 
-      // Step 4: Show celebration if PRs were achieved
+      // Step 4: Progression evaluation (if enabled) — non-blocking
+      if (isProgressionEnabled()) {
+        try {
+          const evalInput: WorkoutEvalInput = {
+            workoutId: result.workoutId,
+            completedAt: result.completedAt,
+            exercises: workoutData.exercises.map((ex) => ({
+              exerciseId: ex.exerciseId,
+              sets: ex.sets.map((s) => ({
+                completed: s.completed,
+                reps: s.reps,
+                weightKg: s.weightKg,
+                durationSeconds: s.durationSeconds,
+              })),
+            })),
+          };
+          await progressionEval.mutateAsync(evalInput);
+        } catch (progressionError) {
+          // Log but don't block workout completion
+          console.error('[Progression] Evaluation failed:', progressionError);
+        }
+      }
+
+      // Step 5: Show celebration if PRs were achieved
       if (result.newPRs.length > 0) {
         setState({
           isFinishing: false,
@@ -98,7 +125,7 @@ export function useFinishWorkout() {
       });
       return null;
     }
-  }, [contextFinish, saveWorkoutMutation]);
+  }, [contextFinish, saveWorkoutMutation, progressionEval]);
 
   const dismissPRCelebration = useCallback(() => {
     setState((prev) => ({ ...prev, showPRCelebration: false }));
