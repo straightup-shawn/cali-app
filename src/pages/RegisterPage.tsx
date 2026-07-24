@@ -118,6 +118,7 @@ export default function RegisterPage() {
               className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
               {...register('password')}
             />
+            <p className="mt-1 text-xs text-gray-500">At least 6 characters, example: 123456</p>
             {errors.password && (
               <p className="mt-1 text-sm text-red-400">
                 {errors.password.message}
@@ -156,7 +157,7 @@ export default function RegisterPage() {
         </form>
 
         <p className="text-center text-sm text-gray-400">
-          Already have an account?{' '}
+          Have an account?{' '}
           <Link
             to="/login"
             className="font-medium text-indigo-400 hover:text-indigo-300"

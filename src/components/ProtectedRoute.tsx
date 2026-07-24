@@ -18,9 +18,9 @@ export default function ProtectedRoute() {
     );
   }
 
-  // Not authenticated — redirect to login
+  // Not authenticated — redirect to register
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/register" replace />;
   }
 
   // Wait for profile to load before making onboarding decision
