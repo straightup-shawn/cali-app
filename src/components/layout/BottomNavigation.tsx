@@ -206,9 +206,10 @@ export default function BottomNavigation() {
       aria-label="Main navigation"
     >
       <ul
-        className={`flex items-center rounded-full border border-white/10 bg-gray-900/80 px-3 py-2 shadow-2xl shadow-black/50 backdrop-blur-xl ${
+        className={`relative flex items-center rounded-full border border-white/[0.15] bg-white/[0.06] px-3 py-2 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.12),inset_0_-1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-[32px] backdrop-saturate-[200%] backdrop-brightness-[1.1] ${
           navItems.length > 3 ? 'gap-0.5' : 'gap-1'
         }`}
+        style={{ WebkitBackdropFilter: 'blur(32px) saturate(200%) brightness(1.1)' }}
       >
         {navItems.map((item) => {
           const Icon = item.icon;
