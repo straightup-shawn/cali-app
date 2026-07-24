@@ -31,13 +31,14 @@ function setupIOSHaptic(): void {
   iosCheckbox.type = 'checkbox';
   iosCheckbox.setAttribute('switch', '');
   iosCheckbox.id = '__ios_haptic_switch';
-  iosCheckbox.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
+  // Position it at 0,0 with size 1x1 — needs to be "in viewport" for activation
+  iosCheckbox.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
 
   // Create label linked to the checkbox
   iosLabel = document.createElement('label');
   iosLabel.htmlFor = '__ios_haptic_switch';
-  iosLabel.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
-  iosLabel.textContent = 'haptic';
+  iosLabel.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
+  iosLabel.textContent = '';
 
   document.body.appendChild(iosCheckbox);
   document.body.appendChild(iosLabel);
@@ -45,12 +46,14 @@ function setupIOSHaptic(): void {
 }
 
 /**
- * Fire the iOS native haptic by clicking the label (toggles the switch).
+ * Fire the iOS native haptic by directly toggling the checkbox.
+ * Must be called within a user activation context (click/touch handler).
  */
 function fireIOSHaptic(): boolean {
-  if (!iosHapticReady || !iosLabel) return false;
+  if (!iosHapticReady || !iosCheckbox) return false;
   try {
-    iosLabel.click();
+    // Direct click on the input itself (not via label)
+    iosCheckbox.click();
     return true;
   } catch {
     return false;
