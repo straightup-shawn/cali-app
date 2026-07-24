@@ -87,7 +87,12 @@ function StartRoutineButton({ routine }: { routine: RoutineWithCount }) {
       type="button"
       onClick={handleStart}
       disabled={starting}
-      className="inline-flex items-center rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-xs font-medium text-gray-200 active:bg-gray-700 disabled:opacity-50"
+      className="inline-flex items-center rounded-lg border px-3 py-2 text-xs font-medium disabled:opacity-50 transition-colors"
+      style={{
+        backgroundColor: 'var(--bg-input)',
+        borderColor: 'var(--border-primary)',
+        color: 'var(--text-primary)',
+      }}
     >
       {starting ? '...' : routine.name}
     </button>
@@ -156,7 +161,11 @@ function RecentWorkouts({ workouts }: { workouts: WorkoutSummary[] }) {
             <Link
               key={workout.id}
               to={`/history/${workout.id}`}
-              className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-800/50 p-3 active:bg-gray-800"
+              className="flex items-center justify-between rounded-lg border p-3 transition-colors"
+              style={{
+                backgroundColor: 'var(--bg-input)',
+                borderColor: 'var(--border-primary)',
+              }}
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-gray-100">
