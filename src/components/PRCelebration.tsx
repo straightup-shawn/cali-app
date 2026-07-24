@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import type { PRCheck } from '@/lib/personal-records';
 import type { RecordType } from '@/types';
+import { hapticCelebration } from '@/lib/haptics';
 
 // =============================================================================
 // Types
@@ -62,6 +64,11 @@ function formatValue(type: RecordType, value: number): string {
  * Displays each new PR with the exercise name, record type, and value.
  */
 export function PRCelebration({ newPRs, onClose }: PRCelebrationProps) {
+  // Haptic celebration when PRs are shown
+  useEffect(() => {
+    if (newPRs.length > 0) hapticCelebration();
+  }, [newPRs]);
+
   if (newPRs.length === 0) return null;
 
   return (

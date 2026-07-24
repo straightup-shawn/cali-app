@@ -42,7 +42,7 @@ export default function App() {
         <SyncManager />
         <SyncToast />
         <ResumeWorkoutPrompt />
-        <Suspense fallback={<div className="flex h-screen items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full" /></div>}>
+        <Suspense fallback={<div className="h-screen bg-gray-950" />}>
         <Routes>
           {/* Public routes — redirect authenticated users to dashboard */}
           <Route element={<PublicRoute />}>

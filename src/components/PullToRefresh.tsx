@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, type ReactNode } from 'react';
+import { hapticMedium } from '@/lib/haptics';
 
 interface PullToRefreshProps {
   onRefresh: () => Promise<void>;
@@ -49,6 +50,7 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
     startYRef.current = null;
 
     if (pullDistance >= THRESHOLD && !refreshing) {
+      hapticMedium();
       setRefreshing(true);
       setPullDistance(THRESHOLD * 0.6); // Hold at spinner position
       try {

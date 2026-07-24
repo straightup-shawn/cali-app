@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { isProgressionEnabled } from '@/lib/feature-flags';
+import { hapticLight } from '@/lib/haptics';
 
 // =============================================================================
 // Icon components
@@ -220,6 +221,7 @@ export default function BottomNavigation() {
               <NavLink
                 to={item.to}
                 aria-label={item.label}
+                onClick={hapticLight}
                 className={({ isActive }) =>
                   `relative flex min-h-[44px] flex-col items-center justify-center gap-0.5 rounded-full py-2 transition-all duration-200 active:scale-95 ${
                     isLarge ? 'min-w-[60px] px-3' : 'min-w-[52px] px-3'

@@ -462,6 +462,8 @@ export default function ActiveWorkoutPage() {
               onUpdate={updateSet}
               onComplete={(exerciseId, setId) => {
                 completeSet(exerciseId, setId);
+                // Haptic feedback on set completion
+                if (navigator.vibrate) navigator.vibrate(20);
                 // Init audio on user gesture (required for iOS)
                 initAudioContext();
                 // Find the exercise's rest duration (local override or from exercise state)
