@@ -9,6 +9,7 @@ import {
   useUpdateRoutine,
 } from '@/hooks/useRoutines';
 import ExercisePicker from '@/components/ExercisePicker';
+import { sendChatMessage, parseRoutineFromResponse } from '@/lib/ai';
 import type { ExerciseType } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -92,6 +93,12 @@ export default function RoutineFormPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // AI generation state
+  const [aiPromptOpen, setAiPromptOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   // Populate form when editing
   useEffect(() => {
@@ -177,23 +184,98 @@ export default function RoutineFormPage() {
     );
   }
 
+  // ------ AI Generate Routine ------
+
+  async function handleAiGenerate() {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const response = await sendChatMessage([
+        { role: 'user', content: `Create a calisthenics routine: ${aiPrompt.trim()}` },
+      ]);
+      const routine = parseRoutineFromResponse(response);
+      if (!routine) {
+        setAiError('AI could not generate a routine. Try a more specific prompt.');
+        return;
+      }
+      // Set routine name if currently empty
+      const currentName = document.querySelector<HTMLInputElement>('#routine-name')?.value;
+      if (!currentName?.trim()) {
+        reset({ name: routine.routine_name });
+      }
+      // Convert AI exercises to local format
+      const newExercises: RoutineExerciseItem[] = routine.exercises.map((ex) => {
+        const type = (ex.exercise_type || 'bodyweight') as ExerciseType;
+        return {
+          key: nextKey(),
+          exercise_id: '', // Will be resolved on save or user can swap
+          name: ex.name,
+          exercise_type: type,
+          target_sets: ex.sets ?? 3,
+          target_reps: ex.reps ?? (needsReps(type) ? 10 : null),
+          target_weight_kg: needsWeight(type) ? 0 : null,
+          target_duration_seconds: ex.duration_seconds ?? (needsDuration(type) ? 30 : null),
+          rest_seconds: ex.rest_seconds ?? null,
+        };
+      });
+      setExercises(newExercises);
+      setAiPromptOpen(false);
+      setAiPrompt('');
+    } catch {
+      setAiError('Failed to reach AI. Check your connection and try again.');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   // ------ Submit ------
 
   async function onSubmit(data: RoutineNameFormData) {
     setServerError(null);
     setIsSaving(true);
 
-    const exercisePayload = exercises.map((ex, idx) => ({
-      exercise_id: ex.exercise_id,
-      position: idx,
-      target_sets: ex.target_sets ?? 3,
-      target_reps: ex.target_reps,
-      target_weight_kg: ex.target_weight_kg,
-      target_duration_seconds: ex.target_duration_seconds,
-      rest_seconds: ex.rest_seconds,
-    }));
-
     try {
+      // Resolve AI-generated exercises that don't have IDs yet
+      const resolvedExercises = await Promise.all(
+        exercises.map(async (ex) => {
+          if (ex.exercise_id) return ex;
+          // Try to find existing exercise by name, or create one
+          const { supabase } = await import('@/lib/supabase');
+          const { data: existing } = await supabase
+            .from('exercises')
+            .select('id')
+            .ilike('name', ex.name)
+            .limit(1)
+            .single();
+          if (existing) {
+            return { ...ex, exercise_id: existing.id };
+          }
+          // Create new exercise
+          const { data: created, error } = await supabase
+            .from('exercises')
+            .insert({
+              name: ex.name,
+              exercise_type: ex.exercise_type,
+              muscle_groups: [],
+            })
+            .select('id')
+            .single();
+          if (error || !created) throw new Error(`Failed to create exercise: ${ex.name}`);
+          return { ...ex, exercise_id: created.id };
+        })
+      );
+
+      const exercisePayload = resolvedExercises.map((ex, idx) => ({
+        exercise_id: ex.exercise_id,
+        position: idx,
+        target_sets: ex.target_sets ?? 3,
+        target_reps: ex.target_reps,
+        target_weight_kg: ex.target_weight_kg,
+        target_duration_seconds: ex.target_duration_seconds,
+        rest_seconds: ex.rest_seconds,
+      }));
+
       if (isEditing && id) {
         await updateRoutine.mutateAsync({
           id,
@@ -280,6 +362,67 @@ export default function RoutineFormPage() {
             <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
           )}
         </div>
+
+        {/* AI Generate Section */}
+        {!isEditing && (
+          <div>
+            {!aiPromptOpen ? (
+              <button
+                type="button"
+                onClick={() => setAiPromptOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-indigo-500/40 bg-indigo-950/20 py-3 text-sm font-medium text-indigo-300 transition-colors hover:bg-indigo-950/40 active:bg-indigo-950/60"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Generate with AI
+              </button>
+            ) : (
+              <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/20 p-3 space-y-3">
+                <label className="block text-xs font-medium text-indigo-300">
+                  Describe what kind of routine you want
+                </label>
+                <input
+                  type="text"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAiGenerate(); } }}
+                  placeholder="e.g. Upper body push day, beginner planche progression..."
+                  className="block h-11 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+                  disabled={aiLoading}
+                  autoFocus
+                />
+                {aiError && (
+                  <p className="text-xs text-red-400">{aiError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleAiGenerate}
+                    disabled={aiLoading || !aiPrompt.trim()}
+                    className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {aiLoading ? (
+                      <>
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Generating…
+                      </>
+                    ) : (
+                      'Generate'
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAiPromptOpen(false); setAiError(null); }}
+                    className="rounded-lg px-3 py-2 text-xs font-medium text-gray-400 hover:text-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Exercises Section */}
         <div>
