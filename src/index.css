@@ -471,6 +471,7 @@ input:focus, select:focus, textarea:focus {
 /* Light mode Progress page node cards */
 .light-mode .bg-gray-900\/50 { background-color: rgba(249, 250, 251, 0.8) !important; }
 .light-mode .bg-gray-900\/80 { background-color: rgba(255, 255, 255, 0.9) !important; }
+.light-mode .bg-gray-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
 .light-mode .bg-green-950\/30 { background-color: rgba(220, 252, 231, 0.5) !important; }
 .light-mode .bg-amber-950\/20 { background-color: rgba(254, 243, 199, 0.5) !important; }
 .light-mode .border-green-500 { border-color: #22c55e !important; }
@@ -478,8 +479,19 @@ input:focus, select:focus, textarea:focus {
 .light-mode .text-amber-300 { color: #b45309 !important; }
 .light-mode .text-green-300 { color: #15803d !important; }
 
+/* Light mode rest timer / interactive pills */
+.light-mode .bg-white\/10 { background-color: rgba(0, 0, 0, 0.06) !important; }
+.light-mode .hover\:bg-white\/20:hover { background-color: rgba(0, 0, 0, 0.1) !important; }
+.light-mode .active\:bg-white\/30:active { background-color: rgba(0, 0, 0, 0.15) !important; }
+.light-mode .bg-gray-700 { background-color: #e5e7eb !important; }
+.light-mode .bg-gray-700\/50 { background-color: rgba(229, 231, 235, 0.5) !important; }
+.light-mode .hover\:bg-gray-600:hover { background-color: #d1d5db !important; }
+.light-mode .active\:bg-gray-500:active { background-color: #9ca3af !important; }
+
 /* Light mode shadow adjustments */
 .light-mode .shadow-black\/20 { --tw-shadow-color: rgba(0, 0, 0, 0.06) !important; }
+.light-mode .shadow-lg { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; }
+.light-mode .shadow-indigo-500\/10 { --tw-shadow-color: color-mix(in srgb, var(--accent) 15%, transparent) !important; }
 .light-mode .shadow-\[0_8px_32px_-8px_rgba\(0\,0\,0\,0\.6\)\,inset_0_1px_0_0_rgba\(255\,255\,255\,0\.12\)\,inset_0_-1px_0_0_rgba\(255\,255\,255\,0\.04\)\] {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06) !important;
 }
