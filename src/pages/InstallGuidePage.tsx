@@ -76,9 +76,9 @@ export default function InstallGuidePage() {
 
         {/* Title */}
         <div>
-          <h1 className="text-xl font-bold text-white">Install Isometrix</h1>
+          <h1 className="text-xl font-bold text-white">Add Isometrix to your phone</h1>
           <p className="mt-2 text-sm text-gray-400">
-            For the best experience, add Isometrix to your home screen.
+            Isometrix works best as an app. Follow the steps below to add it to your home screen — it takes 10 seconds.
           </p>
         </div>
 
@@ -147,12 +147,16 @@ export default function InstallGuidePage() {
           onClick={handleContinue}
           className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-500 active:bg-indigo-700"
         >
-          Continue to Sign Up
+          I've added it — Continue
         </button>
 
-        <p className="text-xs text-gray-500">
-          You can always install later from your browser menu.
-        </p>
+        <button
+          type="button"
+          onClick={handleContinue}
+          className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          Skip for now
+        </button>
       </div>
     </div>
   );
