@@ -867,8 +867,9 @@ function SettingsTab() {
       </section>
 
       {/* About */}
-      <section className="space-y-2">
-        <p className="text-sm italic text-gray-500 text-center">"Move a little every day."</p>
+      <section className="flex flex-col items-center gap-2 py-2">
+        <img src="/branding/wordmark-dark.png" alt="Isometrix" className="h-6 opacity-60" />
+        <p className="text-sm italic text-gray-500">"Move a little every day."</p>
       </section>
 
       {/* Clear Local Data */}
