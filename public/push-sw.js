@@ -21,8 +21,12 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200, 100, 200],
   };
 
+  // Close any existing rest-timer notifications before showing the new one
   event.waitUntil(
-    self.registration.showNotification(title, options)
+    self.registration.getNotifications({ tag: 'rest-timer' }).then(function(notifications) {
+      notifications.forEach(function(n) { n.close(); });
+      return self.registration.showNotification(title, options);
+    })
   );
 });
 
