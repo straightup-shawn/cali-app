@@ -37,6 +37,16 @@ function getInitials(email: string | undefined): string {
   return email.charAt(0).toUpperCase();
 }
 
+/** Derive @username from user metadata or email (strips @isometrix.app domain) */
+function getUsername(user: { user_metadata?: Record<string, any>; email?: string } | null | undefined): string {
+  if (!user) return '@user';
+  const meta = user.user_metadata?.username;
+  if (meta) return `@${meta}`;
+  const email = user.email ?? '';
+  const local = email.split('@')[0];
+  return local ? `@${local}` : '@user';
+}
+
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -365,7 +375,7 @@ function DisplayNameSetting() {
   const { data: profile } = useProfile();
   const { user } = useAuth();
   const updateProfile = useUpdateProfile();
-  const displayName = profile?.display_name ?? user?.email?.split('@')[0] ?? '';
+  const displayName = profile?.display_name ?? user?.user_metadata?.username ?? user?.email?.split('@')[0] ?? '';
   const [value, setValue] = useState(displayName);
   const [saved, setSaved] = useState(false);
 
@@ -484,7 +494,7 @@ function PostsTab() {
   const { data: profile } = useProfile();
   const { data: workouts, isLoading } = useWorkouts({ pageSize: 100 });
 
-  const displayName = profile?.display_name ?? user?.email?.split('@')[0] ?? 'User';
+  const displayName = profile?.display_name ?? user?.user_metadata?.username ?? user?.email?.split('@')[0] ?? 'User';
   const avatarUrl = localStorage.getItem(AVATAR_STORAGE_KEY);
 
   const photoWorkouts = useMemo(() => {
@@ -539,7 +549,7 @@ function PostsTab() {
                 />
               ) : (
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
-                  {getInitials(user?.email)}
+                  {getInitials(user?.user_metadata?.username ?? user?.email)}
                 </div>
               )}
               <div className="min-w-0 flex-1">
@@ -1033,8 +1043,8 @@ export default function ProfilePage() {
   const { data: profile } = useProfile();
   const [activeTab, setActiveTab] = useState<TabId>('posts');
 
-  const initials = getInitials(user?.email);
-  const displayName = profile?.display_name ?? user?.email?.split('@')[0] ?? 'User';
+  const initials = getInitials(user?.user_metadata?.username ?? user?.email);
+  const displayName = profile?.display_name ?? user?.user_metadata?.username ?? user?.email?.split('@')[0] ?? 'User';
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
@@ -1050,7 +1060,7 @@ export default function ProfilePage() {
           <ProfileAvatar initials={initials} />
           <div className="min-w-0 flex-1">
             <EditableDisplayName displayName={displayName} />
-            <p className="mt-0.5 truncate text-sm text-gray-400">{user?.email}</p>
+            <p className="mt-0.5 truncate text-sm text-gray-400">{getUsername(user)}</p>
           </div>
         </div>
       </div>
