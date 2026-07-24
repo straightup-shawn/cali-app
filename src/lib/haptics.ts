@@ -36,33 +36,27 @@ function playThud(intensity: 'light' | 'medium' | 'heavy' = 'medium'): void {
   try {
     const now = audioCtx.currentTime;
 
-    // Low frequency "thump" — drives the speaker cone hard for a split second
+    // Sub-bass frequency that moves air
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    const filter = audioCtx.createBiquadFilter();
 
-    // Sub-bass frequency that moves air
-    const freqMap = { light: 80, medium: 50, heavy: 30 };
-    const volMap = { light: 0.4, medium: 0.6, heavy: 0.85 };
-    const durMap = { light: 0.012, medium: 0.018, heavy: 0.025 };
+    // Tuned for maximum physical feel through iPhone speaker
+    const freqMap = { light: 60, medium: 40, heavy: 25 };
+    const volMap = { light: 0.9, medium: 1.0, heavy: 1.0 };
+    const durMap = { light: 0.025, medium: 0.04, heavy: 0.06 };
 
-    osc.type = 'sine';
+    osc.type = 'square'; // Square wave has more punch than sine
     osc.frequency.setValueAtTime(freqMap[intensity], now);
 
-    // Sharp attack, instant decay — mimics impulse
+    // Maximum attack, fast decay — impulse hit
     gain.gain.setValueAtTime(volMap[intensity], now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + durMap[intensity]);
 
-    // Low-pass filter to remove any harshness
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(150, now);
-
-    osc.connect(filter);
-    filter.connect(gain);
+    osc.connect(gain);
     gain.connect(audioCtx.destination);
 
     osc.start(now);
-    osc.stop(now + durMap[intensity] + 0.005);
+    osc.stop(now + durMap[intensity] + 0.01);
   } catch {
     // Silently fail
   }
