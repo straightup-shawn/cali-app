@@ -276,7 +276,7 @@ export default function ProgressPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
       {/* Header with Momentum */}
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-gray-900/80 backdrop-blur-xl px-4 py-3">
+      <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-100">Progress</h1>
           <div className="flex items-center gap-2">
