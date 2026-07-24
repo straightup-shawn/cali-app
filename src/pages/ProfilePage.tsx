@@ -721,6 +721,8 @@ async function runBackfillAnalysis() {
       notifyBackfillListeners();
     });
     _backfillResult = result;
+    // Save last analyzed timestamp
+    localStorage.setItem('isometrix:last_analyzed', new Date().toISOString());
   } catch {
     _backfillResult = { total: 0, succeeded: 0, failed: -1 };
   } finally {
@@ -757,7 +759,7 @@ function SettingsTab() {
       <section className="space-y-2">
         <h2 className="text-sm font-medium text-gray-300">Exercise Analysis</h2>
         <p className="text-xs text-gray-500">
-          Analyze all exercises to estimate bodyweight contributions for accurate volume tracking.
+          Analyze all exercises to estimate bodyweight contributions and tag muscle groups.
         </p>
         <button
           type="button"
@@ -767,6 +769,22 @@ function SettingsTab() {
         >
           {backfillRunning ? 'Analyzing...' : 'Run Analysis'}
         </button>
+        {/* Last analyzed timestamp */}
+        {(() => {
+          const lastAnalyzed = localStorage.getItem('isometrix:last_analyzed');
+          if (!lastAnalyzed && !backfillRunning && !backfillResult) {
+            return <p className="text-xs text-gray-600">Never analyzed</p>;
+          }
+          if (lastAnalyzed && !backfillRunning && !backfillResult) {
+            const date = new Date(lastAnalyzed);
+            return (
+              <p className="text-xs text-gray-500">
+                Last analyzed: {date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} at {date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            );
+          }
+          return null;
+        })()}
         {backfillRunning && backfillProgress && (
           <div className="space-y-1">
             <div className="flex items-center justify-between text-xs text-gray-400">
