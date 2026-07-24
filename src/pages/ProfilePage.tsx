@@ -1021,10 +1021,10 @@ function DevTools() {
       // Clear all caches
       const cacheNames = await caches.keys();
       await Promise.all(cacheNames.map((name) => caches.delete(name)));
-      // Hard reload
-      window.location.reload();
+      // Navigate to root to ensure proper loading
+      window.location.href = '/';
     } catch {
-      window.location.reload();
+      window.location.href = '/';
     }
   }
 
