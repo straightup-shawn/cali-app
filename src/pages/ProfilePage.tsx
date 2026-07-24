@@ -866,12 +866,6 @@ function SettingsTab() {
         )}
       </section>
 
-      {/* About */}
-      <section className="flex flex-col items-center gap-3 py-4">
-        <img src="/branding/wordmark-light.png" alt="Isometrix" className="w-40 opacity-80" />
-        <p className="text-sm italic text-gray-500">"Move a little every day."</p>
-      </section>
-
       {/* Clear Local Data */}
       <section className="space-y-2">
         <h2 className="text-sm font-medium text-gray-300">Clear Local Data</h2>
@@ -897,6 +891,12 @@ function SettingsTab() {
       >
         Log Out
       </button>
+
+      {/* Branding */}
+      <section className="flex flex-col items-center gap-3 py-6">
+        <img src="/branding/wordmark-light.png" alt="Isometrix" className="w-40 opacity-80" />
+        <p className="text-sm italic text-gray-500">"Move a little every day."</p>
+      </section>
 
       {/* Hidden dev tools — triple tap the version text to reveal */}
       <DevTools />
