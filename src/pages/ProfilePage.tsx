@@ -8,6 +8,7 @@ import { useWeeklyVolume } from '@/hooks/useWeeklyVolume';
 import { uploadProfilePhoto } from '@/lib/storage';
 import { THEMES, getStoredTheme, setStoredTheme, getStoredMode, setStoredMode } from '@/lib/themes';
 import type { ThemeId, ColorMode } from '@/lib/themes';
+import { isMuted, setMuted, hapticMedium } from '@/lib/haptics';
 import { backfillExerciseClassifications } from '@/lib/exercise-backfill';
 import type { BackfillProgress } from '@/lib/exercise-backfill';
 import BodyweightSection from '@/components/profile/BodyweightSection';
@@ -757,6 +758,9 @@ function ThemePicker() {
         </div>
       </div>
 
+      {/* Sound toggle */}
+      <SoundToggle />
+
       {/* Color theme picker */}
       <div className="flex flex-wrap gap-3">
         {Object.values(THEMES).map((theme) => (
@@ -847,6 +851,39 @@ async function runBackfillAnalysis() {
     _backfillProgress = null;
     notifyBackfillListeners();
   }
+}
+
+function SoundToggle() {
+  const [muted, setMutedState] = useState(() => isMuted());
+
+  function toggle() {
+    const newValue = !muted;
+    setMutedState(newValue);
+    setMuted(newValue);
+    if (!newValue) {
+      // Play a preview sound when unmuting
+      hapticMedium();
+    }
+  }
+
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium text-gray-300">Sounds</h2>
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex w-full items-center justify-between rounded-lg border border-gray-700 bg-gray-800 px-4 py-3"
+        style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border-primary)' }}
+      >
+        <span className="text-sm" style={{ color: 'var(--text-primary)' }}>
+          {muted ? '🔇 Sounds off' : '🔊 Sounds on'}
+        </span>
+        <span className={`text-xs font-medium ${muted ? 'text-gray-500' : 'text-indigo-400'}`}>
+          {muted ? 'Muted' : 'Enabled'}
+        </span>
+      </button>
+    </section>
+  );
 }
 
 function SettingsTab() {
