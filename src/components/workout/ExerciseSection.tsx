@@ -360,12 +360,16 @@ export default function ExerciseSection({ exercise, index, total, mode, onUpdate
 
       {/* Remove confirmation */}
       {showRemoveConfirm && (
-        <div className="mt-3 flex items-center gap-2 rounded-lg border border-red-800 bg-red-950/50 p-3">
+        <div
+          className="mt-3 flex items-center gap-2 rounded-lg border border-red-800 p-3"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--bg-secondary) 90%, #7f1d1d)' }}
+        >
           <p className="flex-1 text-xs text-red-300">Remove this exercise and all its sets?</p>
           <button
             type="button"
             onClick={() => setShowRemoveConfirm(false)}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-300 hover:bg-gray-700"
+            className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
           >
             Cancel
           </button>
