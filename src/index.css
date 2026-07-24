@@ -373,7 +373,14 @@ input:focus, select:focus, textarea:focus {
 .light-mode .text-gray-500 { color: #6b7280 !important; }
 .light-mode .text-gray-600 { color: #9ca3af !important; }
 .light-mode .text-gray-700 { color: #6b7280 !important; }
-.light-mode .text-white { color: #111827 !important; }
+.light-mode .text-white { color: var(--text-primary) !important; }
+/* Keep text white on accent/colored backgrounds */
+.light-mode .bg-indigo-600 .text-white,
+.light-mode .bg-indigo-600.text-white,
+.light-mode .bg-red-600 .text-white,
+.light-mode .bg-red-600.text-white,
+.light-mode .bg-green-600 .text-white,
+.light-mode .bg-green-500 .text-white { color: #ffffff !important; }
 .light-mode .border-gray-700 { border-color: #d1d5db !important; }
 .light-mode .border-gray-800 { border-color: #e5e7eb !important; }
 .light-mode .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
@@ -439,6 +446,16 @@ input:focus, select:focus, textarea:focus {
 
 /* Light mode for btn-accent text stays white for contrast */
 .light-mode .btn-accent { color: white !important; }
+.light-mode .bg-indigo-600 .text-white,
+.light-mode [class*="bg-indigo"] .text-white,
+.light-mode [class*="bg-red"] .text-white,
+.light-mode [class*="bg-green"] .text-white { color: white !important; }
+
+/* Fix: text-white on accent backgrounds should STAY white in light mode */
+.light-mode button.bg-indigo-600 { color: white !important; }
+.light-mode button[class*="bg-indigo-600"] { color: white !important; }
+.light-mode .bg-red-600 { color: white !important; }
+.light-mode .rounded-xl.bg-indigo-600 { color: white !important; }
 
 /* Light mode BottomNavigation pill */
 .light-mode .bg-white\/\[0\.06\] { background-color: rgba(255, 255, 255, 0.85) !important; }

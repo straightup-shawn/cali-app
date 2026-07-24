@@ -705,30 +705,30 @@ function ThemePicker() {
       <h2 className="text-sm font-medium text-gray-300">Theme</h2>
 
       {/* Mode toggle */}
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-4">
         <span className="text-sm text-gray-400">Mode</span>
         <div className="flex rounded-lg border border-gray-700 bg-gray-800 p-0.5">
           <button
             type="button"
             onClick={() => handleModeChange('dark')}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`rounded-md px-3 py-1.5 text-sm transition-all ${
               mode === 'dark'
                 ? 'btn-accent shadow-sm'
                 : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            Dark
+            🌙
           </button>
           <button
             type="button"
             onClick={() => handleModeChange('light')}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`rounded-md px-3 py-1.5 text-sm transition-all ${
               mode === 'light'
                 ? 'btn-accent shadow-sm'
                 : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            Light
+            ☀️
           </button>
         </div>
       </div>
