@@ -13,29 +13,64 @@
   </head>
   <body class="bg-gray-950 overscroll-none">
     <div id="root"></div>
-    <!-- Splash screen: epic parallette animation -->
+    <!-- Splash screen: parallettes → logo animation -->
     <div id="splash" style="position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0f;overflow:hidden;">
-      <!-- Parallette Logo Animation -->
-      <div style="position:relative;width:80px;height:100px;">
-        <!-- Left bar (slides in from left) -->
-        <div id="bar-left" style="position:absolute;left:18px;top:0;width:14px;height:100%;background:#fff;border-radius:3px;transform:translateX(-120px);opacity:0;animation:slideFromLeft 0.6s ease-out 0.2s forwards;"></div>
-        <!-- Right bar (slides in from right) -->
-        <div id="bar-right" style="position:absolute;right:18px;top:0;width:14px;height:100%;background:#fff;border-radius:3px;transform:translateX(120px);opacity:0;animation:slideFromRight 0.6s ease-out 0.2s forwards;"></div>
-        <!-- Top crossbar (drops down) -->
-        <div id="bar-top" style="position:absolute;top:0;left:8px;right:8px;height:14px;background:#fff;border-radius:4px;transform:translateY(-60px);opacity:0;animation:dropDown 0.4s ease-out 0.7s forwards;"></div>
-        <!-- Bottom crossbar (rises up) -->
-        <div id="bar-bottom" style="position:absolute;bottom:0;left:8px;right:8px;height:14px;background:#fff;border-radius:4px;transform:translateY(60px);opacity:0;animation:riseUp 0.4s ease-out 0.7s forwards;"></div>
-      </div>
-      <!-- Wordmark fades in after logo assembles -->
-      <div style="margin-top:24px;opacity:0;animation:fadeInText 0.5s ease-out 1.2s forwards;">
+      <svg viewBox="0 0 200 160" width="200" height="160" xmlns="http://www.w3.org/2000/svg">
+        <!-- Person silhouette (fades out) -->
+        <g id="person" style="opacity:1;animation:personFade 0.4s ease-out 1.0s forwards;">
+          <!-- Head -->
+          <circle cx="100" cy="42" r="8" fill="#fff"/>
+          <!-- Body -->
+          <line x1="100" y1="50" x2="100" y2="80" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <!-- Arms reaching down to parallettes -->
+          <line x1="100" y1="58" x2="72" y2="78" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="100" y1="58" x2="128" y2="78" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <!-- Legs (L-sit position) -->
+          <line x1="100" y1="80" x2="85" y2="95" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="85" y1="95" x2="90" y2="110" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="100" y1="80" x2="115" y2="95" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="115" y1="95" x2="110" y2="110" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        </g>
+
+        <!-- Left parallette (starts horizontal, rotates + moves to form left half of I) -->
+        <g id="p-left" style="transform-origin:72px 90px;animation:paralletteLeft 0.8s ease-in-out 1.4s forwards;">
+          <!-- Horizontal bar -->
+          <rect x="52" y="86" width="40" height="8" rx="3" fill="#fff"/>
+          <!-- Legs -->
+          <rect x="58" y="80" width="6" height="14" rx="2" fill="#fff"/>
+          <rect x="80" y="80" width="6" height="14" rx="2" fill="#fff"/>
+        </g>
+
+        <!-- Right parallette (starts horizontal, rotates + moves to form right half of I) -->
+        <g id="p-right" style="transform-origin:128px 90px;animation:paralletteRight 0.8s ease-in-out 1.4s forwards;">
+          <!-- Horizontal bar -->
+          <rect x="108" y="86" width="40" height="8" rx="3" fill="#fff"/>
+          <!-- Legs -->
+          <rect x="114" y="80" width="6" height="14" rx="2" fill="#fff"/>
+          <rect x="136" y="80" width="6" height="14" rx="2" fill="#fff"/>
+        </g>
+      </svg>
+
+      <!-- Wordmark fades in after logo forms -->
+      <div style="margin-top:16px;opacity:0;animation:fadeInWord 0.5s ease-out 2.4s forwards;">
         <img src="/branding/wordmark-light.png" alt="Isometrix" style="width:160px;height:auto;" />
       </div>
+
       <style>
-        @keyframes slideFromLeft{to{transform:translateX(0);opacity:1}}
-        @keyframes slideFromRight{to{transform:translateX(0);opacity:1}}
-        @keyframes dropDown{to{transform:translateY(0);opacity:1}}
-        @keyframes riseUp{to{transform:translateY(0);opacity:1}}
-        @keyframes fadeInText{to{opacity:1}}
+        @keyframes personFade {
+          to { opacity: 0; }
+        }
+        @keyframes paralletteLeft {
+          40% { transform: rotate(-90deg) translate(0, 0); }
+          100% { transform: rotate(-90deg) translate(18px, -10px) scale(0.9); }
+        }
+        @keyframes paralletteRight {
+          40% { transform: rotate(-90deg) translate(0, 0); }
+          100% { transform: rotate(-90deg) translate(-18px, -10px) scale(0.9); }
+        }
+        @keyframes fadeInWord {
+          to { opacity: 1; }
+        }
       </style>
     </div>
     <script type="module" src="/src/main.tsx"></script>
