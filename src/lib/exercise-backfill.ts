@@ -35,11 +35,10 @@ export type ProgressCallback = (progress: BackfillProgress) => void;
 export async function backfillExerciseClassifications(
   onProgress?: ProgressCallback,
 ): Promise<{ total: number; succeeded: number; failed: number }> {
-  // Fetch all unclassified exercises
+  // Fetch ALL exercises — re-tags muscle groups and re-classifies any that need it
   const { data: exercises, error } = await supabase
     .from('exercises')
-    .select('id, name, exercise_type, muscle_groups, instructions')
-    .or('classification_status.is.null,classification_status.eq.pending,classification_status.eq.failed');
+    .select('id, name, exercise_type, muscle_groups, instructions, classification_status');
 
   if (error) throw error;
   if (!exercises || exercises.length === 0) {
