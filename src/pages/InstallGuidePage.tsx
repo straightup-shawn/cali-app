@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 // =============================================================================
 // Platform detection
@@ -58,8 +59,15 @@ export function hasSeenInstallGuide(): boolean {
 export default function InstallGuidePage() {
   const navigate = useNavigate();
   const [platform] = useState<Platform>(detectPlatform);
+  const { canInstall, promptInstall } = useInstallPrompt();
 
   function handleContinue() {
+    localStorage.setItem(DISMISS_KEY, 'true');
+    navigate('/register', { replace: true });
+  }
+
+  async function handleInstallAndContinue() {
+    await promptInstall();
     localStorage.setItem(DISMISS_KEY, 'true');
     navigate('/register', { replace: true });
   }
@@ -141,14 +149,24 @@ export default function InstallGuidePage() {
           )}
         </div>
 
-        {/* Continue button */}
-        <button
-          type="button"
-          onClick={handleContinue}
-          className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-500 active:bg-indigo-700"
-        >
-          I've added it — Continue
-        </button>
+        {/* Install / Continue buttons */}
+        {canInstall ? (
+          <button
+            type="button"
+            onClick={handleInstallAndContinue}
+            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-500 active:bg-indigo-700"
+          >
+            Install App
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleContinue}
+            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-500 active:bg-indigo-700"
+          >
+            I've added it — Continue
+          </button>
+        )}
 
         <button
           type="button"
