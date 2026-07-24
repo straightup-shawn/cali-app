@@ -7,8 +7,12 @@ import { useAuth } from '@/context/AuthContext';
 
 const registerSchema = z
   .object({
-    email: z.string().email('Please enter a valid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    username: z
+      .string()
+      .min(2, 'Username must be at least 2 characters')
+      .max(20, 'Username must be 20 characters or less')
+      .regex(/^[a-zA-Z0-9._]+$/, 'Only letters, numbers, dots, and underscores'),
+    password: z.string().min(3, 'Password must be at least 3 characters'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -36,10 +40,15 @@ export default function RegisterPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await signUp(data.email, data.password);
+      const fakeEmail = `${data.username.toLowerCase()}@isometrix.app`;
+      await signUp(fakeEmail, data.password, data.username);
       navigate('/onboarding');
-    } catch {
-      setError('Unable to create account. Please try again.');
+    } catch (err: any) {
+      if (err?.message?.includes('already registered')) {
+        setError('Username is already taken. Try another one.');
+      } else {
+        setError('Unable to create account. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -69,21 +78,29 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
           <div>
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-sm font-medium text-gray-300"
             >
-              Email
+              Username
             </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              className="mt-1 block h-11 w-full rounded-md border border-gray-700 bg-gray-800 px-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
+            <div className="relative mt-1">
+              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                @
+              </span>
+              <input
+                id="username"
+                type="text"
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="your_name"
+                className="block h-11 w-full rounded-md border border-gray-700 bg-gray-800 pl-8 pr-3 text-base text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
+                {...register('username')}
+              />
+            </div>
+            {errors.username && (
+              <p className="mt-1 text-sm text-red-400">{errors.username.message}</p>
             )}
           </div>
 
