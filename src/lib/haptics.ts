@@ -1,70 +1,19 @@
 /**
  * Haptic Feedback Utility
  * 
- * Uses three strategies in priority order:
- * 1. iOS 18+ hidden checkbox switch trick (real haptic via WebKit form switch)
- * 2. Vibration API (Android)
- * 3. Web Audio API micro-sounds (fallback for older iOS)
+ * Uses two strategies:
+ * 1. Vibration API (Android)
+ * 2. Web Audio API micro-sounds (iOS fallback — real haptics patched in iOS 26.5+)
  */
 
 // =============================================================================
-// iOS Haptic via hidden <input type="checkbox" switch> trick
-// Works on iOS 18+ — toggling a switch input fires a native haptic
-// =============================================================================
-
-let iosHapticReady = false;
-let iosCheckbox: HTMLInputElement | null = null;
-let iosLabel: HTMLLabelElement | null = null;
-
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-/**
- * Set up the hidden checkbox switch for iOS haptic.
- * Must be called once after DOM is ready.
- */
-function setupIOSHaptic(): void {
-  if (!isIOS || iosHapticReady) return;
-
-  // Create hidden checkbox with the switch attribute
-  iosCheckbox = document.createElement('input');
-  iosCheckbox.type = 'checkbox';
-  iosCheckbox.setAttribute('switch', '');
-  iosCheckbox.id = '__ios_haptic_switch';
-  // Position it at 0,0 with size 1x1 — needs to be "in viewport" for activation
-  iosCheckbox.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
-
-  // Create label linked to the checkbox
-  iosLabel = document.createElement('label');
-  iosLabel.htmlFor = '__ios_haptic_switch';
-  iosLabel.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
-  iosLabel.textContent = '';
-
-  document.body.appendChild(iosCheckbox);
-  document.body.appendChild(iosLabel);
-  iosHapticReady = true;
-}
-
-/**
- * Fire the iOS native haptic by directly toggling the checkbox.
- * Must be called within a user activation context (click/touch handler).
- */
-function fireIOSHaptic(): boolean {
-  if (!iosHapticReady || !iosCheckbox) return false;
-  try {
-    // Direct click on the input itself (not via label)
-    iosCheckbox.click();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// =============================================================================
-// Web Audio fallback (for older iOS without switch support)
+// Web Audio fallback
 // =============================================================================
 
 let audioCtx: AudioContext | null = null;
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 /**
  * Initialize audio context on first user interaction.
@@ -76,8 +25,6 @@ export function initHapticAudio(): void {
   } catch {
     // Audio not supported
   }
-  // Also set up iOS haptic DOM elements
-  setupIOSHaptic();
 }
 
 function playTone(
@@ -111,12 +58,7 @@ function playTone(
  * Light tap — nav switches, toggles, minor selections
  */
 export function hapticLight(): void {
-  if (isIOS) {
-    fireIOSHaptic(); // Best-effort native haptic
-    playTone(4200, 0.015, 0.06, 'sine'); // Always play audio too
-    return;
-  }
-  if (navigator.vibrate) {
+  if (!isIOS && navigator.vibrate) {
     navigator.vibrate(10);
     return;
   }
@@ -127,12 +69,7 @@ export function hapticLight(): void {
  * Medium tap — set completion, saves, pull-to-refresh
  */
 export function hapticMedium(): void {
-  if (isIOS) {
-    fireIOSHaptic();
-    playTone(2800, 0.025, 0.08, 'sine');
-    return;
-  }
-  if (navigator.vibrate) {
+  if (!isIOS && navigator.vibrate) {
     navigator.vibrate(20);
     return;
   }
@@ -143,14 +80,7 @@ export function hapticMedium(): void {
  * Success — achievements, PRs, skill unlocks
  */
 export function hapticSuccess(): void {
-  if (isIOS) {
-    fireIOSHaptic();
-    setTimeout(() => fireIOSHaptic(), 80);
-    playTone(1200, 0.04, 0.07, 'sine');
-    setTimeout(() => playTone(1800, 0.06, 0.09, 'sine'), 50);
-    return;
-  }
-  if (navigator.vibrate) {
+  if (!isIOS && navigator.vibrate) {
     navigator.vibrate([15, 50, 15]);
     return;
   }
@@ -162,12 +92,7 @@ export function hapticSuccess(): void {
  * Heavy — finishing a workout, major confirmations
  */
 export function hapticHeavy(): void {
-  if (isIOS) {
-    fireIOSHaptic();
-    playTone(200, 0.04, 0.12, 'triangle');
-    return;
-  }
-  if (navigator.vibrate) {
+  if (!isIOS && navigator.vibrate) {
     navigator.vibrate([30, 50, 30]);
     return;
   }
@@ -178,14 +103,7 @@ export function hapticHeavy(): void {
  * Error/warning — failed actions, discard confirmations
  */
 export function hapticError(): void {
-  if (isIOS) {
-    fireIOSHaptic();
-    setTimeout(() => fireIOSHaptic(), 60);
-    playTone(150, 0.05, 0.1, 'sawtooth');
-    setTimeout(() => playTone(120, 0.05, 0.08, 'sawtooth'), 60);
-    return;
-  }
-  if (navigator.vibrate) {
+  if (!isIOS && navigator.vibrate) {
     navigator.vibrate([40, 30, 40, 30, 40]);
     return;
   }
@@ -197,16 +115,7 @@ export function hapticError(): void {
  * Celebration — PRs, first unlocks, milestones
  */
 export function hapticCelebration(): void {
-  if (isIOS) {
-    fireIOSHaptic();
-    setTimeout(() => fireIOSHaptic(), 100);
-    setTimeout(() => fireIOSHaptic(), 220);
-    playTone(800, 0.05, 0.06, 'sine');
-    setTimeout(() => playTone(1200, 0.05, 0.08, 'sine'), 80);
-    setTimeout(() => playTone(1600, 0.08, 0.10, 'sine'), 180);
-    return;
-  }
-  if (navigator.vibrate) {
+  if (!isIOS && navigator.vibrate) {
     navigator.vibrate([10, 40, 10, 40, 10, 40, 20, 60, 30]);
     return;
   }
