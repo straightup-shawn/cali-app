@@ -282,6 +282,9 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
   }, []);
 
   const completeSet = useCallback((exerciseId: string, setId: string) => {
+    // Fire haptic feedback on set completion
+    import('@/lib/haptics').then(({ hapticMedium }) => hapticMedium());
+
     setWorkout((prev) => {
       if (!prev) return prev;
       return {
