@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { useTimer } from '@/hooks/useTimer';
 import { sendTimerNotification } from '@/lib/notifications';
 import { playTimerAlert } from '@/lib/audio-alert';
+import { scheduleTimerPush, cancelTimerPush } from '@/lib/push-subscription';
 
 interface RestTimerOverlayProps {
   /** Default countdown duration in seconds (from profile or exercise override) */
@@ -70,6 +71,8 @@ export default function RestTimerOverlay({
       reset(defaultSeconds);
       // Small delay to allow reset to settle before starting
       const id = setTimeout(() => start(), 50);
+      // Schedule server-side push for when timer completes (iOS background support)
+      scheduleTimerPush(defaultSeconds);
       return () => clearTimeout(id);
     }
   }, [visible, defaultSeconds, reset, start]);
@@ -91,6 +94,7 @@ export default function RestTimerOverlay({
 
   const handleSkip = () => {
     reset(0);
+    cancelTimerPush();
     onClose();
   };
 

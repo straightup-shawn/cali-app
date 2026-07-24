@@ -1,10 +1,11 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicRoute from '@/components/PublicRoute';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppShell from '@/components/layout/AppShell';
 import { ResumeWorkoutPrompt } from '@/components/ResumeWorkoutPrompt';
 import { ActiveWorkoutProvider } from '@/context/ActiveWorkoutContext';
+import { useAuth } from '@/context/AuthContext';
 import SyncToast from '@/components/SyncToast';
 import { useSyncManager } from '@/hooks/useSyncManager';
 
@@ -36,11 +37,25 @@ function SyncManager() {
   return null;
 }
 
+/** Subscribe to push notifications after auth */
+function PushSubscriber() {
+  const { user } = useAuth();
+  useEffect(() => {
+    if (user) {
+      import('@/lib/push-subscription').then(({ subscribeToPush }) => {
+        subscribeToPush();
+      });
+    }
+  }, [user]);
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ActiveWorkoutProvider>
         <SyncManager />
+        <PushSubscriber />
         <SyncToast />
         <ResumeWorkoutPrompt />
         <Suspense fallback={<div className="h-screen bg-gray-950" />}>
