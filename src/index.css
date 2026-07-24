@@ -459,8 +459,10 @@ input:focus, select:focus, textarea:focus {
 .light-mode .btn-accent { color: white !important; }
 .light-mode .bg-indigo-600 .text-white,
 .light-mode [class*="bg-indigo"] .text-white,
-.light-mode [class*="bg-red"] .text-white,
-.light-mode [class*="bg-green"] .text-white { color: white !important; }
+.light-mode [class*="bg-red"] .text-white { color: white !important; }
+/* Only keep white text on solid green buttons, not tinted green rows */
+.light-mode .bg-green-500 .text-white,
+.light-mode .bg-green-600 .text-white { color: white !important; }
 
 /* Fix: text-white on accent backgrounds should STAY white in light mode */
 .light-mode button.bg-indigo-600 { color: white !important; }
