@@ -28,7 +28,7 @@ export function InstallBanner() {
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white">Install Calisthenics Log</p>
+          <p className="text-sm font-semibold text-white">Install Isometrix</p>
           <p className="mt-0.5 text-xs text-white/80">
             Add to your home screen for quick access and offline use.
           </p>

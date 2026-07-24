@@ -155,7 +155,7 @@ export const THEMES = {
 export type ThemeId = keyof typeof THEMES;
 export type Theme = (typeof THEMES)[ThemeId];
 
-const STORAGE_KEY = 'calisthenics-log:theme';
+const STORAGE_KEY = 'isometrix:theme';
 
 export function getStoredTheme(): ThemeId {
   return (localStorage.getItem(STORAGE_KEY) as ThemeId) ?? 'indigo';

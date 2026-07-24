@@ -1,6 +1,6 @@
 import type { ActiveWorkout } from '@/types';
 
-const STORAGE_KEY = 'calisthenics-log:active-workout';
+const STORAGE_KEY = 'isometrix:active-workout';
 
 /**
  * Persists the current active workout state to localStorage.

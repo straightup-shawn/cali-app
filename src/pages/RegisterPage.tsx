@@ -62,7 +62,7 @@ export default function RegisterPage() {
             Create your account
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            Start tracking your calisthenics progress
+            Start tracking your progress
           </p>
         </div>
 

@@ -16,7 +16,7 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxDelayMs: 30000,
 };
 
-const PENDING_SYNC_KEY = 'calisthenics-log:pending-sync';
+const PENDING_SYNC_KEY = 'isometrix:pending-sync';
 
 // =============================================================================
 // Exponential Backoff Retry

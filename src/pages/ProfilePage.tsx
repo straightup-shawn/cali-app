@@ -17,7 +17,7 @@ import type { UnitPreference } from '@/lib/units';
 // Constants
 // =============================================================================
 
-const AVATAR_STORAGE_KEY = 'calisthenics-log:avatar-url';
+const AVATAR_STORAGE_KEY = 'isometrix:avatar-url';
 
 const REST_PRESETS = [30, 60, 90, 120, 180] as const;
 

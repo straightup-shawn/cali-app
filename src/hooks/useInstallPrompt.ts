@@ -5,7 +5,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const DISMISS_KEY = 'calisthenics-log:install-dismissed';
+const DISMISS_KEY = 'isometrix:install-dismissed';
 
 export function useInstallPrompt() {
   const [canInstall, setCanInstall] = useState(false);

@@ -1,4 +1,4 @@
-# Calisthenics Log
+# Isometrix
 
 A mobile-first progressive web application for tracking calisthenics workouts. Designed for fast, one-handed interaction during active training sessions.
 
