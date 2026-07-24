@@ -67,15 +67,19 @@ export default function SessionDrawer({
 
       {/* Panel */}
       <div
-        className={`fixed bottom-0 inset-x-0 rounded-t-2xl bg-gray-900/95 backdrop-blur-xl max-h-[85vh] overflow-y-auto transition-transform duration-300 ease-out pb-[env(safe-area-inset-bottom)] ${
+        className={`fixed bottom-0 inset-x-0 rounded-t-2xl backdrop-blur-xl max-h-[85vh] overflow-y-auto transition-transform duration-300 ease-out pb-[env(safe-area-inset-bottom)] ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
+        style={{ backgroundColor: 'var(--bg-secondary)' }}
         role="dialog"
         aria-modal="true"
         aria-label="Chat sessions"
       >
         {/* Handle bar */}
-        <div className="sticky top-0 z-10 flex justify-center pt-3 pb-2 bg-gray-900/95 backdrop-blur-xl rounded-t-2xl">
+        <div
+          className="sticky top-0 z-10 flex justify-center pt-3 pb-2 backdrop-blur-xl rounded-t-2xl"
+          style={{ backgroundColor: 'var(--bg-secondary)' }}
+        >
           <div className="w-10 h-1 rounded-full bg-gray-600" />
         </div>
 
@@ -121,8 +125,9 @@ export default function SessionDrawer({
                       className={`flex items-center gap-2 rounded-lg px-3 py-3 transition-colors ${
                         isActive
                           ? 'border-l-2 border-indigo-500 bg-indigo-950/30'
-                          : 'hover:bg-gray-800/50 active:bg-gray-800'
+                          : ''
                       }`}
+                      style={!isActive ? { backgroundColor: 'transparent' } : undefined}
                     >
                       <button
                         type="button"
