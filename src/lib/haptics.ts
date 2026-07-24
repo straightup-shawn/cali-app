@@ -3,11 +3,11 @@
  * 
  * Uses two strategies:
  * 1. Vibration API (Android)
- * 2. Web Audio API micro-sounds (iOS fallback — real haptics patched in iOS 26.5+)
+ * 2. Sub-bass audio thuds (iOS — mimics haptic tap feel through speaker)
  */
 
 // =============================================================================
-// Web Audio fallback
+// Web Audio — sub-bass haptic simulation
 // =============================================================================
 
 let audioCtx: AudioContext | null = null;
@@ -27,24 +27,42 @@ export function initHapticAudio(): void {
   }
 }
 
-function playTone(
-  freq: number,
-  duration: number,
-  volume: number = 0.08,
-  type: OscillatorType = 'sine',
-): void {
+/**
+ * Play a haptic-like thud — very short, low frequency burst that
+ * rattles the iPhone speaker to simulate a physical tap.
+ */
+function playThud(intensity: 'light' | 'medium' | 'heavy' = 'medium'): void {
   if (!audioCtx) return;
   try {
+    const now = audioCtx.currentTime;
+
+    // Low frequency "thump" — drives the speaker cone hard for a split second
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    osc.connect(gain);
+    const filter = audioCtx.createBiquadFilter();
+
+    // Sub-bass frequency that moves air
+    const freqMap = { light: 80, medium: 50, heavy: 30 };
+    const volMap = { light: 0.4, medium: 0.6, heavy: 0.85 };
+    const durMap = { light: 0.012, medium: 0.018, heavy: 0.025 };
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freqMap[intensity], now);
+
+    // Sharp attack, instant decay — mimics impulse
+    gain.gain.setValueAtTime(volMap[intensity], now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + durMap[intensity]);
+
+    // Low-pass filter to remove any harshness
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(150, now);
+
+    osc.connect(filter);
+    filter.connect(gain);
     gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + duration);
+
+    osc.start(now);
+    osc.stop(now + durMap[intensity] + 0.005);
   } catch {
     // Silently fail
   }
@@ -62,7 +80,7 @@ export function hapticLight(): void {
     navigator.vibrate(10);
     return;
   }
-  playTone(4200, 0.015, 0.06, 'sine');
+  playThud('light');
 }
 
 /**
@@ -73,7 +91,7 @@ export function hapticMedium(): void {
     navigator.vibrate(20);
     return;
   }
-  playTone(2800, 0.025, 0.08, 'sine');
+  playThud('medium');
 }
 
 /**
@@ -84,8 +102,8 @@ export function hapticSuccess(): void {
     navigator.vibrate([15, 50, 15]);
     return;
   }
-  playTone(1200, 0.04, 0.07, 'sine');
-  setTimeout(() => playTone(1800, 0.06, 0.09, 'sine'), 50);
+  playThud('light');
+  setTimeout(() => playThud('medium'), 60);
 }
 
 /**
@@ -96,7 +114,7 @@ export function hapticHeavy(): void {
     navigator.vibrate([30, 50, 30]);
     return;
   }
-  playTone(200, 0.04, 0.12, 'triangle');
+  playThud('heavy');
 }
 
 /**
@@ -107,8 +125,8 @@ export function hapticError(): void {
     navigator.vibrate([40, 30, 40, 30, 40]);
     return;
   }
-  playTone(150, 0.05, 0.1, 'sawtooth');
-  setTimeout(() => playTone(120, 0.05, 0.08, 'sawtooth'), 60);
+  playThud('medium');
+  setTimeout(() => playThud('medium'), 70);
 }
 
 /**
@@ -119,7 +137,7 @@ export function hapticCelebration(): void {
     navigator.vibrate([10, 40, 10, 40, 10, 40, 20, 60, 30]);
     return;
   }
-  playTone(800, 0.05, 0.06, 'sine');
-  setTimeout(() => playTone(1200, 0.05, 0.08, 'sine'), 80);
-  setTimeout(() => playTone(1600, 0.08, 0.10, 'sine'), 180);
+  playThud('light');
+  setTimeout(() => playThud('medium'), 80);
+  setTimeout(() => playThud('heavy'), 180);
 }
