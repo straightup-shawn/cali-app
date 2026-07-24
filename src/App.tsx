@@ -27,6 +27,7 @@ const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
 const WorkoutHubPage = lazy(() => import('@/pages/WorkoutHubPage'));
 const AICoachPage = lazy(() => import('@/pages/AICoachPage'));
 const EditWorkoutPage = lazy(() => import('@/pages/EditWorkoutPage'));
+const ProgressPage = lazy(() => import('@/pages/ProgressPage'));
 
 /** Activates the sync manager hook within the component tree */
 function SyncManager() {
@@ -73,6 +74,7 @@ export default function App() {
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/history/:id" element={<WorkoutDetailPage />} />
               <Route path="/history/:id/edit" element={<EditWorkoutPage />} />
+              <Route path="/progress" element={<ProgressPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/workout/active" element={<ActiveWorkoutPage />} />
             </Route>
