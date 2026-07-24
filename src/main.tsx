@@ -2,13 +2,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
-import { applyTheme, getStoredTheme } from '@/lib/themes';
+import { applyTheme, getStoredTheme, applyMode, getStoredMode } from '@/lib/themes';
 import { initHapticAudio } from '@/lib/haptics';
 import App from './App';
 import './index.css';
 
 // Apply persisted color theme immediately to avoid flash
 applyTheme(getStoredTheme());
+applyMode(getStoredMode());
 
 // Initialize haptic audio on first user interaction (required for iOS)
 document.addEventListener('touchstart', () => initHapticAudio(), { once: true });

@@ -6,8 +6,8 @@ import { useWorkouts } from '@/hooks/useWorkouts';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
 import { useWeeklyVolume } from '@/hooks/useWeeklyVolume';
 import { uploadProfilePhoto } from '@/lib/storage';
-import { THEMES, getStoredTheme, setStoredTheme } from '@/lib/themes';
-import type { ThemeId } from '@/lib/themes';
+import { THEMES, getStoredTheme, setStoredTheme, getStoredMode, setStoredMode } from '@/lib/themes';
+import type { ThemeId, ColorMode } from '@/lib/themes';
 import { backfillExerciseClassifications } from '@/lib/exercise-backfill';
 import type { BackfillProgress } from '@/lib/exercise-backfill';
 import BodyweightSection from '@/components/profile/BodyweightSection';
@@ -688,15 +688,52 @@ function StatCard({
 
 function ThemePicker() {
   const [current, setCurrent] = useState<ThemeId>(getStoredTheme());
+  const [mode, setMode] = useState<ColorMode>(getStoredMode());
 
   function handleSelect(id: ThemeId) {
     setStoredTheme(id);
     setCurrent(id);
   }
 
+  function handleModeChange(newMode: ColorMode) {
+    setStoredMode(newMode);
+    setMode(newMode);
+  }
+
   return (
-    <section className="space-y-2">
+    <section className="space-y-3">
       <h2 className="text-sm font-medium text-gray-300">Theme</h2>
+
+      {/* Mode toggle */}
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-sm text-gray-400">Mode</span>
+        <div className="flex rounded-lg border border-gray-700 bg-gray-800 p-0.5">
+          <button
+            type="button"
+            onClick={() => handleModeChange('dark')}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+              mode === 'dark'
+                ? 'btn-accent shadow-sm'
+                : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            Dark
+          </button>
+          <button
+            type="button"
+            onClick={() => handleModeChange('light')}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+              mode === 'light'
+                ? 'btn-accent shadow-sm'
+                : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            Light
+          </button>
+        </div>
+      </div>
+
+      {/* Color theme picker */}
       <div className="flex flex-wrap gap-3">
         {Object.values(THEMES).map((theme) => (
           <button

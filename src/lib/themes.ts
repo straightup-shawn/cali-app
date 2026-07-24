@@ -111,6 +111,45 @@ export const THEMES = {
     accentGlow: 'rgba(148, 163, 184, 0.12)',
     accentGlowHover: 'rgba(148, 163, 184, 0.25)',
   },
+
+  // === Minimalist palettes ===
+
+  slate: {
+    id: 'slate',
+    name: 'Slate',
+    accent: '#475569',
+    accentLight: '#64748b',
+    accentDark: '#334155',
+    accentGlow: 'rgba(71, 85, 105, 0.15)',
+    accentGlowHover: 'rgba(71, 85, 105, 0.30)',
+  },
+  sand: {
+    id: 'sand',
+    name: 'Sand',
+    accent: '#a8a29e',
+    accentLight: '#d6d3d1',
+    accentDark: '#78716c',
+    accentGlow: 'rgba(168, 162, 158, 0.12)',
+    accentGlowHover: 'rgba(168, 162, 158, 0.25)',
+  },
+  sage: {
+    id: 'sage',
+    name: 'Sage',
+    accent: '#6b8f71',
+    accentLight: '#8fb996',
+    accentDark: '#4a7050',
+    accentGlow: 'rgba(107, 143, 113, 0.15)',
+    accentGlowHover: 'rgba(107, 143, 113, 0.30)',
+  },
+  coral: {
+    id: 'coral',
+    name: 'Coral',
+    accent: '#e07a5f',
+    accentLight: '#f0a58e',
+    accentDark: '#c25a3f',
+    accentGlow: 'rgba(224, 122, 95, 0.15)',
+    accentGlowHover: 'rgba(224, 122, 95, 0.30)',
+  },
 } as const;
 
 export type ThemeId = keyof typeof THEMES;
@@ -135,4 +174,32 @@ export function applyTheme(id: ThemeId): void {
   root.style.setProperty('--accent-dark', theme.accentDark);
   root.style.setProperty('--accent-glow', theme.accentGlow);
   root.style.setProperty('--accent-glow-hover', theme.accentGlowHover);
+}
+
+// =============================================================================
+// Color Mode (Light / Dark)
+// =============================================================================
+
+export type ColorMode = 'dark' | 'light';
+
+const MODE_STORAGE_KEY = 'isometrix:color-mode';
+
+export function getStoredMode(): ColorMode {
+  return (localStorage.getItem(MODE_STORAGE_KEY) as ColorMode) ?? 'dark';
+}
+
+export function setStoredMode(mode: ColorMode): void {
+  localStorage.setItem(MODE_STORAGE_KEY, mode);
+  applyMode(mode);
+}
+
+export function applyMode(mode: ColorMode): void {
+  const root = document.documentElement;
+  if (mode === 'light') {
+    root.classList.add('light-mode');
+    root.classList.remove('dark-mode');
+  } else {
+    root.classList.add('dark-mode');
+    root.classList.remove('light-mode');
+  }
 }
