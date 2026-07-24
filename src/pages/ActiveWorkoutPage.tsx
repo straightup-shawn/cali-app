@@ -365,9 +365,10 @@ export default function ActiveWorkoutPage() {
     if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
     else { import('@/lib/haptics').then(m => m.hapticHeavy()); }
     const result = await doFinish();
+    if (!result) return; // Save failed or offline
     // If no PRs to celebrate, navigate directly to summary
-    if (result && !result.newPRs.length) {
-      navigate('/workout/summary', { state: result });
+    if (!result.newPRs.length) {
+      navigate('/workout/summary', { state: result, replace: true });
     }
     // If PRs exist, navigation happens after PR celebration is dismissed
   }, [doFinish, navigate]);
@@ -398,8 +399,8 @@ export default function ActiveWorkoutPage() {
   );
 
   // If no workout is active and not showing PRs, auto-navigate to dashboard
-  if (!workout && !showPRCelebration && !finishing) {
-    // Use effect to navigate instead of rendering a dead-end
+  // But NOT if we're in the middle of finishing (avoids race condition)
+  if (!workout && !showPRCelebration && !finishing && !finishResult) {
     navigate('/dashboard', { replace: true });
     return null;
   }
