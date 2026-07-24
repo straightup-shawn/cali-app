@@ -220,6 +220,7 @@ export default function BottomNavigation() {
             <li key={item.to}>
               <NavLink
                 to={item.to}
+                replace
                 aria-label={item.label}
                 onClick={hapticLight}
                 className={({ isActive }) =>
