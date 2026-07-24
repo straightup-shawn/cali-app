@@ -109,8 +109,8 @@ function playTone(
  */
 export function hapticLight(): void {
   if (isIOS) {
-    if (fireIOSHaptic()) return;
-    playTone(4200, 0.015, 0.06, 'sine');
+    fireIOSHaptic(); // Best-effort native haptic
+    playTone(4200, 0.015, 0.06, 'sine'); // Always play audio too
     return;
   }
   if (navigator.vibrate) {
@@ -125,7 +125,7 @@ export function hapticLight(): void {
  */
 export function hapticMedium(): void {
   if (isIOS) {
-    if (fireIOSHaptic()) return;
+    fireIOSHaptic();
     playTone(2800, 0.025, 0.08, 'sine');
     return;
   }
@@ -143,6 +143,8 @@ export function hapticSuccess(): void {
   if (isIOS) {
     fireIOSHaptic();
     setTimeout(() => fireIOSHaptic(), 80);
+    playTone(1200, 0.04, 0.07, 'sine');
+    setTimeout(() => playTone(1800, 0.06, 0.09, 'sine'), 50);
     return;
   }
   if (navigator.vibrate) {
@@ -159,6 +161,7 @@ export function hapticSuccess(): void {
 export function hapticHeavy(): void {
   if (isIOS) {
     fireIOSHaptic();
+    playTone(200, 0.04, 0.12, 'triangle');
     return;
   }
   if (navigator.vibrate) {
@@ -175,6 +178,8 @@ export function hapticError(): void {
   if (isIOS) {
     fireIOSHaptic();
     setTimeout(() => fireIOSHaptic(), 60);
+    playTone(150, 0.05, 0.1, 'sawtooth');
+    setTimeout(() => playTone(120, 0.05, 0.08, 'sawtooth'), 60);
     return;
   }
   if (navigator.vibrate) {
@@ -193,6 +198,9 @@ export function hapticCelebration(): void {
     fireIOSHaptic();
     setTimeout(() => fireIOSHaptic(), 100);
     setTimeout(() => fireIOSHaptic(), 220);
+    playTone(800, 0.05, 0.06, 'sine');
+    setTimeout(() => playTone(1200, 0.05, 0.08, 'sine'), 80);
+    setTimeout(() => playTone(1600, 0.08, 0.10, 'sine'), 180);
     return;
   }
   if (navigator.vibrate) {
