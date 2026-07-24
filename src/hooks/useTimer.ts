@@ -33,6 +33,7 @@ export function useTimer(config: TimerConfig): TimerState {
   const startEpochRef = useRef<number>(0);
   const accumulatedRef = useRef<number>(mode === 'countdown' ? initialSeconds : 0);
   const onCompleteRef = useRef(onComplete);
+  const isRunningRef = useRef(false);
 
   // Keep onComplete ref in sync without causing re-renders
   useEffect(() => {
@@ -59,6 +60,7 @@ export function useTimer(config: TimerConfig): TimerState {
 
       if (newSeconds <= 0) {
         clearTimer();
+        isRunningRef.current = false;
         setIsRunning(false);
         onCompleteRef.current?.();
       }
@@ -66,12 +68,13 @@ export function useTimer(config: TimerConfig): TimerState {
   }, [mode, clearTimer]);
 
   const start = useCallback(() => {
-    if (intervalRef.current !== null) return; // already running
+    if (isRunningRef.current) return; // already running
 
     // For countdown, don't start if already at 0
     if (mode === 'countdown' && accumulatedRef.current <= 0) return;
 
     startEpochRef.current = Date.now();
+    isRunningRef.current = true;
     setIsRunning(true);
 
     intervalRef.current = setInterval(tick, 1000);
@@ -80,7 +83,7 @@ export function useTimer(config: TimerConfig): TimerState {
   }, [mode, tick]);
 
   const pause = useCallback(() => {
-    if (intervalRef.current === null) return; // not running
+    if (!isRunningRef.current) return; // not running
 
     const elapsed = Math.floor((Date.now() - startEpochRef.current) / 1000);
 
@@ -91,6 +94,7 @@ export function useTimer(config: TimerConfig): TimerState {
     }
 
     clearTimer();
+    isRunningRef.current = false;
     setIsRunning(false);
     setSeconds(accumulatedRef.current);
   }, [mode, clearTimer]);
@@ -98,6 +102,7 @@ export function useTimer(config: TimerConfig): TimerState {
   const reset = useCallback(
     (newSeconds?: number) => {
       clearTimer();
+      isRunningRef.current = false;
       setIsRunning(false);
 
       const resetValue = newSeconds ?? (mode === 'countdown' ? initialSeconds : 0);
@@ -143,6 +148,26 @@ export function useTimer(config: TimerConfig): TimerState {
       clearTimer();
     };
   }, [clearTimer]);
+
+  // iOS workaround: When the app resumes from background, catch up immediately.
+  // iOS suspends setInterval after ~30s, so the timer freezes. On resume, we
+  // recalculate based on real elapsed time and fire onComplete if expired.
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && isRunningRef.current) {
+        // Timer was/should be running — force a tick to catch up
+        // Also restart the interval in case iOS killed it
+        clearTimer();
+        tick();
+        if (isRunningRef.current) {
+          // Still running after tick (countdown didn't complete)
+          intervalRef.current = setInterval(tick, 1000);
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [tick, clearTimer]);
 
   return { seconds, isRunning, start, pause, reset, adjustTime };
 }
