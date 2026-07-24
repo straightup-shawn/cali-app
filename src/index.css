@@ -519,6 +519,25 @@ input:focus, select:focus, textarea:focus {
 .light-mode .hover\:bg-indigo-900:hover { background-color: color-mix(in srgb, var(--accent) 20%, #e5e7eb) !important; }
 .light-mode .hover\:bg-red-900:hover { background-color: rgba(254, 202, 202, 0.8) !important; }
 
+/* Light mode: exercise type badge colors */
+.light-mode .bg-green-900\/50 { background-color: rgba(220, 252, 231, 0.7) !important; }
+.light-mode .bg-blue-900\/50 { background-color: rgba(219, 234, 254, 0.7) !important; }
+.light-mode .bg-purple-900\/50 { background-color: rgba(237, 233, 254, 0.7) !important; }
+.light-mode .bg-orange-900\/50 { background-color: rgba(255, 237, 213, 0.7) !important; }
+.light-mode .bg-red-900\/50 { background-color: rgba(254, 226, 226, 0.7) !important; }
+.light-mode .bg-amber-900\/50 { background-color: rgba(254, 243, 199, 0.7) !important; }
+.light-mode .bg-yellow-900\/50 { background-color: rgba(254, 249, 195, 0.7) !important; }
+.light-mode .bg-indigo-900\/50 { background-color: color-mix(in srgb, var(--accent) 12%, rgba(238, 242, 255, 0.7)) !important; }
+.light-mode .bg-indigo-800\/50 { background-color: color-mix(in srgb, var(--accent) 15%, rgba(238, 242, 255, 0.6)) !important; }
+.light-mode .text-green-300 { color: #15803d !important; }
+.light-mode .text-blue-300 { color: #1d4ed8 !important; }
+.light-mode .text-purple-300 { color: #7e22ce !important; }
+.light-mode .text-orange-300 { color: #c2410c !important; }
+.light-mode .text-red-300 { color: #b91c1c !important; }
+.light-mode .text-indigo-300 { color: var(--accent) !important; }
+.light-mode .text-indigo-200 { color: var(--accent) !important; }
+.light-mode .text-yellow-300 { color: #a16207 !important; }
+
 /* Light mode shadow adjustments */
 .light-mode .shadow-black\/20 { --tw-shadow-color: rgba(0, 0, 0, 0.06) !important; }
 .light-mode .shadow-lg { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; }
