@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { ActiveSet, ExerciseType } from '@/types';
 import { useUnitPreference } from '@/hooks/useUnitPreference';
 import ExerciseDurationTimer from '@/components/workout/ExerciseDurationTimer';
+import HapticButton from '@/components/HapticButton';
 
 // =============================================================================
 // Types
@@ -417,8 +418,7 @@ export default function SetRow({
         <div className="flex-1">{renderInputs()}</div>
 
         {/* Complete/uncomplete set button */}
-        <button
-          type="button"
+        <HapticButton
           onClick={handleComplete}
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors ${
             set.completed
@@ -436,7 +436,7 @@ export default function SetRow({
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
-        </button>
+        </HapticButton>
       </div>
 
       {/* Optional RPE/RIR selector (expandable) */}
