@@ -390,7 +390,8 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-red-600 .text-white,
 .light-mode .bg-red-600.text-white,
 .light-mode .bg-green-600 .text-white,
-.light-mode .bg-green-500 .text-white { color: #ffffff !important; }
+.light-mode .bg-green-500 .text-white,
+.light-mode .bg-green-500.text-white { color: #ffffff !important; }
 .light-mode .border-gray-700 { border-color: #d1d5db !important; }
 .light-mode .border-gray-800 { border-color: #e5e7eb !important; }
 .light-mode .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
@@ -475,6 +476,7 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-gray-900\/80 { background-color: rgba(255, 255, 255, 0.9) !important; }
 .light-mode .bg-gray-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
 .light-mode .bg-green-950\/30 { background-color: rgba(220, 252, 231, 0.5) !important; }
+.light-mode .bg-green-950\/50 { background-color: rgba(209, 250, 229, 0.5) !important; }
 .light-mode .bg-amber-950\/20 { background-color: rgba(254, 243, 199, 0.5) !important; }
 .light-mode .border-green-500 { border-color: #22c55e !important; }
 .light-mode .border-amber-400 { border-color: #f59e0b !important; }
