@@ -364,12 +364,14 @@ input:focus, select:focus, textarea:focus {
 
 .light-mode .bg-gray-950 { background-color: var(--bg-primary) !important; }
 .light-mode .bg-gray-900 { background-color: var(--bg-secondary) !important; }
-.light-mode .bg-gray-800 { background-color: #f3f4f6 !important; }
-.light-mode .bg-gray-800\/60 { background-color: rgba(243, 244, 246, 0.8) !important; }
-.light-mode .hover\:bg-gray-800:hover { background-color: #e5e7eb !important; }
+.light-mode .bg-gray-800 { background-color: #ffffff !important; }
+.light-mode .bg-gray-800\/60 { background-color: rgba(255, 255, 255, 0.9) !important; }
+.light-mode .bg-gray-800\/50 { background-color: rgba(255, 255, 255, 0.8) !important; }
+.light-mode .hover\:bg-gray-800:hover { background-color: #f3f4f6 !important; }
 .light-mode .hover\:bg-gray-900:hover { background-color: #f3f4f6 !important; }
 .light-mode .active\:bg-gray-700:active { background-color: #e5e7eb !important; }
-.light-mode .hover\:bg-gray-700:hover { background-color: #e5e7eb !important; }
+.light-mode .active\:bg-gray-800:active { background-color: #f3f4f6 !important; }
+.light-mode .hover\:bg-gray-700:hover { background-color: #f3f4f6 !important; }
 
 /* Light mode text on secondary surfaces */
 .light-mode .text-gray-200 { color: #374151 !important; }
@@ -389,8 +391,8 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-red-600.text-white,
 .light-mode .bg-green-600 .text-white,
 .light-mode .bg-green-500 .text-white { color: #ffffff !important; }
-.light-mode .border-gray-700 { border-color: #e5e7eb !important; }
-.light-mode .border-gray-800 { border-color: #f3f4f6 !important; }
+.light-mode .border-gray-700 { border-color: #d1d5db !important; }
+.light-mode .border-gray-800 { border-color: #e5e7eb !important; }
 .light-mode .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
 .light-mode .border-white\/\[0\.15\] { border-color: rgba(0,0,0,0.08) !important; }
 
@@ -487,6 +489,31 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-gray-700\/50 { background-color: rgba(229, 231, 235, 0.5) !important; }
 .light-mode .hover\:bg-gray-600:hover { background-color: #d1d5db !important; }
 .light-mode .active\:bg-gray-500:active { background-color: #9ca3af !important; }
+
+/* Light mode: ActiveWorkoutBar floating pill — keep it dark (inverted) for visibility */
+.light-mode .bg-gray-900\/95 { background-color: rgba(17, 24, 39, 0.95) !important; }
+.light-mode .bg-gray-900\/95 .text-white { color: #ffffff !important; }
+.light-mode .bg-gray-900\/95 .text-indigo-400 { color: var(--accent-light) !important; }
+.light-mode .bg-gray-900\/95 .bg-gray-600 { background-color: #4b5563 !important; }
+
+/* Light mode: RestTimerOverlay — keep text white inside glass-card timers */
+.light-mode [role="timer"] .text-white { color: var(--text-primary) !important; }
+.light-mode [role="timer"] .text-gray-400 { color: var(--text-tertiary) !important; }
+.light-mode [role="timer"] .bg-white\/10 { background-color: rgba(0, 0, 0, 0.08) !important; }
+.light-mode [role="timer"] .bg-gray-700 { background-color: #e5e7eb !important; }
+.light-mode [role="timer"] .bg-gray-700 .text-white,
+.light-mode [role="timer"] .bg-gray-700.text-white { color: var(--text-primary) !important; }
+
+/* Light mode: WorkoutTimerBar */
+.light-mode .bg-slate-900 { background-color: #f3f4f6 !important; }
+.light-mode .bg-slate-900 .text-white,
+.light-mode .bg-slate-900.text-white { color: var(--text-primary) !important; }
+
+/* Light mode: timer/action button backgrounds */
+.light-mode .bg-indigo-900\/50 { background-color: color-mix(in srgb, var(--accent) 12%, #f3f4f6) !important; }
+.light-mode .bg-red-900\/50 { background-color: rgba(254, 226, 226, 0.6) !important; }
+.light-mode .hover\:bg-indigo-900:hover { background-color: color-mix(in srgb, var(--accent) 20%, #e5e7eb) !important; }
+.light-mode .hover\:bg-red-900:hover { background-color: rgba(254, 202, 202, 0.8) !important; }
 
 /* Light mode shadow adjustments */
 .light-mode .shadow-black\/20 { --tw-shadow-color: rgba(0, 0, 0, 0.06) !important; }
