@@ -12,6 +12,7 @@ import { useSyncManager } from '@/hooks/useSyncManager';
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
+const InstallGuidePage = lazy(() => import('@/pages/InstallGuidePage'));
 const OnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
 const ExercisesPage = lazy(() => import('@/pages/ExercisesPage'));
 const ExerciseFormPage = lazy(() => import('@/pages/ExerciseFormPage'));
@@ -46,6 +47,7 @@ export default function App() {
         <Routes>
           {/* Public routes — redirect authenticated users to dashboard */}
           <Route element={<PublicRoute />}>
+            <Route path="/install" element={<InstallGuidePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />

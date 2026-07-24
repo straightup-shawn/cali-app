@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { hasSeenInstallGuide } from '@/pages/InstallGuidePage';
 
 export default function ProtectedRoute() {
   const { user, loading: authLoading } = useAuth();
@@ -18,8 +19,11 @@ export default function ProtectedRoute() {
     );
   }
 
-  // Not authenticated — redirect to register
+  // Not authenticated — show install guide first, then register
   if (!user) {
+    if (!hasSeenInstallGuide()) {
+      return <Navigate to="/install" replace />;
+    }
     return <Navigate to="/register" replace />;
   }
 
