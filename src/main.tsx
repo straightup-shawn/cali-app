@@ -43,5 +43,5 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
-// Remove splash after a short delay to ensure first paint
-setTimeout(hideSplash, 600);
+// Remove splash after animation completes (~2s total)
+setTimeout(hideSplash, 2000);
