@@ -3,11 +3,16 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
 import { applyTheme, getStoredTheme } from '@/lib/themes';
+import { initHapticAudio } from '@/lib/haptics';
 import App from './App';
 import './index.css';
 
 // Apply persisted color theme immediately to avoid flash
 applyTheme(getStoredTheme());
+
+// Initialize haptic audio on first user interaction (required for iOS)
+document.addEventListener('touchstart', () => initHapticAudio(), { once: true });
+document.addEventListener('click', () => initHapticAudio(), { once: true });
 
 // Hide splash screen once app is ready
 function hideSplash() {

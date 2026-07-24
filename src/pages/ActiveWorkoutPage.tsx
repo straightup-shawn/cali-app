@@ -361,6 +361,9 @@ export default function ActiveWorkoutPage() {
   }, [discardWorkout, navigate]);
 
   const handleFinish = useCallback(async () => {
+    // Heavy haptic for major action
+    if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    else { import('@/lib/haptics').then(m => m.hapticHeavy()); }
     const result = await doFinish();
     // If no PRs to celebrate, navigate directly to summary
     if (result && !result.newPRs.length) {
