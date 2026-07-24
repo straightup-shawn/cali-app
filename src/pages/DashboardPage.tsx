@@ -121,7 +121,7 @@ function QuickStartCard({ routines }: { routines: RoutineWithCount[] }) {
         onClick={handleStartEmpty}
         className="mt-3 w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-indigo-500/40 active:bg-indigo-700"
       >
-        Start Empty Workout
+        Start Workout
       </button>
 
       {routines.length > 0 && (

@@ -141,7 +141,7 @@ export default function WorkoutHubPage() {
           >
             <span className="flex items-center justify-center gap-2">
               <PlusIcon />
-              Start Empty Workout
+              Start Workout
             </span>
           </button>
 

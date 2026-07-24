@@ -13,6 +13,19 @@ import type {
   Routine,
   ExerciseType,
 } from '@/types';
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+function getTimeBasedWorkoutName(): string {
+  const hour = new Date().getHours();
+  if (hour < 5) return 'Late Night Workout';
+  if (hour < 12) return 'Morning Workout';
+  if (hour < 17) return 'Afternoon Workout';
+  if (hour < 21) return 'Evening Workout';
+  return 'Night Workout';
+}
 import type { RoutineWithExercises } from '@/hooks/useRoutines';
 
 // =============================================================================
@@ -171,7 +184,7 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
   const startWorkout = useCallback((fromRoutine?: Routine | RoutineWithExercises) => {
     const exercises = fromRoutine ? routineToExercises(fromRoutine) : [];
     const routineId = fromRoutine?.id ?? null;
-    const name = fromRoutine?.name ?? 'Empty Workout';
+    const name = fromRoutine?.name ?? getTimeBasedWorkoutName();
 
     const newWorkout: ActiveWorkout = {
       id: generateId(),
