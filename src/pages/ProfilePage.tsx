@@ -861,7 +861,6 @@ function SoundToggle() {
     setMutedState(newValue);
     setMuted(newValue);
     if (!newValue) {
-      // Play a preview sound when unmuting
       hapticMedium();
     }
   }
@@ -869,19 +868,34 @@ function SoundToggle() {
   return (
     <section className="space-y-2">
       <h2 className="text-sm font-medium text-gray-300">Sounds</h2>
-      <button
-        type="button"
-        onClick={toggle}
-        className="flex w-full items-center justify-between rounded-lg border border-gray-700 bg-gray-800 px-4 py-3"
+      <div className="flex rounded-lg border border-gray-700 bg-gray-800 p-1"
         style={{ backgroundColor: 'var(--bg-input)', borderColor: 'var(--border-primary)' }}
       >
-        <span className="text-sm" style={{ color: 'var(--text-primary)' }}>
-          {muted ? '🔇 Sounds off' : '🔊 Sounds on'}
-        </span>
-        <span className={`text-xs font-medium ${muted ? 'text-gray-500' : 'text-indigo-400'}`}>
-          {muted ? 'Muted' : 'Enabled'}
-        </span>
-      </button>
+        <button
+          type="button"
+          onClick={() => { if (muted) toggle(); }}
+          className={`flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
+            !muted ? 'btn-accent shadow-sm' : 'text-gray-400 hover:text-gray-200'
+          }`}
+          aria-label="Sounds on"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => { if (!muted) toggle(); }}
+          className={`flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
+            muted ? 'btn-accent shadow-sm' : 'text-gray-400 hover:text-gray-200'
+          }`}
+          aria-label="Sounds off"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+          </svg>
+        </button>
+      </div>
     </section>
   );
 }
