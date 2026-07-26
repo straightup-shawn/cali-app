@@ -68,6 +68,11 @@ export function arePrerequisitesSatisfied(
 /**
  * Evaluates unlock criteria against completed sets.
  * Only counts sets where completed === true.
+ * 
+ * For sets_at_reps: checks TOTAL reps across all sets >= min_sets * min_reps
+ * (e.g., 3×5=15 total reps, so 1×15 also works)
+ * For hold: checks TOTAL hold seconds across all sets >= min_hold_seconds
+ * For reps: checks if any single set has at least min_reps
  */
 export function isUnlockCriteriaMet(
   criteria: UnlockCriteria,
@@ -78,24 +83,27 @@ export function isUnlockCriteriaMet(
   switch (criteria.type) {
     case 'reps': {
       if (criteria.min_reps == null) return false;
+      // Any single set with enough reps counts
       return completedSets.some(
         (s) => s.reps != null && s.reps >= criteria.min_reps!,
       );
     }
     case 'hold': {
       if (criteria.min_hold_seconds == null) return false;
-      return completedSets.some(
-        (s) =>
-          s.durationSeconds != null &&
-          s.durationSeconds >= criteria.min_hold_seconds!,
+      // Total hold time across all sets
+      const totalSeconds = completedSets.reduce(
+        (sum, s) => sum + (s.durationSeconds ?? 0), 0
       );
+      return totalSeconds >= criteria.min_hold_seconds;
     }
     case 'sets_at_reps': {
       if (criteria.min_sets == null || criteria.min_reps == null) return false;
-      const qualifyingSets = completedSets.filter(
-        (s) => s.reps != null && s.reps >= criteria.min_reps!,
+      // Total reps across all sets >= required total (min_sets × min_reps)
+      const requiredTotal = criteria.min_sets * criteria.min_reps;
+      const totalReps = completedSets.reduce(
+        (sum, s) => sum + (s.reps ?? 0), 0
       );
-      return qualifyingSets.length >= criteria.min_sets;
+      return totalReps >= requiredTotal;
     }
     default:
       return false;
@@ -107,7 +115,7 @@ export function isUnlockCriteriaMet(
 // =============================================================================
 
 /**
- * Evaluates mastery criteria. Same logic as unlock but with mastery thresholds.
+ * Evaluates mastery criteria. Same volume-based logic as unlock.
  * If criteria is null, returns true (simple mastery — no additional threshold).
  */
 export function isMasteryCriteriaMet(
@@ -127,18 +135,18 @@ export function isMasteryCriteriaMet(
     }
     case 'hold': {
       if (criteria.min_hold_seconds == null) return false;
-      return completedSets.some(
-        (s) =>
-          s.durationSeconds != null &&
-          s.durationSeconds >= criteria.min_hold_seconds!,
+      const totalSeconds = completedSets.reduce(
+        (sum, s) => sum + (s.durationSeconds ?? 0), 0
       );
+      return totalSeconds >= criteria.min_hold_seconds;
     }
     case 'sets_at_reps': {
       if (criteria.min_sets == null || criteria.min_reps == null) return false;
-      const qualifyingSets = completedSets.filter(
-        (s) => s.reps != null && s.reps >= criteria.min_reps!,
+      const requiredTotal = criteria.min_sets * criteria.min_reps;
+      const totalReps = completedSets.reduce(
+        (sum, s) => sum + (s.reps ?? 0), 0
       );
-      return qualifyingSets.length >= criteria.min_sets;
+      return totalReps >= requiredTotal;
     }
     default:
       return false;
