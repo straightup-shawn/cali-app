@@ -79,6 +79,7 @@ export function useFinishWorkout() {
             completedAt: result.completedAt,
             exercises: workoutData.exercises.map((ex) => ({
               exerciseId: ex.exerciseId,
+              exerciseName: ex.exerciseName,
               sets: ex.sets.map((s) => ({
                 completed: s.completed,
                 reps: s.reps,

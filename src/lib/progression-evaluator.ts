@@ -343,12 +343,21 @@ export function evaluateWorkout(input: EvaluationInput): EvaluationOutput {
     }
   }
 
-  // Build exercise sets lookup: exerciseId → CompletedSet[]
+  // Build exercise sets lookup: exerciseId → CompletedSet[] AND name → CompletedSet[]
   const exerciseSetsMap = new Map<string, CompletedSet[]>();
+  const exerciseNameSetsMap = new Map<string, CompletedSet[]>();
   for (const ex of workout.exercises) {
     const existing = exerciseSetsMap.get(ex.exerciseId) ?? [];
     existing.push(...ex.sets);
     exerciseSetsMap.set(ex.exerciseId, existing);
+
+    // Also index by lowercase name for name-based matching
+    if (ex.exerciseName) {
+      const nameKey = ex.exerciseName.toLowerCase().trim();
+      const nameExisting = exerciseNameSetsMap.get(nameKey) ?? [];
+      nameExisting.push(...ex.sets);
+      exerciseNameSetsMap.set(nameKey, nameExisting);
+    }
   }
 
   // 2. Sort nodes in topological order
@@ -362,7 +371,15 @@ export function evaluateWorkout(input: EvaluationInput): EvaluationOutput {
     const currentState = stateMap.get(node.id) ?? 'locked';
     let newState = currentState;
 
-    const exerciseSets = exerciseSetsMap.get(node.exerciseId) ?? [];
+    // Match by exerciseId first, then fall back to name matching
+    let exerciseSets: CompletedSet[] = [];
+    if (node.exerciseId) {
+      exerciseSets = exerciseSetsMap.get(node.exerciseId) ?? [];
+    }
+    if (exerciseSets.length === 0 && node.name) {
+      // Try matching by node name (case-insensitive)
+      exerciseSets = exerciseNameSetsMap.get(node.name.toLowerCase().trim()) ?? [];
+    }
 
     // Process transitions in order — a node can advance multiple steps in one pass
     if (newState === 'locked') {

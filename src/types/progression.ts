@@ -83,6 +83,7 @@ export interface CompletedSet {
 
 export interface WorkoutExerciseData {
   exerciseId: string;
+  exerciseName?: string;
   sets: CompletedSet[];
 }
 
