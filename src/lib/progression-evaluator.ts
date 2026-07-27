@@ -287,6 +287,79 @@ export function topologicalSort(nodes: SkillNode[]): SkillNode[] {
 }
 
 // =============================================================================
+// Fuzzy name matching — handles case, hyphens, spaces, typos
+// =============================================================================
+
+/**
+ * Normalize an exercise name for comparison:
+ * - lowercase
+ * - remove hyphens, underscores, extra spaces
+ * - trim
+ */
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Levenshtein distance between two strings.
+ * Lower = more similar. 0 = identical.
+ */
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+  }
+  return dp[m][n];
+}
+
+/**
+ * Returns the best matching key from a name map for a given query.
+ * Returns null if the best match is too far off (similarity < threshold).
+ */
+function fuzzyMatchName(
+  query: string,
+  candidates: string[],
+  threshold = 0.75,
+): string | null {
+  const normalizedQuery = normalizeName(query);
+  let bestKey: string | null = null;
+  let bestScore = -1;
+
+  for (const candidate of candidates) {
+    const normalizedCandidate = normalizeName(candidate);
+
+    // Exact match after normalization
+    if (normalizedQuery === normalizedCandidate) return candidate;
+
+    // Similarity score: 1 - (edit_distance / max_length)
+    const dist = levenshtein(normalizedQuery, normalizedCandidate);
+    const maxLen = Math.max(normalizedQuery.length, normalizedCandidate.length);
+    const score = maxLen === 0 ? 1 : 1 - dist / maxLen;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestKey = candidate;
+    }
+  }
+
+  return bestScore >= threshold ? bestKey : null;
+}
+
+// =============================================================================
 // Main Evaluator
 // =============================================================================
 
@@ -360,6 +433,9 @@ export function evaluateWorkout(input: EvaluationInput): EvaluationOutput {
     }
   }
 
+  // Pre-compute candidate name list for fuzzy matching
+  const candidateNames = Array.from(exerciseNameSetsMap.keys());
+
   // 2. Sort nodes in topological order
   const sortedNodes = topologicalSort(nodes);
 
@@ -371,14 +447,23 @@ export function evaluateWorkout(input: EvaluationInput): EvaluationOutput {
     const currentState = stateMap.get(node.id) ?? 'locked';
     let newState = currentState;
 
-    // Match by exerciseId first, then fall back to name matching
+    // Match by exerciseId first, then exact name, then fuzzy name
     let exerciseSets: CompletedSet[] = [];
     if (node.exerciseId) {
       exerciseSets = exerciseSetsMap.get(node.exerciseId) ?? [];
     }
     if (exerciseSets.length === 0 && node.name) {
-      // Try matching by node name (case-insensitive)
-      exerciseSets = exerciseNameSetsMap.get(node.name.toLowerCase().trim()) ?? [];
+      // Try exact lowercase match first
+      const exactKey = node.name.toLowerCase().trim();
+      exerciseSets = exerciseNameSetsMap.get(exactKey) ?? [];
+
+      // Fall back to fuzzy match if exact fails
+      if (exerciseSets.length === 0 && candidateNames.length > 0) {
+        const bestMatch = fuzzyMatchName(node.name, candidateNames);
+        if (bestMatch) {
+          exerciseSets = exerciseNameSetsMap.get(bestMatch) ?? [];
+        }
+      }
     }
 
     // Process transitions in order — a node can advance multiple steps in one pass
