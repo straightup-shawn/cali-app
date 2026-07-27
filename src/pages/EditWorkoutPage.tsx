@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useWorkout, useUpdateWorkout } from '@/hooks/useWorkouts';
 import { useEditWorkoutState } from '@/hooks/useEditWorkoutState';
+import { useProgressionEval } from '@/hooks/useProgression';
+import { isProgressionEnabled } from '@/lib/feature-flags';
 import ExerciseSection from '@/components/workout/ExerciseSection';
 import ExercisePicker from '@/components/ExercisePicker';
 import type { ExerciseType } from '@/types';
@@ -71,6 +73,7 @@ export default function EditWorkoutPage() {
   const navigate = useNavigate();
   const { data: workout, isLoading: fetchLoading, error: fetchError } = useWorkout(id);
   const updateWorkoutMutation = useUpdateWorkout();
+  const progressionEval = useProgressionEval();
 
   const {
     editState,
@@ -136,13 +139,36 @@ export default function EditWorkoutPage() {
     try {
       const payload = computePayload();
       await updateWorkoutMutation.mutateAsync(payload);
+
+      // Run progression evaluation against the edited workout data
+      if (isProgressionEnabled() && editState.exercises.length > 0 && workout) {
+        try {
+          await progressionEval.mutateAsync({
+            workoutId: workout.id,
+            completedAt: workout.completed_at ?? workout.started_at,
+            exercises: editState.exercises.map((ex) => ({
+              exerciseId: ex.exerciseId,
+              exerciseName: ex.exerciseName,
+              sets: ex.sets.map((s) => ({
+                completed: s.completed ?? true,
+                reps: s.reps ?? null,
+                weightKg: s.weightKg ?? null,
+                durationSeconds: s.durationSeconds ?? null,
+              })),
+            })),
+          });
+        } catch {
+          // Non-blocking — don't fail the save if progression eval fails
+        }
+      }
+
       navigate(`/history/${id}`);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Failed to save changes');
     } finally {
       setSaving(false);
     }
-  }, [editState, computePayload, updateWorkoutMutation, navigate, id]);
+  }, [editState, computePayload, updateWorkoutMutation, navigate, id, progressionEval, workout]);
 
   // Loading state
   if (fetchLoading || stateLoading) {
