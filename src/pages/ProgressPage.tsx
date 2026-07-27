@@ -334,23 +334,41 @@ export default function ProgressPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Undo unlock: reset node back to 'available' state
+  // Undo unlock: reset node back to 'available' state and deduct momentum
   const handleUndoUnlock = useCallback(async (nodeId: string) => {
     if (!user) return;
+
+    // Get the node's momentum reward to deduct it
+    const node = allNodes.find((n) => n.id === nodeId);
+    const momentumReward = node?.momentumReward ?? 0;
+
+    // Reset progress state
     await (supabase
       .from('user_skill_progress' as never)
       .update({ state: 'available', unlocked_at: null, mastered_at: null, updated_at: new Date().toISOString() } as never)
       .eq('user_id', user.id)
       .eq('node_id', nodeId) as unknown as Promise<void>);
-    // Also delete evidence
+
+    // Delete evidence
     await (supabase
       .from('skill_evidence' as never)
       .delete()
       .eq('user_id', user.id)
       .eq('node_id', nodeId) as unknown as Promise<void>);
+
+    // Remove momentum ledger entry for this node unlock
+    if (momentumReward > 0) {
+      await (supabase
+        .from('momentum_ledger' as never)
+        .delete()
+        .eq('user_id', user.id)
+        .eq('source_type', 'node_unlock')
+        .eq('source_id', nodeId) as unknown as Promise<void>);
+    }
+
     queryClient.invalidateQueries({ queryKey: ['nodeProgress'] });
     queryClient.invalidateQueries({ queryKey: ['momentum'] });
-  }, [user, queryClient]);
+  }, [user, queryClient, allNodes]);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
