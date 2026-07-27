@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useSkillPaths, useNodeProgress, useMomentum } from '@/hooks/useProgression';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 import type { SkillNode, UserNodeState, NodeState, UnlockCriteria } from '@/types/progression';
 
 // =============================================================================
@@ -117,10 +120,36 @@ function SkillNodeCard({ node, state, isLast, onClick }: SkillNodeCardProps) {
 interface NodeDetailSheetProps {
   node: SkillNode;
   state: NodeState;
+  unlockedAt?: string | null;
+  masteredAt?: string | null;
+  allNodes: SkillNode[];
+  nodeStates: Map<string, UserNodeState> | undefined;
   onClose: () => void;
+  onUndoUnlock: (nodeId: string) => Promise<void>;
 }
 
-function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
+function NodeDetailSheet({ node, state, unlockedAt, masteredAt, allNodes, nodeStates, onClose, onUndoUnlock }: NodeDetailSheetProps) {
+  const [undoing, setUndoing] = useState(false);
+
+  // Check if any higher-tier node in the same path is unlocked/mastered
+  const hasHigherTierUnlocked = allNodes.some((n) => {
+    if (n.pathId !== node.pathId) return false;
+    if (n.tier <= node.tier) return false;
+    const s = nodeStates?.get(n.id)?.state;
+    return s === 'unlocked' || s === 'mastered';
+  });
+
+  const canUndo = (state === 'unlocked' || state === 'mastered') && !hasHigherTierUnlocked;
+
+  async function handleUndo() {
+    setUndoing(true);
+    try {
+      await onUndoUnlock(node.id);
+      onClose();
+    } finally {
+      setUndoing(false);
+    }
+  }
   const stateBadges: Record<NodeState, { label: string; className: string }> = {
     locked: { label: 'Locked', className: 'bg-gray-700 text-gray-400' },
     available: { label: 'Available', className: 'bg-indigo-900/50 text-indigo-300' },
@@ -227,12 +256,38 @@ function NodeDetailSheet({ node, state, onClose }: NodeDetailSheetProps) {
               <p className="text-sm text-indigo-300">Keep training — meet the unlock criteria in a single session.</p>
             )}
             {state === 'unlocked' && (
-              <p className="text-sm text-green-300">
-                {node.masteryCriteria ? 'Unlocked! Push further to achieve mastery.' : 'Skill unlocked! ✓'}
-              </p>
+              <div>
+                <p className="text-sm text-green-300">
+                  {node.masteryCriteria ? 'Unlocked! Push further to achieve mastery.' : 'Skill unlocked! ✓'}
+                </p>
+                {unlockedAt && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Unlocked {new Date(unlockedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
             )}
             {state === 'mastered' && (
-              <p className="text-sm text-amber-300">Mastered! You've conquered this skill. 🏆</p>
+              <div>
+                <p className="text-sm text-amber-300">Mastered! You've conquered this skill. 🏆</p>
+                {masteredAt && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Mastered {new Date(masteredAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Undo unlock button — only if no higher tier is unlocked */}
+            {canUndo && (
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={undoing}
+                className="mt-3 w-full rounded-lg border border-red-800 bg-red-950/30 px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-950/60 active:bg-red-900/60 disabled:opacity-50"
+              >
+                {undoing ? 'Undoing…' : 'Undo Unlock'}
+              </button>
             )}
           </div>
         </div>
@@ -276,6 +331,26 @@ export default function ProgressPage() {
     : null;
 
   const isLoading = pathsLoading || progressLoading;
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Undo unlock: reset node back to 'available' state
+  const handleUndoUnlock = useCallback(async (nodeId: string) => {
+    if (!user) return;
+    await (supabase
+      .from('user_skill_progress' as never)
+      .update({ state: 'available', unlocked_at: null, mastered_at: null, updated_at: new Date().toISOString() } as never)
+      .eq('user_id', user.id)
+      .eq('node_id', nodeId) as unknown as Promise<void>);
+    // Also delete evidence
+    await (supabase
+      .from('skill_evidence' as never)
+      .delete()
+      .eq('user_id', user.id)
+      .eq('node_id', nodeId) as unknown as Promise<void>);
+    queryClient.invalidateQueries({ queryKey: ['nodeProgress'] });
+    queryClient.invalidateQueries({ queryKey: ['momentum'] });
+  }, [user, queryClient]);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
@@ -360,7 +435,12 @@ export default function ProgressPage() {
         <NodeDetailSheet
           node={selectedNode}
           state={getNodeState(selectedNode, nodeStates)}
+          unlockedAt={nodeStates?.get(selectedNode.id)?.unlockedAt ?? null}
+          masteredAt={nodeStates?.get(selectedNode.id)?.masteredAt ?? null}
+          allNodes={allNodes}
+          nodeStates={nodeStates}
           onClose={() => setSelectedNodeId(null)}
+          onUndoUnlock={handleUndoUnlock}
         />
       )}
     </div>
