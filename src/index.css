@@ -288,7 +288,7 @@
 .hover\:bg-green-600:hover { background-color: color-mix(in srgb, var(--accent-dark) 75%, #16a34a) !important; }
 .active\:bg-green-700:active { background-color: color-mix(in srgb, var(--accent-dark) 60%, #15803d) !important; }
 .text-green-400 { color: color-mix(in srgb, var(--accent-light) 50%, #4ade80) !important; }
-.text-green-300 { color: color-mix(in srgb, var(--accent-light) 40%, #86efac) !important; }
+/* text-green-300 intentionally NOT remapped — used for exercise type badges (should stay green) */
 .border-green-800 { border-color: color-mix(in srgb, var(--accent-dark) 50%, #166534) !important; }
 .bg-green-950\/50 { background-color: color-mix(in srgb, var(--accent) 12%, rgba(5, 46, 22, 0.5)) !important; }
 .ring-green-400\/50 { --tw-ring-color: color-mix(in srgb, var(--accent-light) 50%, rgba(74, 222, 128, 0.5)) !important; }
