@@ -328,7 +328,8 @@ function levenshtein(a: string, b: string): number {
 
 /**
  * Returns the best matching key from a name map for a given query.
- * Returns null if the best match is too far off (similarity < threshold).
+ * Returns null if the best match is too far off.
+ * Uses stricter threshold for short names to avoid false positives like L-Sit/V-Sit.
  */
 function fuzzyMatchName(
   query: string,
@@ -336,6 +337,10 @@ function fuzzyMatchName(
   threshold = 0.75,
 ): string | null {
   const normalizedQuery = normalizeName(query);
+
+  // For short names (≤6 chars after normalization), require near-exact match
+  const effectiveThreshold = normalizedQuery.length <= 6 ? 0.90 : threshold;
+
   let bestKey: string | null = null;
   let bestScore = -1;
 
@@ -356,7 +361,7 @@ function fuzzyMatchName(
     }
   }
 
-  return bestScore >= threshold ? bestKey : null;
+  return bestScore >= effectiveThreshold ? bestKey : null;
 }
 
 // =============================================================================
