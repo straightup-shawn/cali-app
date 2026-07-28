@@ -88,7 +88,7 @@ const DEFAULTS: Record<string, DefaultClassification> = {
 
   // Other
   'burpee': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other', muscle_groups: ['chest', 'quads', 'abs', 'front_delts', 'triceps'] },
-  'jumping jack': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'cardio', muscle_groups: ['calves', 'side_delts', 'adductors'] },
+  'jumping jack': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'distance', muscle_groups: ['calves', 'side_delts', 'adductors'] },
 };
 
 /**

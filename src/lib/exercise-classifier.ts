@@ -32,7 +32,7 @@ export type MovementFamily =
   | 'lunge'
   | 'core'
   | 'isometric'
-  | 'cardio'
+  | 'distance'
   | 'skill'
   | 'other';
 
@@ -81,7 +81,7 @@ const VALID_MOVEMENT_FAMILIES: MovementFamily[] = [
   'lunge',
   'core',
   'isometric',
-  'cardio',
+  'distance',
   'skill',
   'other',
 ];

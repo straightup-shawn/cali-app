@@ -29,7 +29,7 @@ const TYPE_LABELS: Record<ExerciseType, string> = {
   assisted: 'Assisted',
   duration: 'Duration',
   static_hold: 'Static Hold',
-  cardio: 'Cardio',
+  distance: 'Distance',
 };
 
 const TYPE_COLORS: Record<ExerciseType, string> = {
@@ -38,7 +38,7 @@ const TYPE_COLORS: Record<ExerciseType, string> = {
   assisted: 'bg-purple-900/50 text-purple-300',
   duration: 'bg-orange-900/50 text-orange-300',
   static_hold: 'bg-red-900/50 text-red-300',
-  cardio: 'bg-cyan-900/50 text-cyan-300',
+  distance: 'bg-cyan-900/50 text-cyan-300',
 };
 
 // =============================================================================

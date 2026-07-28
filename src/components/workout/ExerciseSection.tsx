@@ -15,7 +15,7 @@ export const TYPE_LABELS: Record<ExerciseType, string> = {
   assisted: 'Assisted',
   duration: 'Duration',
   static_hold: 'Static Hold',
-  cardio: 'Cardio',
+  distance: 'Distance',
 };
 
 export const TYPE_COLORS: Record<ExerciseType, string> = {
@@ -24,7 +24,7 @@ export const TYPE_COLORS: Record<ExerciseType, string> = {
   assisted: 'bg-purple-900/50 text-purple-300',
   duration: 'bg-orange-900/50 text-orange-300',
   static_hold: 'bg-red-900/50 text-red-300',
-  cardio: 'bg-cyan-900/50 text-cyan-300',
+  distance: 'bg-cyan-900/50 text-cyan-300',
 };
 
 export const REST_DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300] as const;
@@ -49,8 +49,8 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
   const [showRpePicker, setShowRpePicker] = useState(false);
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
-  const showDuration = ['duration', 'static_hold', 'cardio'].includes(exerciseType);
-  const showDistance = exerciseType === 'cardio';
+  const showDuration = ['duration', 'static_hold', 'distance'].includes(exerciseType);
+  const showDistance = exerciseType === 'distance';
   const showRpe = true; // RPE is available for all exercise types
 
   const previousLabel = formatPreviousSet(previousSet, exerciseType);
