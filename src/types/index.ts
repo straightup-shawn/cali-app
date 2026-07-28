@@ -2,7 +2,7 @@
 // Enums / Union Types
 // =============================================================================
 
-export type ExerciseType = 'bodyweight' | 'weighted' | 'assisted' | 'duration' | 'static_hold' | 'cardio';
+export type ExerciseType = 'bodyweight' | 'weighted' | 'assisted' | 'duration' | 'static_hold' | 'distance';
 export type UnitPreference = 'metric' | 'imperial';
 export type RecordType = 'max_reps' | 'max_weight' | 'max_volume' | 'longest_hold';
 

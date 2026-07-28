@@ -47,7 +47,7 @@ const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'assisted', label: 'Assisted' },
   { value: 'duration', label: 'Duration' },
   { value: 'static_hold', label: 'Static Hold' },
-  { value: 'cardio', label: 'Distance' },
+  { value: 'distance', label: 'Distance' },
 ];
 
 const exerciseFormSchema = z.object({
@@ -56,7 +56,7 @@ const exerciseFormSchema = z.object({
     .min(1, 'Exercise name is required')
     .max(100, 'Name must be 100 characters or less'),
   exercise_type: z.enum(
-    ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold', 'cardio'],
+    ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold', 'distance'],
     { message: 'Please select an exercise type' }
   ),
   muscle_groups: z.array(z.string()).optional(),

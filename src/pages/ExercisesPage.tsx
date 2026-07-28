@@ -26,7 +26,7 @@ const EXERCISE_TYPES: ExerciseType[] = [
   'assisted',
   'duration',
   'static_hold',
-  'cardio',
+  'distance',
 ];
 
 const TYPE_LABELS: Record<ExerciseType, string> = {
@@ -35,7 +35,7 @@ const TYPE_LABELS: Record<ExerciseType, string> = {
   assisted: 'Assisted',
   duration: 'Duration',
   static_hold: 'Static Hold',
-  cardio: 'Distance',
+  distance: 'Distance',
 };
 
 function useDebounce(value: string, delay: number): string {
