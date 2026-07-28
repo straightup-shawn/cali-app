@@ -533,6 +533,8 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-yellow-900\/50 { background-color: rgba(254, 249, 195, 0.7) !important; }
 .light-mode .bg-indigo-900\/50 { background-color: color-mix(in srgb, var(--accent) 12%, rgba(238, 242, 255, 0.7)) !important; }
 .light-mode .bg-indigo-800\/50 { background-color: color-mix(in srgb, var(--accent) 15%, rgba(238, 242, 255, 0.6)) !important; }
+.light-mode .bg-cyan-900\/50 { background-color: rgba(207, 250, 254, 0.7) !important; }
+.light-mode .text-cyan-300 { color: #0e7490 !important; }
 .light-mode .text-green-300 { color: #15803d !important; }
 .light-mode .text-blue-300 { color: #1d4ed8 !important; }
 .light-mode .text-purple-300 { color: #7e22ce !important; }
