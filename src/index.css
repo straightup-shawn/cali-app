@@ -405,6 +405,10 @@ input:focus, select:focus, textarea:focus {
 .light-mode .placeholder\:text-gray-500::placeholder { color: #9ca3af !important; }
 .light-mode .placeholder\:text-gray-600::placeholder { color: #9ca3af !important; }
 
+/* Light mode select elements */
+.light-mode select { color: var(--text-primary) !important; }
+.light-mode select option { color: #111827; background-color: #ffffff; }
+
 /* Light mode hover states */
 .light-mode .hover\:text-gray-200:hover { color: var(--text-primary) !important; }
 .light-mode .hover\:text-gray-300:hover { color: var(--text-secondary) !important; }

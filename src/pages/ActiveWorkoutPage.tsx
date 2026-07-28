@@ -236,6 +236,7 @@ export default function ActiveWorkoutPage() {
     addSet,
     deleteSet,
     updateSet,
+    updateExerciseRest,
     completeSet,
     uncompleteSet,
     discardWorkout,
@@ -347,8 +348,7 @@ export default function ActiveWorkoutPage() {
   const [discardOpen, setDiscardOpen] = useState(false);
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
   const [restTimerVisible, setRestTimerVisible] = useState(false);
-  const [restTimerDuration, setRestTimerDuration] = useState(90); // default 90s
-  const [exerciseRestDurations, setExerciseRestDurations] = useState<Record<string, number>>({});
+  const [restTimerDuration, setRestTimerDuration] = useState(90);
 
   // Request notification permission on first mount (when starting a workout)
   useEffect(() => {
@@ -393,9 +393,9 @@ export default function ActiveWorkoutPage() {
 
   const handleRestDurationChange = useCallback(
     (exerciseId: string, seconds: number) => {
-      setExerciseRestDurations((prev) => ({ ...prev, [exerciseId]: seconds }));
+      updateExerciseRest(exerciseId, seconds);
     },
-    []
+    [updateExerciseRest]
   );
 
   // If no workout is active and not showing PRs, auto-navigate to dashboard
@@ -458,7 +458,7 @@ export default function ActiveWorkoutPage() {
               key={exercise.id}
               exercise={{
                 ...exercise,
-                restSeconds: exerciseRestDurations[exercise.id] ?? exercise.restSeconds,
+                restSeconds: exercise.restSeconds,
               }}
               index={index}
               total={workout.exercises.length}
@@ -471,7 +471,7 @@ export default function ActiveWorkoutPage() {
                 // Init audio on user gesture (required for iOS)
                 initAudioContext();
                 // Find the exercise's rest duration (local override or from exercise state)
-                const duration = exerciseRestDurations[exerciseId] ?? exercise.restSeconds ?? 90;
+                const duration = exercise.restSeconds ?? 90;
                 setRestTimerDuration(duration);
                 setRestTimerVisible(true);
               }}

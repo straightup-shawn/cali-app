@@ -41,6 +41,7 @@ interface ActiveWorkoutContextValue {
   addSet: (exerciseId: string) => void;
   deleteSet: (exerciseId: string, setId: string) => void;
   updateSet: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
+  updateExerciseRest: (exerciseId: string, seconds: number) => void;
   completeSet: (exerciseId: string, setId: string) => void;
   uncompleteSet: (exerciseId: string, setId: string) => void;
   /** Saves workout to Supabase, detects PRs, clears local state. Returns the workout data for PR celebration. */
@@ -281,6 +282,19 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
+  const updateExerciseRest = useCallback((exerciseId: string, seconds: number) => {
+    setWorkout((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        exercises: prev.exercises.map((ex) => {
+          if (ex.id !== exerciseId) return ex;
+          return { ...ex, restSeconds: seconds };
+        }),
+      };
+    });
+  }, []);
+
   const completeSet = useCallback((exerciseId: string, setId: string) => {
     // Fire haptic feedback on set completion
     import('@/lib/haptics').then(({ hapticMedium }) => hapticMedium());
@@ -384,6 +398,7 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     addSet,
     deleteSet,
     updateSet,
+    updateExerciseRest,
     completeSet,
     uncompleteSet,
     finishWorkout,
