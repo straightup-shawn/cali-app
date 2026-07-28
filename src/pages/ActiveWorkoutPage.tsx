@@ -88,7 +88,7 @@ interface WorkoutTimerBarProps {
 
 function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, onMenuToggle }: WorkoutTimerBarProps) {
   return (
-    <header className="sticky top-0 z-10 glass-header px-4 py-3">
+    <header className="sticky top-0 z-20 glass-header px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold text-gray-100">
@@ -430,7 +430,7 @@ export default function ActiveWorkoutPage() {
   const exerciseIds = workout.exercises.map((e) => e.exerciseId);
 
   return (
-    <div className={`relative flex min-h-screen flex-col bg-gray-950 ${restTimerVisible ? 'pb-40' : 'pb-24'}`}>
+    <div className={`relative flex min-h-screen flex-col bg-gray-950 overflow-y-auto ${restTimerVisible ? 'pb-40' : 'pb-24'}`}>
       {/* Timer bar header */}
       <WorkoutTimerBar
         seconds={elapsedSeconds}
