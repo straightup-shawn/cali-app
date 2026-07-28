@@ -4,56 +4,61 @@ import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 import type { PreviousSet } from '@/hooks/usePreviousPerformance';
 
 // =============================================================================
-// Duration Input (mm:ss) — uses local state, parses on blur
+// Duration Input (HH:MM:SS) — three separate fields
 // =============================================================================
 
-function formatSeconds(seconds: number | null): string {
-  if (seconds == null) return '';
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
-}
-
-function parseDurationText(text: string): number | null {
-  const trimmed = text.trim();
-  if (!trimmed) return null;
-  const parts = trimmed.split(':');
-  if (parts.length === 2) {
-    const mins = parseInt(parts[0], 10) || 0;
-    const secs = parseInt(parts[1], 10) || 0;
-    return mins * 60 + secs;
-  }
-  if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10);
-  return null;
-}
-
 function DurationInput({ value, onChange }: { value: number | null; onChange: (s: number | null) => void }) {
-  const [text, setText] = useState(() => formatSeconds(value));
-  const [focused, setFocused] = useState(false);
+  const totalSeconds = value ?? 0;
+  const hh = Math.floor(totalSeconds / 3600);
+  const mm = Math.floor((totalSeconds % 3600) / 60);
+  const ss = totalSeconds % 60;
 
-  // Sync from parent when not focused
-  if (!focused && formatSeconds(value) !== text) {
-    // Only sync if user isn't typing
+  function update(newHH: number, newMM: number, newSS: number) {
+    const total = newHH * 3600 + newMM * 60 + newSS;
+    onChange(total > 0 ? total : null);
   }
 
   return (
-    <input
-      type="text"
-      inputMode="numeric"
-      placeholder="m:ss"
-      value={focused ? text : formatSeconds(value)}
-      onFocus={() => {
-        setFocused(true);
-        setText(formatSeconds(value));
-      }}
-      onChange={(e) => setText(e.target.value)}
-      onBlur={() => {
-        setFocused(false);
-        const parsed = parseDurationText(text);
-        onChange(parsed);
-      }}
-      className="h-10 w-0 min-w-[3.5rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-    />
+    <div className="flex items-center gap-0.5">
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0} max={99}
+        placeholder="h"
+        value={hh || ''}
+        onChange={(e) => {
+          const v = Math.min(99, Math.max(0, parseInt(e.target.value) || 0));
+          update(v, mm, ss);
+        }}
+        className="h-10 w-8 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+      />
+      <span className="text-gray-500 text-xs">:</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0} max={59}
+        placeholder="m"
+        value={mm || ''}
+        onChange={(e) => {
+          const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
+          update(hh, v, ss);
+        }}
+        className="h-10 w-8 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+      />
+      <span className="text-gray-500 text-xs">:</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0} max={59}
+        placeholder="s"
+        value={ss || ''}
+        onChange={(e) => {
+          const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
+          update(hh, mm, v);
+        }}
+        className="h-10 w-8 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+      />
+    </div>
   );
 }
 
