@@ -2,7 +2,7 @@
 // Enums / Union Types
 // =============================================================================
 
-export type ExerciseType = 'bodyweight' | 'weighted' | 'assisted' | 'duration' | 'static_hold';
+export type ExerciseType = 'bodyweight' | 'weighted' | 'assisted' | 'duration' | 'static_hold' | 'cardio';
 export type UnitPreference = 'metric' | 'imperial';
 export type RecordType = 'max_reps' | 'max_weight' | 'max_volume' | 'longest_hold';
 
@@ -137,6 +137,7 @@ export interface ActiveSet {
   reps: number | null;
   weightKg: number | null;
   durationSeconds: number | null;
+  distanceMeters: number | null;
   rpe: number | null;
   rir: number | null;
   completed: boolean;

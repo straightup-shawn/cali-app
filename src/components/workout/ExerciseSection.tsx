@@ -15,6 +15,7 @@ export const TYPE_LABELS: Record<ExerciseType, string> = {
   assisted: 'Assisted',
   duration: 'Duration',
   static_hold: 'Static Hold',
+  cardio: 'Cardio',
 };
 
 export const TYPE_COLORS: Record<ExerciseType, string> = {
@@ -23,6 +24,7 @@ export const TYPE_COLORS: Record<ExerciseType, string> = {
   assisted: 'bg-purple-900/50 text-purple-300',
   duration: 'bg-orange-900/50 text-orange-300',
   static_hold: 'bg-red-900/50 text-red-300',
+  cardio: 'bg-cyan-900/50 text-cyan-300',
 };
 
 export const REST_DURATION_OPTIONS = [30, 60, 90, 120, 150, 180, 240, 300] as const;
@@ -47,7 +49,8 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
   const [showRpePicker, setShowRpePicker] = useState(false);
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
-  const showDuration = ['duration', 'static_hold'].includes(exerciseType);
+  const showDuration = ['duration', 'static_hold', 'cardio'].includes(exerciseType);
+  const showDistance = exerciseType === 'cardio';
   const showRpe = true; // RPE is available for all exercise types
 
   const previousLabel = formatPreviousSet(previousSet, exerciseType);
@@ -134,6 +137,23 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
             onChange={(e) =>
               onUpdate(exerciseId, set.id, {
                 durationSeconds: e.target.value ? parseInt(e.target.value, 10) : null,
+              })
+            }
+            className="h-10 w-0 min-w-[3.5rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+        )}
+
+        {/* Distance input (cardio) */}
+        {showDistance && (
+          <input
+            type="number"
+            inputMode="decimal"
+            placeholder="km"
+            step="0.01"
+            value={set.distanceMeters != null ? (set.distanceMeters / 1000).toFixed(2).replace(/\.?0+$/, '') : ''}
+            onChange={(e) =>
+              onUpdate(exerciseId, set.id, {
+                distanceMeters: e.target.value ? Math.round(parseFloat(e.target.value) * 1000) : null,
               })
             }
             className="h-10 w-0 min-w-[3.5rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"

@@ -47,6 +47,7 @@ const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'assisted', label: 'Assisted' },
   { value: 'duration', label: 'Duration' },
   { value: 'static_hold', label: 'Static Hold' },
+  { value: 'cardio', label: 'Cardio' },
 ];
 
 const exerciseFormSchema = z.object({
