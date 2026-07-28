@@ -32,7 +32,7 @@ const TYPE_COLORS: Record<ExerciseType, string> = {
   cardio: 'bg-cyan-900/50 text-cyan-300',
 };
 
-const EXERCISE_TYPES: ExerciseType[] = ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold'];
+const EXERCISE_TYPES: ExerciseType[] = ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold', 'cardio'];
 
 function useDebounce(value: string, delay: number): string {
   const [debouncedValue, setDebouncedValue] = useState(value);

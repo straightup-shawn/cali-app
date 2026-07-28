@@ -26,6 +26,7 @@ const EXERCISE_TYPES: ExerciseType[] = [
   'assisted',
   'duration',
   'static_hold',
+  'cardio',
 ];
 
 const TYPE_LABELS: Record<ExerciseType, string> = {

@@ -160,6 +160,19 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
           />
         )}
 
+        {/* Pace display (auto-calculated from duration + distance) */}
+        {showDistance && set.durationSeconds && set.distanceMeters && set.distanceMeters > 0 && (
+          <span className="shrink-0 text-[10px] text-gray-400">
+            {(() => {
+              const km = set.distanceMeters / 1000;
+              const paceSeconds = set.durationSeconds / km;
+              const m = Math.floor(paceSeconds / 60);
+              const s = Math.round(paceSeconds % 60);
+              return `${m}:${String(s).padStart(2, '0')}/km`;
+            })()}
+          </span>
+        )}
+
         {/* RPE pill button */}
         {showRpe && (
           <button
