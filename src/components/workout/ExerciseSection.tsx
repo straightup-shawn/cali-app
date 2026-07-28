@@ -127,18 +127,44 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
           />
         )}
 
-        {/* Duration input */}
+        {/* Duration input (mm:ss format) */}
         {showDuration && (
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
-            placeholder="Sec"
-            value={set.durationSeconds ?? ''}
-            onChange={(e) =>
-              onUpdate(exerciseId, set.id, {
-                durationSeconds: e.target.value ? parseInt(e.target.value, 10) : null,
-              })
-            }
+            placeholder="m:ss"
+            value={set.durationSeconds != null ? `${Math.floor(set.durationSeconds / 60)}:${String(set.durationSeconds % 60).padStart(2, '0')}` : ''}
+            onChange={(e) => {
+              const v = e.target.value;
+              // Allow typing in progress (just digits and colon)
+              if (v === '' || v === ':') {
+                onUpdate(exerciseId, set.id, { durationSeconds: null });
+                return;
+              }
+              // Parse mm:ss or m:ss or just seconds
+              const match = v.match(/^(\d{1,3}):([0-5]?\d)$/);
+              if (match) {
+                const mins = parseInt(match[1], 10);
+                const secs = parseInt(match[2], 10);
+                onUpdate(exerciseId, set.id, { durationSeconds: mins * 60 + secs });
+              } else if (/^\d+$/.test(v)) {
+                // Plain number = total seconds
+                onUpdate(exerciseId, set.id, { durationSeconds: parseInt(v, 10) });
+              }
+            }}
+            onBlur={(e) => {
+              // On blur, try to parse any partial input
+              const v = e.target.value.trim();
+              if (!v) return;
+              const parts = v.split(':');
+              if (parts.length === 2) {
+                const mins = parseInt(parts[0], 10) || 0;
+                const secs = parseInt(parts[1], 10) || 0;
+                onUpdate(exerciseId, set.id, { durationSeconds: mins * 60 + secs });
+              } else if (/^\d+$/.test(v)) {
+                onUpdate(exerciseId, set.id, { durationSeconds: parseInt(v, 10) });
+              }
+            }}
             className="h-10 w-0 min-w-[3.5rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         )}
