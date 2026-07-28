@@ -92,13 +92,10 @@ export default function RestTimerOverlay({
     }
   }, [visible, defaultSeconds, reset, start]);
 
-  // Auto-dismiss 2 seconds after completion
+  // Auto-dismiss immediately after completion (sound/vibration already fired)
   useEffect(() => {
     if (completed && visible) {
-      const id = setTimeout(() => {
-        onClose();
-      }, 2000);
-      return () => clearTimeout(id);
+      onClose();
     }
   }, [completed, visible, onClose]);
 
