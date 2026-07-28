@@ -55,6 +55,22 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
   // In edit mode, always show completed styling
   const isCompleted = mode === 'edit' ? true : set.completed;
 
+  // PR detection — compare completed set against previous best
+  const isPR = isCompleted && previousSet && (() => {
+    if (showReps && set.reps != null && previousSet.reps != null) {
+      if (showWeight && set.weightKg != null && previousSet.weightKg != null) {
+        // Weighted: PR if more weight at same reps, or more reps at same weight
+        return set.weightKg > previousSet.weightKg || (set.weightKg === previousSet.weightKg && set.reps > previousSet.reps);
+      }
+      // Bodyweight: PR if more reps
+      return set.reps > previousSet.reps;
+    }
+    if (showDuration && set.durationSeconds != null && previousSet.durationSeconds != null) {
+      return set.durationSeconds > previousSet.durationSeconds;
+    }
+    return false;
+  })();
+
   return (
     <div
       className={`overflow-hidden rounded-xl border px-2 py-2 ${
@@ -64,9 +80,13 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
       }`}
     >
       <div className="flex items-center gap-1.5">
-        {/* Set number + previous stacked */}
+        {/* Set number + previous stacked + PR badge */}
         <div className="w-7 shrink-0 text-center">
-          <span className="text-xs font-medium text-gray-400">{set.setNumber}</span>
+          {isPR ? (
+            <span className="text-xs">🏆</span>
+          ) : (
+            <span className="text-xs font-medium text-gray-400">{set.setNumber}</span>
+          )}
           {previousLabel !== '—' && (
             <p className="truncate text-[9px] leading-tight text-gray-500" title={previousLabel}>{previousLabel}</p>
           )}
