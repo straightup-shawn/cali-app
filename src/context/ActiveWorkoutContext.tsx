@@ -44,6 +44,10 @@ interface ActiveWorkoutContextValue {
   updateExerciseRest: (exerciseId: string, seconds: number) => void;
   completeSet: (exerciseId: string, setId: string) => void;
   uncompleteSet: (exerciseId: string, setId: string) => void;
+  /** Rest timer state — persists across navigation */
+  restTimer: { startedAt: string; durationSeconds: number } | null;
+  startRestTimer: (durationSeconds: number) => void;
+  clearRestTimer: () => void;
   /** Saves workout to Supabase, detects PRs, clears local state. Returns the workout data for PR celebration. */
   finishWorkout: () => Promise<ActiveWorkout | null>;
   discardWorkout: () => void;
@@ -154,6 +158,15 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
   const { user } = useAuth();
   const [workout, setWorkout] = useState<ActiveWorkout | null>(() => loadPersistedWorkout());
   const workoutRef = useRef<ActiveWorkout | null>(workout);
+  const [restTimer, setRestTimer] = useState<{ startedAt: string; durationSeconds: number } | null>(null);
+
+  const startRestTimer = useCallback((durationSeconds: number) => {
+    setRestTimer({ startedAt: new Date().toISOString(), durationSeconds });
+  }, []);
+
+  const clearRestTimer = useCallback(() => {
+    setRestTimer(null);
+  }, []);
 
   // Keep ref in sync for beforeunload handler
   useEffect(() => {
@@ -401,6 +414,9 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     updateExerciseRest,
     completeSet,
     uncompleteSet,
+    restTimer,
+    startRestTimer,
+    clearRestTimer,
     finishWorkout,
     discardWorkout,
     pauseWorkout,

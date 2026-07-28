@@ -240,6 +240,9 @@ export default function ActiveWorkoutPage() {
     completeSet,
     uncompleteSet,
     discardWorkout,
+    restTimer,
+    startRestTimer,
+    clearRestTimer,
   } = useActiveWorkout();
 
   const { preference, weightLabel } = useUnitPreference();
@@ -349,6 +352,21 @@ export default function ActiveWorkoutPage() {
   const [addExerciseOpen, setAddExerciseOpen] = useState(false);
   const [restTimerVisible, setRestTimerVisible] = useState(false);
   const [restTimerDuration, setRestTimerDuration] = useState(90);
+
+  // Resume rest timer from context if active when returning to this page
+  useEffect(() => {
+    if (restTimer) {
+      const elapsed = (Date.now() - new Date(restTimer.startedAt).getTime()) / 1000;
+      const remaining = restTimer.durationSeconds - elapsed;
+      if (remaining > 0) {
+        setRestTimerDuration(Math.ceil(remaining));
+        setRestTimerVisible(true);
+      } else {
+        // Timer already expired while away — clear it
+        clearRestTimer();
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Request notification permission on first mount (when starting a workout)
   useEffect(() => {
@@ -474,6 +492,7 @@ export default function ActiveWorkoutPage() {
                 const duration = exercise.restSeconds ?? 90;
                 setRestTimerDuration(duration);
                 setRestTimerVisible(true);
+                startRestTimer(duration);
               }}
               onUncomplete={uncompleteSet}
               onAddSet={addSet}
@@ -520,7 +539,7 @@ export default function ActiveWorkoutPage() {
           <div className="mb-2">
             <RestTimerOverlay
               defaultSeconds={restTimerDuration}
-              onClose={() => setRestTimerVisible(false)}
+              onClose={() => { setRestTimerVisible(false); clearRestTimer(); }}
               visible={restTimerVisible}
               inline
             />
