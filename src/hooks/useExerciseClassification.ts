@@ -72,7 +72,7 @@ export function useClassifyExercise() {
       }
 
       // Try to save classification results (may fail if migration not run)
-      await supabase
+      const { error: updateError } = await supabase
         .from('exercises')
         .update({
           resistance_model: result.resistance_model,
@@ -83,13 +83,23 @@ export function useClassifyExercise() {
           volume_mode: result.volume_mode,
           ai_confidence: result.confidence,
           ai_rationale: result.rationale,
-          muscle_groups: result.muscle_groups ?? [],
+          muscle_groups: result.muscle_groups && result.muscle_groups.length > 0 ? result.muscle_groups : undefined,
           classification_status: 'completed',
           analyzed_at: new Date().toISOString(),
           user_overridden: false,
         })
-        .eq('id', input.exerciseId)
-        .then(() => {}); // swallow DB error — classification result still works in memory
+        .eq('id', input.exerciseId);
+
+      // If classification columns don't exist yet, at minimum update muscle_groups
+      if (updateError) {
+        await supabase
+          .from('exercises')
+          .update({
+            muscle_groups: result.muscle_groups && result.muscle_groups.length > 0 ? result.muscle_groups : undefined,
+          })
+          .eq('id', input.exerciseId)
+          .then(() => {});
+      }
 
       return result;
     },

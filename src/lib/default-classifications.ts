@@ -89,6 +89,52 @@ const DEFAULTS: Record<string, DefaultClassification> = {
   // Other
   'burpee': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other', muscle_groups: ['chest', 'quads', 'abs', 'front_delts', 'triceps'] },
   'jumping jack': { bodyweight_fraction: 0.30, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'distance', muscle_groups: ['calves', 'side_delts', 'adductors'] },
+
+  // Skills & Balance
+  'crow pose': { bodyweight_fraction: 0.70, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_push', muscle_groups: ['abs', 'front_delts', 'triceps', 'hip_flexors', 'forearms'] },
+  'crane pose': { bodyweight_fraction: 0.75, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_push', muscle_groups: ['abs', 'front_delts', 'triceps', 'hip_flexors', 'forearms'] },
+  'frog stand': { bodyweight_fraction: 0.60, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_push', muscle_groups: ['front_delts', 'triceps', 'abs', 'forearms'] },
+  'tuck planche': { bodyweight_fraction: 0.85, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'horizontal_push', muscle_groups: ['front_delts', 'chest', 'biceps', 'abs', 'traps'] },
+  'v-sit': { bodyweight_fraction: 0.55, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core', muscle_groups: ['abs', 'hip_flexors', 'quads'] },
+  'manna': { bodyweight_fraction: 0.80, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'core', muscle_groups: ['abs', 'hip_flexors', 'front_delts', 'triceps'] },
+  'elbow lever': { bodyweight_fraction: 0.65, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other', muscle_groups: ['abs', 'obliques', 'front_delts', 'forearms'] },
+  'skin the cat': { bodyweight_fraction: 0.90, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'other', muscle_groups: ['lats', 'front_delts', 'abs', 'biceps', 'chest'] },
+
+  // Rings
+  'ring row': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_pull', muscle_groups: ['upper_back', 'lats', 'biceps', 'rear_delts', 'rhomboids'] },
+  'ring push-up': { bodyweight_fraction: 0.68, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'front_delts', 'abs'] },
+  'ring support hold': { bodyweight_fraction: 0.90, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'vertical_push', muscle_groups: ['chest', 'triceps', 'front_delts', 'abs'] },
+  'iron cross': { bodyweight_fraction: 1.0, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other', muscle_groups: ['chest', 'biceps', 'front_delts', 'lats'] },
+
+  // Flexibility / Mobility
+  'bridge': { bodyweight_fraction: 0.55, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'other', muscle_groups: ['glutes', 'erector_spinae', 'front_delts', 'quads'] },
+  'wall handstand': { bodyweight_fraction: 0.95, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'vertical_push', muscle_groups: ['front_delts', 'side_delts', 'traps', 'abs', 'forearms'] },
+  'dead hang': { bodyweight_fraction: 1.0, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'vertical_pull', muscle_groups: ['forearms', 'lats', 'front_delts'] },
+  'active hang': { bodyweight_fraction: 1.0, resistance_model: 'isometric_bodyweight', volume_mode: 'duration', movement_family: 'vertical_pull', muscle_groups: ['lats', 'forearms', 'rear_delts', 'traps'] },
+  'scapular pull-up': { bodyweight_fraction: 0.95, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['lats', 'traps', 'rhomboids', 'rear_delts'] },
+
+  // Explosive
+  'box jump': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'calves', 'hamstrings'] },
+  'clap push-up': { bodyweight_fraction: 0.68, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'front_delts'] },
+  'plyometric push-up': { bodyweight_fraction: 0.68, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'front_delts'] },
+  'tuck jump': { bodyweight_fraction: 0.65, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'calves', 'abs'] },
+  'broad jump': { bodyweight_fraction: 0.70, resistance_model: 'bodyweight', volume_mode: 'repetitions', movement_family: 'hinge', muscle_groups: ['glutes', 'quads', 'hamstrings', 'calves'] },
+
+  // Weighted variants
+  'weighted pull-up': { bodyweight_fraction: 1.0, resistance_model: 'external_load_plus_bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_pull', muscle_groups: ['lats', 'biceps', 'upper_back', 'forearms'] },
+  'weighted dip': { bodyweight_fraction: 1.0, resistance_model: 'external_load_plus_bodyweight', volume_mode: 'repetitions', movement_family: 'vertical_push', muscle_groups: ['chest', 'triceps', 'front_delts'] },
+  'weighted squat': { bodyweight_fraction: 0.67, resistance_model: 'external_load_plus_bodyweight', volume_mode: 'repetitions', movement_family: 'squat', muscle_groups: ['quads', 'glutes', 'hamstrings'] },
+  'weighted push-up': { bodyweight_fraction: 0.70, resistance_model: 'external_load_plus_bodyweight', volume_mode: 'repetitions', movement_family: 'horizontal_push', muscle_groups: ['chest', 'triceps', 'front_delts'] },
+
+  // Cardio / Distance
+  'running': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['quads', 'hamstrings', 'calves', 'glutes'] },
+  'jogging': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['quads', 'hamstrings', 'calves', 'glutes'] },
+  'sprinting': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['quads', 'glutes', 'hamstrings', 'calves'] },
+  'walking': { bodyweight_fraction: 1.0, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['quads', 'calves', 'glutes'] },
+  'swimming': { bodyweight_fraction: 0.80, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['lats', 'front_delts', 'chest', 'abs', 'quads'] },
+  'cycling': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['quads', 'hamstrings', 'calves', 'glutes'] },
+  'jump rope': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['calves', 'forearms', 'front_delts'] },
+  'skipping': { bodyweight_fraction: 0.50, resistance_model: 'bodyweight', volume_mode: 'duration', movement_family: 'distance', muscle_groups: ['calves', 'forearms', 'front_delts'] },
 };
 
 /**
