@@ -4,49 +4,34 @@ import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 import type { PreviousSet } from '@/hooks/usePreviousPerformance';
 
 // =============================================================================
-// Duration Input — HH:MM:SS three-field input
+// Duration Input — MM:SS two-field input
 // =============================================================================
 
 function DurationInput({ value, onChange }: { value: number | null; onChange: (s: number | null) => void }) {
   const totalSec = value ?? 0;
-  const hh = Math.floor(totalSec / 3600);
-  const mm = Math.floor((totalSec % 3600) / 60);
+  const mm = Math.floor(totalSec / 60);
   const ss = totalSec % 60;
 
-  const update = (newH: number, newM: number, newS: number) => {
-    const clamped = Math.min(newH, 99) * 3600 + Math.min(newM, 59) * 60 + Math.min(newS, 59);
+  const update = (newM: number, newS: number) => {
+    const clamped = Math.min(newM, 99) * 60 + Math.min(newS, 59);
     onChange(clamped > 0 ? clamped : null);
   };
 
   const fieldClass =
-    'h-9 w-10 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none';
+    'h-9 w-12 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none';
 
   return (
     <div className="flex items-center gap-0.5">
       <input
         type="number"
         inputMode="numeric"
-        placeholder="HH"
-        min={0}
-        max={99}
-        value={hh || ''}
-        onChange={(e) => {
-          const v = Math.min(99, Math.max(0, parseInt(e.target.value) || 0));
-          update(v, mm, ss);
-        }}
-        className={fieldClass}
-      />
-      <span className="text-xs text-gray-500">:</span>
-      <input
-        type="number"
-        inputMode="numeric"
         placeholder="MM"
         min={0}
-        max={59}
+        max={99}
         value={mm || ''}
         onChange={(e) => {
-          const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
-          update(hh, v, ss);
+          const v = Math.min(99, Math.max(0, parseInt(e.target.value) || 0));
+          update(v, ss);
         }}
         className={fieldClass}
       />
@@ -60,7 +45,7 @@ function DurationInput({ value, onChange }: { value: number | null; onChange: (s
         value={ss || ''}
         onChange={(e) => {
           const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
-          update(hh, mm, v);
+          update(mm, v);
         }}
         className={fieldClass}
       />
