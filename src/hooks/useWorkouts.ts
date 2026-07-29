@@ -184,6 +184,9 @@ export interface AddExercisePayload {
     reps?: number | null;
     weight_kg?: number | null;
     duration_seconds?: number | null;
+    distance_meters?: number | null;
+    calories?: number | null;
+    rounds?: number | null;
     rpe?: number | null;
   }[];
 }
@@ -199,6 +202,9 @@ export interface AddSetPayload {
   reps?: number | null;
   weight_kg?: number | null;
   duration_seconds?: number | null;
+  distance_meters?: number | null;
+  calories?: number | null;
+  rounds?: number | null;
   rpe?: number | null;
 }
 
@@ -254,6 +260,9 @@ export function useUpdateWorkout() {
           reps: s.reps ?? null,
           weight_kg: s.weight_kg ?? null,
           duration_seconds: s.duration_seconds ?? null,
+          distance_meters: s.distance_meters ?? null,
+          calories: s.calories ?? null,
+          rounds: s.rounds ?? null,
           rpe: s.rpe ?? null,
           completed: true,
         }));
@@ -309,6 +318,9 @@ export function useUpdateWorkout() {
               reps: s.reps ?? null,
               weight_kg: s.weight_kg ?? null,
               duration_seconds: s.duration_seconds ?? null,
+              distance_meters: s.distance_meters ?? null,
+              calories: s.calories ?? null,
+              rounds: s.rounds ?? null,
               rpe: s.rpe ?? null,
               completed: true,
             }));

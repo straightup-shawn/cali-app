@@ -518,6 +518,8 @@ const TYPE_BADGE_COLORS: Record<ExerciseType, string> = {
   duration: 'bg-orange-900/50 text-orange-300',
   static_hold: 'bg-red-900/50 text-red-300',
   distance: 'bg-cyan-900/50 text-cyan-300',
+  rounds: 'bg-yellow-900/50 text-yellow-300',
+  calories: 'bg-pink-900/50 text-pink-300',
 };
 
 const TYPE_BADGE_LABELS: Record<ExerciseType, string> = {
@@ -527,6 +529,8 @@ const TYPE_BADGE_LABELS: Record<ExerciseType, string> = {
   duration: 'Duration',
   static_hold: 'Static Hold',
   distance: 'Distance',
+  rounds: 'Rounds',
+  calories: 'Calories',
 };
 
 function ExerciseListItem({

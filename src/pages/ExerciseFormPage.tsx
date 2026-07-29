@@ -48,6 +48,8 @@ const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'duration', label: 'Duration' },
   { value: 'static_hold', label: 'Static Hold' },
   { value: 'distance', label: 'Distance' },
+  { value: 'rounds', label: 'Rounds' },
+  { value: 'calories', label: 'Calories' },
 ];
 
 const exerciseFormSchema = z.object({
@@ -56,7 +58,7 @@ const exerciseFormSchema = z.object({
     .min(1, 'Exercise name is required')
     .max(100, 'Name must be 100 characters or less'),
   exercise_type: z.enum(
-    ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold', 'distance'],
+    ['bodyweight', 'weighted', 'assisted', 'duration', 'static_hold', 'distance', 'rounds', 'calories'],
     { message: 'Please select an exercise type' }
   ),
   muscle_groups: z.array(z.string()).optional(),

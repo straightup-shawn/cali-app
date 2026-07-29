@@ -242,6 +242,9 @@ export interface Database {
           reps: number | null;
           weight_kg: number | null;
           duration_seconds: number | null;
+          distance_meters: number | null;
+          calories: number | null;
+          rounds: number | null;
           rpe: number | null;
           rir: number | null;
           completed: boolean;
@@ -254,6 +257,9 @@ export interface Database {
           reps?: number | null;
           weight_kg?: number | null;
           duration_seconds?: number | null;
+          distance_meters?: number | null;
+          calories?: number | null;
+          rounds?: number | null;
           rpe?: number | null;
           rir?: number | null;
           completed?: boolean;
@@ -266,6 +272,9 @@ export interface Database {
           reps?: number | null;
           weight_kg?: number | null;
           duration_seconds?: number | null;
+          distance_meters?: number | null;
+          calories?: number | null;
+          rounds?: number | null;
           rpe?: number | null;
           rir?: number | null;
           completed?: boolean;
