@@ -4,59 +4,65 @@ import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 import type { PreviousSet } from '@/hooks/usePreviousPerformance';
 
 // =============================================================================
-// Duration Input (HH:MM:SS) — three separate fields
+// Duration Input — HH:MM:SS three-field input
 // =============================================================================
 
 function DurationInput({ value, onChange }: { value: number | null; onChange: (s: number | null) => void }) {
-  const totalSeconds = value ?? 0;
-  const hh = Math.floor(totalSeconds / 3600);
-  const mm = Math.floor((totalSeconds % 3600) / 60);
-  const ss = totalSeconds % 60;
+  const totalSec = value ?? 0;
+  const hh = Math.floor(totalSec / 3600);
+  const mm = Math.floor((totalSec % 3600) / 60);
+  const ss = totalSec % 60;
 
-  function update(newHH: number, newMM: number, newSS: number) {
-    const total = newHH * 3600 + newMM * 60 + newSS;
-    onChange(total > 0 ? total : null);
-  }
+  const update = (newH: number, newM: number, newS: number) => {
+    const clamped = Math.min(newH, 99) * 3600 + Math.min(newM, 59) * 60 + Math.min(newS, 59);
+    onChange(clamped > 0 ? clamped : null);
+  };
+
+  const fieldClass =
+    'h-9 w-10 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none';
 
   return (
     <div className="flex items-center gap-0.5">
       <input
         type="number"
         inputMode="numeric"
-        min={0} max={99}
-        placeholder="h"
+        placeholder="HH"
+        min={0}
+        max={99}
         value={hh || ''}
         onChange={(e) => {
           const v = Math.min(99, Math.max(0, parseInt(e.target.value) || 0));
           update(v, mm, ss);
         }}
-        className="h-10 w-8 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+        className={fieldClass}
       />
-      <span className="text-gray-500 text-xs">:</span>
+      <span className="text-xs text-gray-500">:</span>
       <input
         type="number"
         inputMode="numeric"
-        min={0} max={59}
-        placeholder="m"
+        placeholder="MM"
+        min={0}
+        max={59}
         value={mm || ''}
         onChange={(e) => {
           const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
           update(hh, v, ss);
         }}
-        className="h-10 w-8 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+        className={fieldClass}
       />
-      <span className="text-gray-500 text-xs">:</span>
+      <span className="text-xs text-gray-500">:</span>
       <input
         type="number"
         inputMode="numeric"
-        min={0} max={59}
-        placeholder="s"
+        placeholder="SS"
+        min={0}
+        max={59}
         value={ss || ''}
         onChange={(e) => {
           const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
           update(hh, mm, v);
         }}
-        className="h-10 w-8 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+        className={fieldClass}
       />
     </div>
   );
