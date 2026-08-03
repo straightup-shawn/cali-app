@@ -139,119 +139,122 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
       }`}
     >
       <div className="flex items-center gap-1.5">
-        {/* Set number + previous stacked + PR badge */}
-        <div className="w-7 shrink-0 text-center">
+        {/* Set number + previous below */}
+        <div className="w-9 shrink-0 text-center">
           {isPR ? (
             <span className="text-xs">🏆</span>
           ) : (
-            <span className="text-xs font-medium text-gray-400">{set.setNumber}</span>
+            <span className="text-sm font-semibold text-gray-400">{set.setNumber}</span>
           )}
           {previousLabel !== '—' && (
-            <p className="truncate text-[9px] leading-tight text-gray-500" title={previousLabel}>{previousLabel}</p>
+            <p className="text-[8px] leading-tight text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis" title={previousLabel}>{previousLabel}</p>
           )}
         </div>
 
-        {/* Reps input */}
-        {showReps && (
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder="Reps"
-            value={set.reps ?? ''}
-            onChange={(e) =>
-              onUpdate(exerciseId, set.id, {
-                reps: e.target.value ? parseInt(e.target.value, 10) : null,
-              })
-            }
-            className="h-10 w-0 min-w-[3rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-          />
-        )}
+        {/* Inputs row — evenly distributed */}
+        <div className="flex flex-1 items-center gap-1.5 min-w-0">
+          {/* Reps input */}
+          {showReps && (
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="Reps"
+              value={set.reps ?? ''}
+              onChange={(e) =>
+                onUpdate(exerciseId, set.id, {
+                  reps: e.target.value ? parseInt(e.target.value, 10) : null,
+                })
+              }
+              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+          )}
 
-        {/* Weight input */}
-        {showWeight && (
-          <input
-            type="number"
-            inputMode="decimal"
-            placeholder="kg"
-            value={set.weightKg ?? ''}
-            onChange={(e) =>
-              onUpdate(exerciseId, set.id, {
-                weightKg: e.target.value ? parseFloat(e.target.value) : null,
-              })
-            }
-            className="h-10 w-0 min-w-[3rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-          />
-        )}
+          {/* Weight input */}
+          {showWeight && (
+            <input
+              type="number"
+              inputMode="decimal"
+              placeholder="kg"
+              value={set.weightKg ?? ''}
+              onChange={(e) =>
+                onUpdate(exerciseId, set.id, {
+                  weightKg: e.target.value ? parseFloat(e.target.value) : null,
+                })
+              }
+              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+          )}
 
-        {/* Duration input (mm:ss format) */}
-        {showDuration && (
-          <DurationInput
-            value={set.durationSeconds}
-            onChange={(seconds) => onUpdate(exerciseId, set.id, { durationSeconds: seconds })}
-          />
-        )}
+          {/* Duration input (mm:ss format) */}
+          {showDuration && (
+            <DurationInput
+              value={set.durationSeconds}
+              onChange={(seconds) => onUpdate(exerciseId, set.id, { durationSeconds: seconds })}
+            />
+          )}
 
-        {/* Distance input (cardio) */}
-        {showDistance && (
-          <input
-            type="number"
-            inputMode="decimal"
-            placeholder="km"
-            step="0.01"
-            value={set.distanceMeters != null ? (set.distanceMeters / 1000).toFixed(2).replace(/\.?0+$/, '') : ''}
-            onChange={(e) =>
-              onUpdate(exerciseId, set.id, {
-                distanceMeters: e.target.value ? Math.round(parseFloat(e.target.value) * 1000) : null,
-              })
-            }
-            className="h-10 w-0 min-w-[3.5rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-          />
-        )}
+          {/* Distance input (cardio) */}
+          {showDistance && (
+            <input
+              type="number"
+              inputMode="decimal"
+              placeholder="km"
+              step="0.01"
+              value={set.distanceMeters != null ? (set.distanceMeters / 1000).toFixed(2).replace(/\.?0+$/, '') : ''}
+              onChange={(e) =>
+                onUpdate(exerciseId, set.id, {
+                  distanceMeters: e.target.value ? Math.round(parseFloat(e.target.value) * 1000) : null,
+                })
+              }
+              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+          )}
 
-        {/* Pace display (auto-calculated from duration + distance) */}
-        {showDistance && set.durationSeconds && set.distanceMeters && set.distanceMeters > 0 && (
-          <span className="shrink-0 text-[10px] text-gray-400">
-            {(() => {
-              const km = set.distanceMeters / 1000;
-              const paceSeconds = set.durationSeconds / km;
-              const m = Math.floor(paceSeconds / 60);
-              const s = Math.round(paceSeconds % 60);
-              return `${m}:${String(s).padStart(2, '0')}/km`;
-            })()}
-          </span>
-        )}
+          {/* Pace display (auto-calculated from duration + distance) */}
+          {showDistance && set.durationSeconds && set.distanceMeters && set.distanceMeters > 0 && (
+            <span className="shrink-0 text-[10px] text-gray-400">
+              {(() => {
+                const km = set.distanceMeters / 1000;
+                const paceSeconds = set.durationSeconds / km;
+                const m = Math.floor(paceSeconds / 60);
+                const s = Math.round(paceSeconds % 60);
+                return `${m}:${String(s).padStart(2, '0')}/km`;
+              })()}
+            </span>
+          )}
 
-        {/* Rounds input */}
-        {showRounds && (
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder="Rnds"
-            value={set.rounds ?? ''}
-            onChange={(e) =>
-              onUpdate(exerciseId, set.id, {
-                rounds: e.target.value ? parseInt(e.target.value, 10) : null,
-              })
-            }
-            className="h-10 w-0 min-w-[3rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-          />
-        )}
+          {/* Rounds input */}
+          {showRounds && (
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="Rnds"
+              value={set.rounds ?? ''}
+              onChange={(e) =>
+                onUpdate(exerciseId, set.id, {
+                  rounds: e.target.value ? parseInt(e.target.value, 10) : null,
+                })
+              }
+              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+          )}
 
-        {/* Calories input */}
-        {showCalories && (
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder="cal"
-            value={set.calories ?? ''}
-            onChange={(e) =>
-              onUpdate(exerciseId, set.id, {
-                calories: e.target.value ? parseInt(e.target.value, 10) : null,
-              })
-            }
-            className="h-10 w-0 min-w-[3rem] flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-          />
-        )}
+          {/* Calories input */}
+          {showCalories && (
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="cal"
+              value={set.calories ?? ''}
+              onChange={(e) =>
+                onUpdate(exerciseId, set.id, {
+                  calories: e.target.value ? parseInt(e.target.value, 10) : null,
+                })
+              }
+              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+          )}
+        </div>
 
         {/* RPE pill button */}
         {showRpe && (
