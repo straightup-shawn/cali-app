@@ -168,14 +168,16 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
   return (
     <div className="relative overflow-hidden rounded-xl">
       {/* Delete button behind (revealed on swipe) */}
-      <div className="absolute inset-y-0 right-0 flex w-[72px] items-center justify-center rounded-r-xl bg-red-600 dark:bg-red-600">
+      <div className="absolute inset-y-0 right-0 flex w-[72px] items-center justify-center">
         <button
           type="button"
           onClick={() => { onDelete(exerciseId, set.id); setSwipeX(0); }}
-          className="flex h-full w-full items-center justify-center text-white font-medium text-xs"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white active:bg-red-700"
           aria-label="Delete set"
         >
-          Delete
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
         </button>
       </div>
 
