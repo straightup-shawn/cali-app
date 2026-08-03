@@ -78,9 +78,9 @@ export function PRCelebration({ newPRs, onClose }: PRCelebrationProps) {
       aria-modal="true"
       aria-labelledby="pr-celebration-title"
     >
-      <div className="w-full max-w-sm rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-xl animate-in fade-in zoom-in">
+      <div className="w-full max-w-sm max-h-[85vh] flex flex-col rounded-2xl border border-gray-700 bg-gray-900 p-6 shadow-xl animate-in fade-in zoom-in">
         {/* Trophy header */}
-        <div className="mb-4 text-center">
+        <div className="mb-4 text-center shrink-0">
           <div className="text-5xl mb-2">🏆</div>
           <h2
             id="pr-celebration-title"
@@ -93,8 +93,8 @@ export function PRCelebration({ newPRs, onClose }: PRCelebrationProps) {
           </p>
         </div>
 
-        {/* PR list */}
-        <ul className="mb-6 space-y-3">
+        {/* PR list — scrollable */}
+        <ul className="mb-6 space-y-3 overflow-y-auto min-h-0 flex-1">
           {newPRs.map((pr) => (
             <li
               key={`${pr.exerciseId}-${pr.recordType}`}
@@ -123,10 +123,10 @@ export function PRCelebration({ newPRs, onClose }: PRCelebrationProps) {
           ))}
         </ul>
 
-        {/* Close button */}
+        {/* Close button — always visible at bottom */}
         <button
           onClick={onClose}
-          className="w-full rounded-lg bg-amber-500 px-4 py-3 font-semibold text-white active:bg-amber-600 transition-colors"
+          className="w-full shrink-0 rounded-lg bg-amber-500 px-4 py-3 font-semibold text-white active:bg-amber-600 transition-colors"
           type="button"
         >
           Awesome!
