@@ -445,8 +445,6 @@ export default function ActiveWorkoutPage() {
   // At this point workout is guaranteed to be non-null
   if (!workout) return null;
 
-  const exerciseIds = workout.exercises.map((e) => e.exerciseId);
-
   return (
     <div className={`relative flex min-h-screen flex-col bg-gray-950 overflow-y-auto ${restTimerVisible ? 'pb-40' : 'pb-24'}`}>
       {/* Timer bar header */}
@@ -569,7 +567,6 @@ export default function ActiveWorkoutPage() {
             exerciseType: exercise.exercise_type as ExerciseType,
           });
         }}
-        excludeIds={exerciseIds}
       />
 
       {/* Rest timer is now rendered inline in the fixed bottom bar above */}
