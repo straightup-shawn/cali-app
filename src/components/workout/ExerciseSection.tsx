@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { usePreviousPerformance, formatPreviousSet } from '@/hooks/usePreviousPerformance';
+import { useUnitPreference } from '@/hooks/useUnitPreference';
 import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 import type { PreviousSet } from '@/hooks/usePreviousPerformance';
 
@@ -93,35 +94,37 @@ interface SetRowProps {
   exerciseId: string;
   previousSet?: PreviousSet;
   mode: 'active' | 'edit';
+  weightLabel: string;
+  kgToDisplay: (kg: number) => number;
+  inputToKg: (val: number) => number;
   onUpdate: (exerciseId: string, setId: string, data: Partial<ActiveSet>) => void;
   onComplete?: (exerciseId: string, setId: string) => void;
   onUncomplete?: (exerciseId: string, setId: string) => void;
   onDelete: (exerciseId: string, setId: string) => void;
 }
 
-function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
+function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel, kgToDisplay, inputToKg, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
   const [showRpePicker, setShowRpePicker] = useState(false);
+  const [swipeX, setSwipeX] = useState(0);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const swipingRef = useRef(false);
+
   const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exerciseType);
   const showWeight = ['weighted', 'assisted'].includes(exerciseType);
   const showDuration = ['duration', 'static_hold', 'distance', 'rounds', 'calories'].includes(exerciseType);
   const showDistance = exerciseType === 'distance';
   const showRounds = exerciseType === 'rounds';
   const showCalories = exerciseType === 'calories';
-  const showRpe = true; // RPE is available for all exercise types
+  const showRpe = true;
 
   const previousLabel = formatPreviousSet(previousSet, exerciseType);
-
-  // In edit mode, always show completed styling
   const isCompleted = mode === 'edit' ? true : set.completed;
 
-  // PR detection — compare completed set against previous best
   const isPR = isCompleted && previousSet && (() => {
     if (showReps && set.reps != null && previousSet.reps != null) {
       if (showWeight && set.weightKg != null && previousSet.weightKg != null) {
-        // Weighted: PR if more weight at same reps, or more reps at same weight
         return set.weightKg > previousSet.weightKg || (set.weightKg === previousSet.weightKg && set.reps > previousSet.reps);
       }
-      // Bodyweight: PR if more reps
       return set.reps > previousSet.reps;
     }
     if (showDuration && set.durationSeconds != null && previousSet.durationSeconds != null) {
@@ -130,214 +133,229 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, onUpdate, on
     return false;
   })();
 
+  // Swipe-to-delete handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    swipingRef.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = e.touches[0].clientX - touchStartRef.current.x;
+    const dy = e.touches[0].clientY - touchStartRef.current.y;
+    // Lock into horizontal swipe if moved more X than Y
+    if (!swipingRef.current && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      swipingRef.current = true;
+    }
+    if (swipingRef.current) {
+      e.preventDefault();
+      setSwipeX(Math.min(0, Math.max(-80, dx)));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+    if (swipeX < -40) {
+      setSwipeX(-72); // snap to reveal delete
+    } else {
+      setSwipeX(0);
+    }
+    swipingRef.current = false;
+  }, [swipeX]);
+
+  const inputClass = 'h-8 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none';
+
   return (
-    <div
-      className={`overflow-hidden rounded-xl border px-2 py-2 ${
-        isCompleted
-          ? 'border-green-800 bg-green-950/50'
-          : 'border-gray-700 bg-gray-800'
-      }`}
-    >
-      <div className="flex items-center gap-1.5">
-        {/* Set number + previous below */}
-        <div className="w-9 shrink-0 text-center">
-          {isPR ? (
-            <span className="text-xs">🏆</span>
-          ) : (
-            <span className="text-sm font-semibold text-gray-400">{set.setNumber}</span>
-          )}
-          {previousLabel !== '—' && (
-            <p className="text-[8px] leading-tight text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis" title={previousLabel}>{previousLabel}</p>
-          )}
-        </div>
-
-        {/* Inputs row — evenly distributed */}
-        <div className="flex flex-1 items-center gap-1.5 min-w-0">
-          {/* Reps input */}
-          {showReps && (
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Reps"
-              value={set.reps ?? ''}
-              onChange={(e) =>
-                onUpdate(exerciseId, set.id, {
-                  reps: e.target.value ? parseInt(e.target.value, 10) : null,
-                })
-              }
-              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-          )}
-
-          {/* Weight input */}
-          {showWeight && (
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="kg"
-              value={set.weightKg ?? ''}
-              onChange={(e) =>
-                onUpdate(exerciseId, set.id, {
-                  weightKg: e.target.value ? parseFloat(e.target.value) : null,
-                })
-              }
-              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-          )}
-
-          {/* Duration input (mm:ss format) */}
-          {showDuration && (
-            <DurationInput
-              value={set.durationSeconds}
-              onChange={(seconds) => onUpdate(exerciseId, set.id, { durationSeconds: seconds })}
-            />
-          )}
-
-          {/* Distance input (cardio) */}
-          {showDistance && (
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder="km"
-              step="0.01"
-              value={set.distanceMeters != null ? (set.distanceMeters / 1000).toFixed(2).replace(/\.?0+$/, '') : ''}
-              onChange={(e) =>
-                onUpdate(exerciseId, set.id, {
-                  distanceMeters: e.target.value ? Math.round(parseFloat(e.target.value) * 1000) : null,
-                })
-              }
-              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-          )}
-
-          {/* Pace display (auto-calculated from duration + distance) */}
-          {showDistance && set.durationSeconds && set.distanceMeters && set.distanceMeters > 0 && (
-            <span className="shrink-0 text-[10px] text-gray-400">
-              {(() => {
-                const km = set.distanceMeters / 1000;
-                const paceSeconds = set.durationSeconds / km;
-                const m = Math.floor(paceSeconds / 60);
-                const s = Math.round(paceSeconds % 60);
-                return `${m}:${String(s).padStart(2, '0')}/km`;
-              })()}
-            </span>
-          )}
-
-          {/* Rounds input */}
-          {showRounds && (
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="Rnds"
-              value={set.rounds ?? ''}
-              onChange={(e) =>
-                onUpdate(exerciseId, set.id, {
-                  rounds: e.target.value ? parseInt(e.target.value, 10) : null,
-                })
-              }
-              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-          )}
-
-          {/* Calories input */}
-          {showCalories && (
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder="cal"
-              value={set.calories ?? ''}
-              onChange={(e) =>
-                onUpdate(exerciseId, set.id, {
-                  calories: e.target.value ? parseInt(e.target.value, 10) : null,
-                })
-              }
-              className="h-10 w-0 flex-1 rounded-md border border-gray-700 bg-gray-900 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-          )}
-        </div>
-
-        {/* RPE pill button */}
-        {showRpe && (
-          <button
-            type="button"
-            onClick={() => setShowRpePicker(!showRpePicker)}
-            className={`h-8 shrink-0 rounded-full px-2 text-xs font-medium transition-colors ${
-              set.rpe !== null
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
-            }`}
-            aria-label={set.rpe !== null ? `RPE ${set.rpe}` : 'Set RPE'}
-          >
-            {set.rpe !== null ? `${set.rpe}` : 'RPE'}
-          </button>
-        )}
-
-        {/* Complete/uncomplete button — only in active mode */}
-        {mode === 'active' && (
-          <button
-            type="button"
-            onClick={() => set.completed ? onUncomplete?.(exerciseId, set.id) : onComplete?.(exerciseId, set.id)}
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
-              set.completed
-                ? 'bg-green-500 text-white hover:bg-green-600 active:bg-green-700'
-                : 'border border-gray-600 text-gray-500 hover:border-green-500 hover:text-green-400 active:bg-green-950'
-            }`}
-            aria-label={set.completed ? 'Undo set completion' : 'Complete set'}
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
-                d="M5 13l4 4L19 7" />
-            </svg>
-          </button>
-        )}
-
-        {/* Delete set button */}
+    <div className="relative overflow-hidden rounded-xl">
+      {/* Delete button behind (revealed on swipe) */}
+      <div className="absolute inset-y-0 right-0 flex w-[72px] items-center justify-center rounded-r-xl bg-red-600 dark:bg-red-600">
         <button
           type="button"
-          onClick={() => onDelete(exerciseId, set.id)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-gray-600 hover:text-red-400 active:bg-red-950"
+          onClick={() => { onDelete(exerciseId, set.id); setSwipeX(0); }}
+          className="flex h-full w-full items-center justify-center text-white font-medium text-xs"
           aria-label="Delete set"
         >
-          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          Delete
         </button>
       </div>
 
-      {/* Inline RPE picker */}
-      {showRpePicker && (
-        <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
-          {RPE_VALUES.map((v) => (
+      {/* Main row content (slides left) */}
+      <div
+        className={`relative border px-2 py-1.5 rounded-xl transition-transform ${
+          isCompleted
+            ? 'border-green-800 bg-green-950/50'
+            : 'border-gray-700 bg-gray-800'
+        }`}
+        style={{ transform: `translateX(${swipeX}px)`, transition: swipingRef.current ? 'none' : 'transform 0.2s ease-out' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex items-center gap-1.5">
+          {/* Set number + previous */}
+          <div className="w-12 shrink-0">
+            <div className="text-center">
+              {isPR ? (
+                <span className="text-xs">🏆</span>
+              ) : (
+                <span className="text-xs font-semibold text-gray-400">{set.setNumber}</span>
+              )}
+            </div>
+            {previousLabel !== '—' && (
+              <p className="text-[9px] leading-tight text-gray-500 text-center" title={previousLabel}>{previousLabel}</p>
+            )}
+          </div>
+
+          {/* Inputs */}
+          <div className="flex flex-1 items-center gap-1 min-w-0">
+            {showReps && (
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Reps"
+                value={set.reps ?? ''}
+                onChange={(e) =>
+                  onUpdate(exerciseId, set.id, { reps: e.target.value ? parseInt(e.target.value, 10) : null })
+                }
+                className={inputClass}
+              />
+            )}
+
+            {showWeight && (
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder={weightLabel}
+                value={set.weightKg != null ? parseFloat(kgToDisplay(set.weightKg).toFixed(1)) : ''}
+                onChange={(e) =>
+                  onUpdate(exerciseId, set.id, { weightKg: e.target.value ? inputToKg(parseFloat(e.target.value)) : null })
+                }
+                className={inputClass}
+              />
+            )}
+
+            {showDuration && (
+              <DurationInput
+                value={set.durationSeconds}
+                onChange={(seconds) => onUpdate(exerciseId, set.id, { durationSeconds: seconds })}
+              />
+            )}
+
+            {showDistance && (
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder="km"
+                step="0.01"
+                value={set.distanceMeters != null ? (set.distanceMeters / 1000).toFixed(2).replace(/\.?0+$/, '') : ''}
+                onChange={(e) =>
+                  onUpdate(exerciseId, set.id, { distanceMeters: e.target.value ? Math.round(parseFloat(e.target.value) * 1000) : null })
+                }
+                className={inputClass}
+              />
+            )}
+
+            {showDistance && set.durationSeconds && set.distanceMeters && set.distanceMeters > 0 && (
+              <span className="shrink-0 text-[9px] text-gray-400">
+                {(() => {
+                  const km = set.distanceMeters / 1000;
+                  const paceSeconds = set.durationSeconds / km;
+                  const m = Math.floor(paceSeconds / 60);
+                  const s = Math.round(paceSeconds % 60);
+                  return `${m}:${String(s).padStart(2, '0')}/km`;
+                })()}
+              </span>
+            )}
+
+            {showRounds && (
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="Rnds"
+                value={set.rounds ?? ''}
+                onChange={(e) =>
+                  onUpdate(exerciseId, set.id, { rounds: e.target.value ? parseInt(e.target.value, 10) : null })
+                }
+                className={inputClass}
+              />
+            )}
+
+            {showCalories && (
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="cal"
+                value={set.calories ?? ''}
+                onChange={(e) =>
+                  onUpdate(exerciseId, set.id, { calories: e.target.value ? parseInt(e.target.value, 10) : null })
+                }
+                className={inputClass}
+              />
+            )}
+          </div>
+
+          {/* RPE pill */}
+          {showRpe && (
             <button
-              key={v}
               type="button"
-              onClick={() => {
-                onUpdate(exerciseId, set.id, { rpe: v });
-                setShowRpePicker(false);
-              }}
-              className={`min-h-[36px] min-w-[36px] rounded-lg border text-xs font-medium transition-colors ${
-                set.rpe === v
-                  ? 'border-indigo-500 bg-indigo-600 text-white'
-                  : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+              onClick={() => setShowRpePicker(!showRpePicker)}
+              className={`h-7 shrink-0 rounded-full px-1.5 text-[10px] font-medium transition-colors ${
+                set.rpe !== null
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-700 text-gray-400'
               }`}
+              aria-label={set.rpe !== null ? `RPE ${set.rpe}` : 'Set RPE'}
             >
-              {v}
+              {set.rpe !== null ? `${set.rpe}` : 'RPE'}
             </button>
-          ))}
-          {set.rpe !== null && (
+          )}
+
+          {/* Complete button — active mode only */}
+          {mode === 'active' && (
             <button
               type="button"
-              onClick={() => {
-                onUpdate(exerciseId, set.id, { rpe: null });
-                setShowRpePicker(false);
-              }}
-              className="min-h-[36px] rounded-lg border border-gray-600 bg-gray-700 px-2 text-xs font-medium text-red-400 hover:bg-gray-600"
+              onClick={() => set.completed ? onUncomplete?.(exerciseId, set.id) : onComplete?.(exerciseId, set.id)}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+                set.completed
+                  ? 'bg-green-500 text-white'
+                  : 'border border-gray-600 text-gray-500'
+              }`}
+              aria-label={set.completed ? 'Undo set completion' : 'Complete set'}
             >
-              Clear
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
             </button>
           )}
         </div>
-      )}
+
+        {/* RPE picker */}
+        {showRpePicker && (
+          <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
+            {RPE_VALUES.map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => { onUpdate(exerciseId, set.id, { rpe: v }); setShowRpePicker(false); }}
+                className={`min-h-[32px] min-w-[32px] rounded-lg border text-xs font-medium transition-colors ${
+                  set.rpe === v ? 'border-indigo-500 bg-indigo-600 text-white' : 'border-gray-600 bg-gray-700 text-gray-200'
+                }`}
+              >
+                {v}
+              </button>
+            ))}
+            {set.rpe !== null && (
+              <button
+                type="button"
+                onClick={() => { onUpdate(exerciseId, set.id, { rpe: null }); setShowRpePicker(false); }}
+                className="min-h-[32px] rounded-lg border border-gray-600 bg-gray-700 px-2 text-xs font-medium text-red-400"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -366,6 +384,7 @@ export default function ExerciseSection({ exercise, index, total, mode, onUpdate
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [showRestPicker, setShowRestPicker] = useState(false);
   const { data: previousPerformance } = usePreviousPerformance(exercise.exerciseId);
+  const { weightLabel, kgToDisplay, inputToKg } = useUnitPreference();
 
   const currentRest = exercise.restSeconds ?? 90;
 
@@ -474,6 +493,9 @@ export default function ExerciseSection({ exercise, index, total, mode, onUpdate
             exerciseId={exercise.id}
             previousSet={previousPerformance?.sets.find((ps) => ps.setNumber === set.setNumber)}
             mode={mode}
+            weightLabel={weightLabel}
+            kgToDisplay={kgToDisplay}
+            inputToKg={inputToKg}
             onUpdate={onUpdate}
             onComplete={onComplete}
             onUncomplete={onUncomplete}
