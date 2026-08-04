@@ -189,9 +189,9 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
             : 'border-gray-700 bg-gray-800'
         }`}
         style={{ transform: `translateX(${swipeX}px)`, transition: swipingRef.current ? 'none' : 'transform 0.2s ease-out' }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={showRpePicker ? undefined : handleTouchStart}
+        onTouchMove={showRpePicker ? undefined : handleTouchMove}
+        onTouchEnd={showRpePicker ? undefined : handleTouchEnd}
       >
         <div className="flex items-center gap-1.5">
           {/* Set number + previous */}
