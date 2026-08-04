@@ -331,30 +331,60 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
           )}
         </div>
 
-        {/* RPE picker */}
+        {/* RPE picker — gradient slider */}
         {showRpePicker && (
-          <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-gray-700 bg-gray-900 p-2">
-            {RPE_VALUES.map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => { onUpdate(exerciseId, set.id, { rpe: v }); setShowRpePicker(false); }}
-                className={`min-h-[32px] min-w-[32px] rounded-lg border text-xs font-medium transition-colors ${
-                  set.rpe === v ? 'border-indigo-500 bg-indigo-600 text-white' : 'border-gray-600 bg-gray-700 text-gray-200'
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-            {set.rpe !== null && (
-              <button
-                type="button"
-                onClick={() => { onUpdate(exerciseId, set.id, { rpe: null }); setShowRpePicker(false); }}
-                className="min-h-[32px] rounded-lg border border-gray-600 bg-gray-700 px-2 text-xs font-medium text-red-400"
-              >
-                Clear
-              </button>
-            )}
+          <div className="mt-2 rounded-lg border border-gray-700 bg-gray-900 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-gray-400">RPE</span>
+              <span className="text-sm font-bold text-white">{set.rpe ?? '—'}</span>
+              {set.rpe !== null && (
+                <button
+                  type="button"
+                  onClick={() => { onUpdate(exerciseId, set.id, { rpe: null }); setShowRpePicker(false); }}
+                  className="text-[10px] text-red-400 font-medium"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {/* Gradient track */}
+            <div className="relative h-8 rounded-full overflow-hidden"
+              style={{ background: 'linear-gradient(to right, #22c55e, #eab308, #f97316, #ef4444)' }}
+            >
+              <input
+                type="range"
+                min={6}
+                max={10}
+                step={0.5}
+                value={set.rpe ?? 6}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  onUpdate(exerciseId, set.id, { rpe: val });
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                style={{ WebkitAppearance: 'none' }}
+              />
+              {/* Thumb indicator */}
+              <div
+                className="absolute top-1 bottom-1 w-6 rounded-full bg-white shadow-lg border-2 border-gray-300 transition-all pointer-events-none"
+                style={{ left: `calc(${((set.rpe ?? 6) - 6) / 4 * 100}% - 12px)` }}
+              />
+            </div>
+            {/* Scale labels */}
+            <div className="flex justify-between mt-1.5 px-1">
+              <span className="text-[9px] text-green-400">Easy</span>
+              <span className="text-[9px] text-yellow-400">Moderate</span>
+              <span className="text-[9px] text-orange-400">Hard</span>
+              <span className="text-[9px] text-red-400">Max</span>
+            </div>
+            {/* Tap to confirm */}
+            <button
+              type="button"
+              onClick={() => setShowRpePicker(false)}
+              className="mt-2 w-full rounded-md bg-indigo-600 py-1.5 text-xs font-medium text-white active:bg-indigo-700"
+            >
+              Done
+            </button>
           </div>
         )}
       </div>
