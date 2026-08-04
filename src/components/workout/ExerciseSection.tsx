@@ -301,7 +301,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
             <button
               type="button"
               onClick={() => setShowRpePicker(!showRpePicker)}
-              className={`h-7 shrink-0 rounded-full px-1.5 text-[10px] font-medium transition-colors ${
+              className={`h-7 w-9 shrink-0 rounded-full text-[10px] font-medium transition-colors ${
                 set.rpe !== null
                   ? 'bg-indigo-600 text-white'
                   : 'bg-gray-700 text-gray-400'
