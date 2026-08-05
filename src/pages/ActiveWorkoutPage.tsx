@@ -165,9 +165,8 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
 
             {/* Duration section */}
             <div className="rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm font-medium text-gray-300">Duration</span>
-                <span className="text-sm font-mono" style={{ color: 'var(--accent)' }}>{formatDuration(seconds)}</span>
+                <div className="flex items-center justify-center px-4 py-3">
+                <span className="text-lg font-mono font-semibold" style={{ color: 'var(--accent)' }}>{formatDuration(seconds)}</span>
               </div>
               <div className="border-t border-gray-700 px-4 py-3">
                 <select
