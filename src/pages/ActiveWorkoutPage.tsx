@@ -152,58 +152,57 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
         </div>
       </header>
 
-      {/* Bottom sheet for duration/start time editing — Hevy style */}
+      {/* Bottom sheet for duration/start time editing */}
       {sheetOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setSheetOpen(false)}>
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-black/50" />
           <div
-            className="relative w-full max-w-md rounded-t-2xl bg-white dark:bg-gray-900 px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom"
+            className="relative w-full max-w-md rounded-t-2xl border-t border-gray-700 bg-gray-900 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle */}
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-300 dark:bg-gray-600" />
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-600" />
 
-            {/* Title */}
-            <h3 className="text-center text-base font-semibold text-gray-900 dark:text-white mb-4">Duration</h3>
-
-            {/* Duration row */}
-            <div className="flex items-center justify-between px-1 mb-2">
-              <span className="text-base font-medium text-gray-900 dark:text-gray-100">Duration</span>
-              <span className="text-base font-medium text-blue-500">{formatDuration(seconds)}</span>
+            {/* Duration section */}
+            <div className="rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm font-medium text-gray-300">Duration</span>
+                <span className="text-sm font-mono" style={{ color: 'var(--accent)' }}>{formatDuration(seconds)}</span>
+              </div>
+              <div className="border-t border-gray-700 px-4 py-3">
+                <select
+                  value={Math.floor(seconds / 60)}
+                  onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
+                  className="h-12 w-full rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:outline-none"
+                  style={{ borderColor: 'var(--accent)' }}
+                >
+                  {Array.from({ length: 241 }, (_, i) => {
+                    const h = Math.floor(i / 60);
+                    const m = i % 60;
+                    const label = h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`;
+                    return <option key={i} value={i}>{label}</option>;
+                  })}
+                </select>
+              </div>
             </div>
 
-            {/* Native select wheel — single continuous list */}
-            <div className="mb-4">
-              <select
-                value={Math.floor(seconds / 60)}
-                onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
-                className="h-44 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-center text-lg text-gray-900 dark:text-white appearance-none focus:border-blue-500 focus:outline-none"
-                size={7}
-              >
-                {Array.from({ length: 241 }, (_, i) => {
-                  const h = Math.floor(i / 60);
-                  const m = i % 60;
-                  const label = h === 0 ? `${m}min` : m === 0 ? `${h}h 0min` : `${h}h ${m}min`;
-                  return <option key={i} value={i} className="py-2 text-center">{label}</option>;
-                })}
-              </select>
-            </div>
-
-            {/* Start time row */}
-            <div className="flex items-center justify-between px-1 mb-4">
-              <span className="text-base font-medium text-gray-900 dark:text-gray-100">Start time</span>
-              <div className="relative">
-                <span className="text-base font-medium text-blue-500">{formatStartTime(startedAt)}</span>
-                <input
-                  type="datetime-local"
-                  value={startTimeValue}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      onStartTimeChange(new Date(e.target.value).toISOString());
-                    }
-                  }}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
+            {/* Start time section */}
+            <div className="mt-3 rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm font-medium text-gray-300">Start Time</span>
+                <div className="relative">
+                  <span className="text-sm" style={{ color: 'var(--accent)' }}>{formatStartTime(startedAt)}</span>
+                  <input
+                    type="datetime-local"
+                    value={startTimeValue}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        onStartTimeChange(new Date(e.target.value).toISOString());
+                      }
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
 
@@ -211,13 +210,23 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
             <button
               type="button"
               onClick={() => { onTimerTap(); setSheetOpen(false); }}
-              className={`w-full rounded-xl py-3.5 text-base font-semibold transition-colors ${
+              className={`mt-4 w-full rounded-xl py-3 text-sm font-semibold text-white transition-colors ${
                 isPaused
-                  ? 'bg-blue-500 text-white active:bg-blue-600'
-                  : 'bg-blue-500 text-white active:bg-blue-600'
+                  ? 'bg-emerald-600 active:bg-emerald-700'
+                  : 'bg-amber-600 active:bg-amber-700'
               }`}
             >
-              {isPaused ? '▶  Resume Workout Timer' : '⏸  Pause Workout Timer'}
+              {isPaused ? '▶  Resume Workout' : '⏸  Pause Workout'}
+            </button>
+
+            {/* Done button */}
+            <button
+              type="button"
+              onClick={() => setSheetOpen(false)}
+              className="mt-2 w-full rounded-xl py-3 text-sm font-semibold transition-colors"
+              style={{ backgroundColor: 'var(--accent)', color: 'white' }}
+            >
+              Done
             </button>
           </div>
         </div>
