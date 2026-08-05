@@ -447,9 +447,17 @@ export default function ActiveWorkoutPage() {
   }, [workout, preference, latestBodyweightKg, exerciseClassificationMap]);
 
   // Timer - derive elapsed from persisted startedAt timestamp (survives refresh)
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(() => {
+    if (!workout) return 0;
+    if (workout.isPaused) return workout.elapsedSeconds;
+    return Math.floor((Date.now() - new Date(workout.startedAt).getTime()) / 1000);
+  });
   useEffect(() => {
-    if (!workout || workout.isPaused) return;
+    if (!workout) return;
+    if (workout.isPaused) {
+      setElapsedSeconds(workout.elapsedSeconds);
+      return;
+    }
     const startTime = new Date(workout.startedAt).getTime();
     const tick = () => setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
     tick(); // immediate first update

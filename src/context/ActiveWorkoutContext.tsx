@@ -397,14 +397,18 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
   const pauseWorkout = useCallback(() => {
     setWorkout((prev) => {
       if (!prev || prev.isPaused) return prev;
-      return { ...prev, isPaused: true };
+      // Store current elapsed so we can resume from this point
+      const elapsed = Math.floor((Date.now() - new Date(prev.startedAt).getTime()) / 1000);
+      return { ...prev, isPaused: true, elapsedSeconds: elapsed };
     });
   }, []);
 
   const resumeWorkout = useCallback(() => {
     setWorkout((prev) => {
       if (!prev || !prev.isPaused) return prev;
-      return { ...prev, isPaused: false };
+      // Shift startedAt forward so elapsed resumes from where we paused
+      const newStartedAt = new Date(Date.now() - prev.elapsedSeconds * 1000).toISOString();
+      return { ...prev, isPaused: false, startedAt: newStartedAt };
     });
   }, []);
 
