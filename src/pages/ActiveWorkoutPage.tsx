@@ -84,47 +84,176 @@ interface WorkoutTimerBarProps {
   volumeValue: number;
   volumeUnit: string;
   isPaused: boolean;
+  startedAt: string;
   onTimerTap: () => void;
+  onDurationChange: (seconds: number) => void;
+  onStartTimeChange: (iso: string) => void;
   onMenuToggle: () => void;
 }
 
-function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaused, onTimerTap, onMenuToggle }: WorkoutTimerBarProps) {
+function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaused, startedAt, onTimerTap, onDurationChange, onStartTimeChange, onMenuToggle }: WorkoutTimerBarProps) {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [expanded, setExpanded] = useState<'duration' | 'start' | null>(null);
+
+  const formatDuration = (s: number) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m ${s % 60}s`;
+  };
+
+  const formatStartTime = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+
+  // Convert seconds to HH:MM:SS for time input
+  const durationTimeValue = (() => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  })();
+
+  // Convert ISO to datetime-local value
+  const startTimeValue = (() => {
+    const d = new Date(startedAt);
+    const offset = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 16);
+  })();
+
   return (
-    <header className="sticky top-0 z-20 glass-header px-4 py-3">
-      <div className="flex items-center justify-between">
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-bold text-gray-100">
-            {workoutName}
-          </h1>
-          <div className="flex items-center gap-3">
+    <>
+      <header className="sticky top-0 z-20 glass-header px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-lg font-bold text-gray-100">
+              {workoutName}
+            </h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSheetOpen(true)}
+                className={`text-sm font-mono rounded-md px-1.5 py-0.5 active:bg-gray-700/50 ${isPaused ? 'text-yellow-400' : 'text-indigo-400'}`}
+                aria-label="Edit workout time"
+              >
+                {isPaused && '⏸ '}{formatTime(seconds)}
+              </button>
+              {volumeValue > 0 && (
+                <p className="text-sm font-medium text-gray-400">
+                  Vol: <AnimatedVolume value={volumeValue} unit={volumeUnit} />
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onMenuToggle}
+            className="ml-2 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:bg-gray-800 active:bg-gray-700"
+            aria-label="Workout menu"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 5v.01M12 12v.01M12 19v.01" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* Bottom sheet for duration/start time editing */}
+      {sheetOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setSheetOpen(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative w-full max-w-md rounded-t-2xl border-t border-gray-700 bg-gray-900 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-600" />
+
+            {/* Pause/Resume button */}
             <button
               type="button"
               onClick={onTimerTap}
-              className={`text-sm font-mono rounded-md px-1.5 py-0.5 active:bg-gray-700/50 ${isPaused ? 'text-yellow-400' : 'text-indigo-400'}`}
-              aria-label={isPaused ? 'Resume timer' : 'Pause timer'}
+              className={`w-full mb-4 rounded-xl py-3 text-sm font-semibold transition-colors ${
+                isPaused
+                  ? 'bg-green-600 text-white active:bg-green-700'
+                  : 'bg-yellow-600 text-white active:bg-yellow-700'
+              }`}
             >
-              {isPaused && '⏸ '}{formatTime(seconds)}
+              {isPaused ? '▶ Resume Workout' : '⏸ Pause Workout'}
             </button>
-            {volumeValue > 0 && (
-              <p className="text-sm font-medium text-gray-400">
-                Vol: <AnimatedVolume value={volumeValue} unit={volumeUnit} />
-              </p>
-            )}
+
+            {/* Duration section */}
+            <div className="rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setExpanded(expanded === 'duration' ? null : 'duration')}
+                className="flex w-full items-center justify-between px-4 py-3"
+              >
+                <span className="text-sm font-medium text-gray-300">Duration</span>
+                <span className="text-sm font-mono text-white">{formatDuration(seconds)}</span>
+              </button>
+              {expanded === 'duration' && (
+                <div className="border-t border-gray-700 px-4 py-3">
+                  <input
+                    type="time"
+                    step="1"
+                    value={durationTimeValue}
+                    onChange={(e) => {
+                      const parts = e.target.value.split(':');
+                      if (parts.length >= 2) {
+                        const h = parseInt(parts[0]) || 0;
+                        const m = parseInt(parts[1]) || 0;
+                        const s = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0;
+                        onDurationChange(h * 3600 + m * 60 + s);
+                      }
+                    }}
+                    className="w-full h-12 rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Start time section */}
+            <div className="mt-3 rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setExpanded(expanded === 'start' ? null : 'start')}
+                className="flex w-full items-center justify-between px-4 py-3"
+              >
+                <span className="text-sm font-medium text-gray-300">Start Time</span>
+                <span className="text-sm text-white">{formatStartTime(startedAt)}</span>
+              </button>
+              {expanded === 'start' && (
+                <div className="border-t border-gray-700 px-4 py-3">
+                  <input
+                    type="datetime-local"
+                    value={startTimeValue}
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        onStartTimeChange(new Date(e.target.value).toISOString());
+                      }
+                    }}
+                    className="w-full h-12 rounded-lg border border-gray-600 bg-gray-900 text-center text-sm text-white focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Done button */}
+            <button
+              type="button"
+              onClick={() => setSheetOpen(false)}
+              className="mt-4 w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white active:bg-indigo-700"
+            >
+              Done
+            </button>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onMenuToggle}
-          className="ml-2 flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:bg-gray-800 active:bg-gray-700"
-          aria-label="Workout menu"
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M12 5v.01M12 12v.01M12 19v.01" />
-          </svg>
-        </button>
-      </div>
-    </header>
+      )}
+    </>
   );
 }
 
@@ -251,6 +380,7 @@ export default function ActiveWorkoutPage() {
     discardWorkout,
     pauseWorkout,
     resumeWorkout,
+    updateStartedAt,
     restTimer,
     startRestTimer,
     clearRestTimer,
@@ -465,7 +595,14 @@ export default function ActiveWorkoutPage() {
         volumeValue={liveVolumeValue}
         volumeUnit={weightLabel}
         isPaused={workout.isPaused}
+        startedAt={workout.startedAt}
         onTimerTap={() => workout.isPaused ? resumeWorkout() : pauseWorkout()}
+        onDurationChange={(newSeconds) => {
+          // Adjust startedAt so elapsed = newSeconds
+          const newStart = new Date(Date.now() - newSeconds * 1000).toISOString();
+          updateStartedAt(newStart);
+        }}
+        onStartTimeChange={(iso) => updateStartedAt(iso)}
         onMenuToggle={() => setMenuOpen((o) => !o)}
       />
 
