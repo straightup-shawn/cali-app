@@ -144,7 +144,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
     const dx = e.touches[0].clientX - touchStartRef.current.x;
     const dy = e.touches[0].clientY - touchStartRef.current.y;
     // Lock into horizontal swipe if moved more X than Y
-    if (!swipingRef.current && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+    if (!swipingRef.current && Math.abs(dx) > 20 && Math.abs(dx) > Math.abs(dy) * 2) {
       swipingRef.current = true;
     }
     if (swipingRef.current) {
