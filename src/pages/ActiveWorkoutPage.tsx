@@ -93,6 +93,7 @@ interface WorkoutTimerBarProps {
 
 function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaused, startedAt, onTimerTap, onDurationChange, onStartTimeChange, onMenuToggle }: WorkoutTimerBarProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [durationPickerOpen, setDurationPickerOpen] = useState(false);
 
   const formatDuration = (s: number) => {
     const h = Math.floor(s / 3600);
@@ -163,26 +164,32 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
             {/* Drag handle */}
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-600" />
 
-            {/* Duration section */}
+            {/* Duration section — tap time to expand picker */}
             <div className="rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
-                <div className="flex items-center justify-center px-4 py-3">
-                <span className="text-lg font-mono font-semibold" style={{ color: 'var(--accent)' }}>{formatDuration(seconds)}</span>
-              </div>
-              <div className="border-t border-gray-700 px-4 py-3">
-                <select
-                  value={Math.floor(seconds / 60)}
-                  onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
-                  className="h-12 w-full rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:outline-none"
-                  style={{ borderColor: 'var(--accent)' }}
-                >
-                  {Array.from({ length: 241 }, (_, i) => {
-                    const h = Math.floor(i / 60);
-                    const m = i % 60;
-                    const label = h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`;
-                    return <option key={i} value={i}>{label}</option>;
-                  })}
-                </select>
-              </div>
+              <button
+                type="button"
+                onClick={() => setDurationPickerOpen((o) => !o)}
+                className="w-full px-4 py-3"
+              >
+                <span className="block text-center text-xl font-mono font-semibold" style={{ color: 'var(--accent)' }}>{formatDuration(seconds)}</span>
+              </button>
+              {durationPickerOpen && (
+                <div className="border-t border-gray-700 px-4 py-3">
+                  <select
+                    value={Math.floor(seconds / 60)}
+                    onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
+                    className="h-12 w-full rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:outline-none"
+                    style={{ borderColor: 'var(--accent)' }}
+                  >
+                    {Array.from({ length: 241 }, (_, i) => {
+                      const h = Math.floor(i / 60);
+                      const m = i % 60;
+                      const label = h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`;
+                      return <option key={i} value={i}>{label}</option>;
+                    })}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Start time section */}
