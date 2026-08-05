@@ -317,34 +317,19 @@ function SetRowEdit({ set, exerciseType, editValues, onUpdate, onDelete, isDelet
       )}
 
       {showDuration && (
-        <div className="relative min-w-[5rem]">
+        <div className="flex items-center gap-1">
           <input
-            type="time"
-            step="1"
-            value={(() => {
-              const s = editValues.duration_seconds ?? 0;
-              const m = Math.floor(s / 60);
-              const sec = s % 60;
-              return `00:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-            })()}
-            onChange={(e) => {
-              const parts = e.target.value.split(':');
-              if (parts.length >= 2) {
-                const h = parseInt(parts[0]) || 0;
-                const m = parseInt(parts[1]) || 0;
-                const sec = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0;
-                const total = h * 3600 + m * 60 + sec;
-                onUpdate(set.id, 'duration_seconds', total > 0 ? total : null);
-              }
-            }}
+            type="number"
+            inputMode="numeric"
+            placeholder="Sec"
+            value={editValues.duration_seconds ?? ''}
+            onChange={(e) =>
+              onUpdate(set.id, 'duration_seconds', e.target.value ? parseInt(e.target.value, 10) : null)
+            }
             disabled={isDeleted}
-            className={`h-9 w-full rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full ${isDeleted ? 'line-through' : ''}`}
+            className={`h-9 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none ${isDeleted ? 'line-through' : ''}`}
           />
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className={`text-sm font-medium ${isDeleted ? 'text-gray-500 line-through' : 'text-white'}`}>
-              {editValues.duration_seconds ? `${Math.floor(editValues.duration_seconds / 60)}:${String(editValues.duration_seconds % 60).padStart(2, '0')}` : <span className="text-gray-500">MM:SS</span>}
-            </span>
-          </div>
+          <span className="text-xs text-gray-500">sec</span>
         </div>
       )}
 
@@ -544,33 +529,18 @@ function ExerciseSummarySection({ exercise, prRecords, formatWeight, isEditing, 
               )}
 
               {['duration', 'static_hold'].includes(exerciseType) && (
-                <div className="relative min-w-[5rem]">
+                <div className="flex items-center gap-1">
                   <input
-                    type="time"
-                    step="1"
-                    value={(() => {
-                      const s = newSet.duration_seconds ?? 0;
-                      const m = Math.floor(s / 60);
-                      const sec = s % 60;
-                      return `00:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-                    })()}
-                    onChange={(e) => {
-                      const parts = e.target.value.split(':');
-                      if (parts.length >= 2) {
-                        const h = parseInt(parts[0]) || 0;
-                        const m = parseInt(parts[1]) || 0;
-                        const sec = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0;
-                        const total = h * 3600 + m * 60 + sec;
-                        onUpdateNewSet?.(exercise.id, idx, 'duration_seconds', total > 0 ? total : null);
-                      }
-                    }}
-                    className="h-9 w-full rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full"
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Sec"
+                    value={newSet.duration_seconds ?? ''}
+                    onChange={(e) =>
+                      onUpdateNewSet?.(exercise.id, idx, 'duration_seconds', e.target.value ? parseInt(e.target.value, 10) : null)
+                    }
+                    className="h-9 w-16 rounded-md border border-gray-700 bg-gray-800 text-center text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-sm font-medium text-white">
-                      {newSet.duration_seconds ? `${Math.floor(newSet.duration_seconds / 60)}:${String(newSet.duration_seconds % 60).padStart(2, '0')}` : <span className="text-gray-500">MM:SS</span>}
-                    </span>
-                  </div>
+                  <span className="text-xs text-gray-500">sec</span>
                 </div>
               )}
 
@@ -878,6 +848,7 @@ export default function WorkoutDetailPage() {
   // Edit state
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
+  const [editDuration, setEditDuration] = useState<number | null>(null);
   const [editSets, setEditSets] = useState<Record<string, EditSetValues>>({});
   const updateWorkout = useUpdateWorkout();
 
@@ -898,6 +869,7 @@ export default function WorkoutDetailPage() {
   const handleStartEdit = useCallback(() => {
     if (!workout) return;
     setEditName(workout.name);
+    setEditDuration(workout.duration_seconds);
     // Initialize edit values from current set data
     const setsMap: Record<string, EditSetValues> = {};
     for (const exercise of workout.workout_exercises ?? []) {
@@ -1063,6 +1035,7 @@ export default function WorkoutDetailPage() {
       await updateWorkout.mutateAsync({
         workoutId: id,
         name: editName !== workout.name ? editName : undefined,
+        durationSeconds: editDuration !== workout.duration_seconds ? editDuration : undefined,
         sets: changedSets.length > 0 ? changedSets : undefined,
         deleteSets: deletedSetIds.size > 0 ? Array.from(deletedSetIds) : undefined,
         addSets: (() => {
@@ -1264,7 +1237,35 @@ export default function WorkoutDetailPage() {
           {workout.duration_seconds !== null && (
             <>
               <span>•</span>
-              <span>{formatDuration(workout.duration_seconds)}</span>
+              {isEditing ? (
+                <div className="relative inline-block">
+                  <input
+                    type="time"
+                    step="1"
+                    value={(() => {
+                      const s = workout.duration_seconds ?? 0;
+                      const h = Math.floor(s / 3600);
+                      const m = Math.floor((s % 3600) / 60);
+                      const sec = s % 60;
+                      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+                    })()}
+                    onChange={(e) => {
+                      const parts = e.target.value.split(':');
+                      if (parts.length >= 2) {
+                        const h = parseInt(parts[0]) || 0;
+                        const m = parseInt(parts[1]) || 0;
+                        const sec = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0;
+                        const total = h * 3600 + m * 60 + sec;
+                        // Store in local state for saving
+                        setEditDuration(total > 0 ? total : null);
+                      }
+                    }}
+                    className="h-7 w-20 rounded-md border border-indigo-500 bg-gray-800 text-center text-xs text-indigo-300 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+              ) : (
+                <span>{formatDuration(workout.duration_seconds)}</span>
+              )}
             </>
           )}
         </div>

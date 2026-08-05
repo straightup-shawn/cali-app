@@ -5,7 +5,7 @@ import type { ActiveWorkoutExercise, ActiveSet, ExerciseType } from '@/types';
 import type { PreviousSet } from '@/hooks/usePreviousPerformance';
 
 // =============================================================================
-// Duration Input — uses native time picker on iOS, falls back to MM:SS fields
+// Duration Input — MM:SS two-field input (for exercise sets)
 // =============================================================================
 
 function DurationInput({ value, onChange }: { value: number | null; onChange: (s: number | null) => void }) {
@@ -13,38 +13,43 @@ function DurationInput({ value, onChange }: { value: number | null; onChange: (s
   const mm = Math.floor(totalSec / 60);
   const ss = totalSec % 60;
 
-  // Format as HH:MM:SS for the time input (always use 00 for hours)
-  const timeValue = `00:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
-
-  // Display label
-  const displayLabel = totalSec > 0 ? `${mm}:${String(ss).padStart(2, '0')}` : '';
-
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const parts = e.target.value.split(':');
-    if (parts.length >= 2) {
-      const h = parseInt(parts[0]) || 0;
-      const m = parseInt(parts[1]) || 0;
-      const s = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0;
-      const total = h * 3600 + m * 60 + s;
-      onChange(total > 0 ? total : null);
-    }
+  const update = (newM: number, newS: number) => {
+    const clamped = Math.min(newM, 99) * 60 + Math.min(newS, 59);
+    onChange(clamped > 0 ? clamped : null);
   };
 
+  const fieldClass =
+    'h-8 w-10 rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none';
+
   return (
-    <div className="relative flex-1 min-w-[4.5rem]">
+    <div className="flex items-center gap-0.5">
       <input
-        type="time"
-        step="1"
-        value={timeValue}
-        onChange={handleTimeChange}
-        className="h-8 w-full rounded-md border border-gray-700 bg-gray-900 text-center text-xs text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full"
+        type="number"
+        inputMode="numeric"
+        placeholder="MM"
+        min={0}
+        max={99}
+        value={mm || ''}
+        onChange={(e) => {
+          const v = Math.min(99, Math.max(0, parseInt(e.target.value) || 0));
+          update(v, ss);
+        }}
+        className={fieldClass}
       />
-      {/* Overlay display for cleaner look */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span className="text-xs text-white font-medium">
-          {displayLabel || <span className="text-gray-500">MM:SS</span>}
-        </span>
-      </div>
+      <span className="text-[10px] text-gray-500">:</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        placeholder="SS"
+        min={0}
+        max={59}
+        value={ss || ''}
+        onChange={(e) => {
+          const v = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
+          update(mm, v);
+        }}
+        className={fieldClass}
+      />
     </div>
   );
 }

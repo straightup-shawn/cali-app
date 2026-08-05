@@ -211,6 +211,7 @@ export interface AddSetPayload {
 export interface UpdateWorkoutPayload {
   workoutId: string;
   name?: string;
+  durationSeconds?: number | null;
   sets?: UpdateSetPayload[];
   deleteSets?: string[];
   addSets?: AddSetPayload[];
@@ -236,6 +237,17 @@ export function useUpdateWorkout() {
         const { error } = await supabase
           .from('workouts')
           .update({ name: payload.name })
+          .eq('id', payload.workoutId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      }
+
+      // Update workout duration if provided
+      if (payload.durationSeconds !== undefined) {
+        const { error } = await supabase
+          .from('workouts')
+          .update({ duration_seconds: payload.durationSeconds })
           .eq('id', payload.workoutId)
           .eq('user_id', user.id);
 
