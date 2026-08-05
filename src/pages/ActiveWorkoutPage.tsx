@@ -93,7 +93,6 @@ interface WorkoutTimerBarProps {
 
 function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaused, startedAt, onTimerTap, onDurationChange, onStartTimeChange, onMenuToggle }: WorkoutTimerBarProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [expanded, setExpanded] = useState<'duration' | 'start' | null>(null);
 
   const formatDuration = (s: number) => {
     const h = Math.floor(s / 3600);
@@ -153,91 +152,72 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
         </div>
       </header>
 
-      {/* Bottom sheet for duration/start time editing */}
+      {/* Bottom sheet for duration/start time editing — Hevy style */}
       {sheetOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setSheetOpen(false)}>
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/40" />
           <div
-            className="relative w-full max-w-md rounded-t-2xl border-t border-gray-700 bg-gray-900 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom"
+            className="relative w-full max-w-md rounded-t-2xl bg-white dark:bg-gray-900 px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle */}
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-600" />
+            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gray-300 dark:bg-gray-600" />
+
+            {/* Title */}
+            <h3 className="text-center text-base font-semibold text-gray-900 dark:text-white mb-4">Duration</h3>
+
+            {/* Duration row */}
+            <div className="flex items-center justify-between px-1 mb-2">
+              <span className="text-base font-medium text-gray-900 dark:text-gray-100">Duration</span>
+              <span className="text-base font-medium text-blue-500">{formatDuration(seconds)}</span>
+            </div>
+
+            {/* Native select wheel — single continuous list */}
+            <div className="mb-4">
+              <select
+                value={Math.floor(seconds / 60)}
+                onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
+                className="h-44 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-center text-lg text-gray-900 dark:text-white appearance-none focus:border-blue-500 focus:outline-none"
+                size={7}
+              >
+                {Array.from({ length: 241 }, (_, i) => {
+                  const h = Math.floor(i / 60);
+                  const m = i % 60;
+                  const label = h === 0 ? `${m}min` : m === 0 ? `${h}h 0min` : `${h}h ${m}min`;
+                  return <option key={i} value={i} className="py-2 text-center">{label}</option>;
+                })}
+              </select>
+            </div>
+
+            {/* Start time row */}
+            <div className="flex items-center justify-between px-1 mb-4">
+              <span className="text-base font-medium text-gray-900 dark:text-gray-100">Start time</span>
+              <div className="relative">
+                <span className="text-base font-medium text-blue-500">{formatStartTime(startedAt)}</span>
+                <input
+                  type="datetime-local"
+                  value={startTimeValue}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      onStartTimeChange(new Date(e.target.value).toISOString());
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
 
             {/* Pause/Resume button */}
             <button
               type="button"
-              onClick={onTimerTap}
-              className={`w-full mb-4 rounded-xl py-3 text-sm font-semibold transition-colors ${
+              onClick={() => { onTimerTap(); setSheetOpen(false); }}
+              className={`w-full rounded-xl py-3.5 text-base font-semibold transition-colors ${
                 isPaused
-                  ? 'bg-green-600 text-white active:bg-green-700'
-                  : 'bg-yellow-600 text-white active:bg-yellow-700'
+                  ? 'bg-blue-500 text-white active:bg-blue-600'
+                  : 'bg-blue-500 text-white active:bg-blue-600'
               }`}
             >
-              {isPaused ? '▶ Resume Workout' : '⏸ Pause Workout'}
-            </button>
-
-            {/* Duration section */}
-            <div className="rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setExpanded(expanded === 'duration' ? null : 'duration')}
-                className="flex w-full items-center justify-between px-4 py-3"
-              >
-                <span className="text-sm font-medium text-gray-300">Duration</span>
-                <span className="text-sm font-mono text-white">{formatDuration(seconds)}</span>
-              </button>
-              {expanded === 'duration' && (
-                <div className="border-t border-gray-700 px-4 py-4">
-                  <select
-                    value={Math.floor(seconds / 60)}
-                    onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
-                    className="h-12 w-full rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:border-indigo-500 focus:outline-none"
-                  >
-                    {Array.from({ length: 241 }, (_, i) => {
-                      const h = Math.floor(i / 60);
-                      const m = i % 60;
-                      const label = h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`;
-                      return <option key={i} value={i}>{label}</option>;
-                    })}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Start time section */}
-            <div className="mt-3 rounded-xl border border-gray-700 bg-gray-800 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setExpanded(expanded === 'start' ? null : 'start')}
-                className="flex w-full items-center justify-between px-4 py-3"
-              >
-                <span className="text-sm font-medium text-gray-300">Start Time</span>
-                <span className="text-sm text-white">{formatStartTime(startedAt)}</span>
-              </button>
-              {expanded === 'start' && (
-                <div className="border-t border-gray-700 px-4 py-3">
-                  <input
-                    type="datetime-local"
-                    value={startTimeValue}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        onStartTimeChange(new Date(e.target.value).toISOString());
-                      }
-                    }}
-                    className="w-full h-12 rounded-lg border border-gray-600 bg-gray-900 text-center text-sm text-white focus:border-indigo-500 focus:outline-none"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Done button */}
-            <button
-              type="button"
-              onClick={() => setSheetOpen(false)}
-              className="mt-4 w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white active:bg-indigo-700"
-            >
-              Done
+              {isPaused ? '▶  Resume Workout Timer' : '⏸  Pause Workout Timer'}
             </button>
           </div>
         </div>
