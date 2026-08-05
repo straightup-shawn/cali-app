@@ -189,39 +189,18 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
               </button>
               {expanded === 'duration' && (
                 <div className="border-t border-gray-700 px-4 py-4">
-                  <div className="flex items-center justify-center gap-2">
-                    {/* Hours select */}
-                    <select
-                      value={Math.floor(seconds / 3600)}
-                      onChange={(e) => {
-                        const h = parseInt(e.target.value);
-                        const m = Math.floor((seconds % 3600) / 60);
-                        onDurationChange(h * 3600 + m * 60);
-                      }}
-                      className="h-12 w-20 rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:border-indigo-500 focus:outline-none"
-                    >
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <option key={i} value={i}>{i}</option>
-                      ))}
-                    </select>
-                    <span className="text-sm font-medium text-gray-400">hr</span>
-
-                    {/* Minutes select */}
-                    <select
-                      value={Math.floor((seconds % 3600) / 60)}
-                      onChange={(e) => {
-                        const h = Math.floor(seconds / 3600);
-                        const m = parseInt(e.target.value);
-                        onDurationChange(h * 3600 + m * 60);
-                      }}
-                      className="h-12 w-20 rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:border-indigo-500 focus:outline-none"
-                    >
-                      {Array.from({ length: 60 }, (_, i) => (
-                        <option key={i} value={i}>{i}</option>
-                      ))}
-                    </select>
-                    <span className="text-sm font-medium text-gray-400">min</span>
-                  </div>
+                  <select
+                    value={Math.floor(seconds / 60)}
+                    onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
+                    className="h-12 w-full rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:border-indigo-500 focus:outline-none"
+                  >
+                    {Array.from({ length: 241 }, (_, i) => {
+                      const h = Math.floor(i / 60);
+                      const m = i % 60;
+                      const label = h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`;
+                      return <option key={i} value={i}>{label}</option>;
+                    })}
+                  </select>
                 </div>
               )}
             </div>
