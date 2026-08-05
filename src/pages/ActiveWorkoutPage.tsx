@@ -171,7 +171,7 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
                   onChange={(e) => onDurationChange(parseInt(e.target.value) * 60)}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 >
-                  {Array.from({ length: 241 }, (_, i) => {
+                  {Array.from({ length: 1441 }, (_, i) => {
                     const h = Math.floor(i / 60);
                     const m = i % 60;
                     const label = h === 0 ? `${m} min` : m === 0 ? `${h} hr` : `${h} hr ${m} min`;
