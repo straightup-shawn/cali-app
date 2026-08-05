@@ -107,14 +107,6 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
     return d.toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
   };
 
-  // Convert seconds to HH:MM:SS for time input
-  const durationTimeValue = (() => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  })();
-
   // Convert ISO to datetime-local value
   const startTimeValue = (() => {
     const d = new Date(startedAt);
@@ -196,22 +188,40 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaus
                 <span className="text-sm font-mono text-white">{formatDuration(seconds)}</span>
               </button>
               {expanded === 'duration' && (
-                <div className="border-t border-gray-700 px-4 py-3">
-                  <input
-                    type="time"
-                    step="1"
-                    value={durationTimeValue}
-                    onChange={(e) => {
-                      const parts = e.target.value.split(':');
-                      if (parts.length >= 2) {
-                        const h = parseInt(parts[0]) || 0;
-                        const m = parseInt(parts[1]) || 0;
-                        const s = parts.length >= 3 ? parseInt(parts[2]) || 0 : 0;
-                        onDurationChange(h * 3600 + m * 60 + s);
-                      }
-                    }}
-                    className="w-full h-12 rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white focus:border-indigo-500 focus:outline-none"
-                  />
+                <div className="border-t border-gray-700 px-4 py-4">
+                  <div className="flex items-center justify-center gap-2">
+                    {/* Hours select */}
+                    <select
+                      value={Math.floor(seconds / 3600)}
+                      onChange={(e) => {
+                        const h = parseInt(e.target.value);
+                        const m = Math.floor((seconds % 3600) / 60);
+                        onDurationChange(h * 3600 + m * 60);
+                      }}
+                      className="h-12 w-20 rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:border-indigo-500 focus:outline-none"
+                    >
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <option key={i} value={i}>{i}</option>
+                      ))}
+                    </select>
+                    <span className="text-sm font-medium text-gray-400">hr</span>
+
+                    {/* Minutes select */}
+                    <select
+                      value={Math.floor((seconds % 3600) / 60)}
+                      onChange={(e) => {
+                        const h = Math.floor(seconds / 3600);
+                        const m = parseInt(e.target.value);
+                        onDurationChange(h * 3600 + m * 60);
+                      }}
+                      className="h-12 w-20 rounded-lg border border-gray-600 bg-gray-900 text-center text-lg text-white appearance-none focus:border-indigo-500 focus:outline-none"
+                    >
+                      {Array.from({ length: 60 }, (_, i) => (
+                        <option key={i} value={i}>{i}</option>
+                      ))}
+                    </select>
+                    <span className="text-sm font-medium text-gray-400">min</span>
+                  </div>
                 </div>
               )}
             </div>
