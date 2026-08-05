@@ -83,10 +83,12 @@ interface WorkoutTimerBarProps {
   workoutName: string;
   volumeValue: number;
   volumeUnit: string;
+  isPaused: boolean;
+  onTimerTap: () => void;
   onMenuToggle: () => void;
 }
 
-function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, onMenuToggle }: WorkoutTimerBarProps) {
+function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, isPaused, onTimerTap, onMenuToggle }: WorkoutTimerBarProps) {
   return (
     <header className="sticky top-0 z-20 glass-header px-4 py-3">
       <div className="flex items-center justify-between">
@@ -95,7 +97,14 @@ function WorkoutTimerBar({ seconds, workoutName, volumeValue, volumeUnit, onMenu
             {workoutName}
           </h1>
           <div className="flex items-center gap-3">
-            <p className="text-sm font-mono text-indigo-400">{formatTime(seconds)}</p>
+            <button
+              type="button"
+              onClick={onTimerTap}
+              className={`text-sm font-mono rounded-md px-1.5 py-0.5 active:bg-gray-700/50 ${isPaused ? 'text-yellow-400' : 'text-indigo-400'}`}
+              aria-label={isPaused ? 'Resume timer' : 'Pause timer'}
+            >
+              {isPaused && '⏸ '}{formatTime(seconds)}
+            </button>
             {volumeValue > 0 && (
               <p className="text-sm font-medium text-gray-400">
                 Vol: <AnimatedVolume value={volumeValue} unit={volumeUnit} />
@@ -240,6 +249,8 @@ export default function ActiveWorkoutPage() {
     completeSet,
     uncompleteSet,
     discardWorkout,
+    pauseWorkout,
+    resumeWorkout,
     restTimer,
     startRestTimer,
     clearRestTimer,
@@ -453,6 +464,8 @@ export default function ActiveWorkoutPage() {
         workoutName={workout.name}
         volumeValue={liveVolumeValue}
         volumeUnit={weightLabel}
+        isPaused={workout.isPaused}
+        onTimerTap={() => workout.isPaused ? resumeWorkout() : pauseWorkout()}
         onMenuToggle={() => setMenuOpen((o) => !o)}
       />
 
