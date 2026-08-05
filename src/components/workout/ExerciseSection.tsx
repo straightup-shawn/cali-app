@@ -185,7 +185,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
       <div
         className={`relative border px-2 py-1.5 rounded-xl transition-transform ${
           isCompleted
-            ? 'border-green-800 bg-green-950/50'
+            ? 'border-green-800 bg-green-950'
             : 'border-gray-700 bg-gray-800'
         }`}
         style={{ transform: `translateX(${swipeX}px)`, transition: swipingRef.current ? 'none' : 'transform 0.2s ease-out' }}
