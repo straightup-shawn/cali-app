@@ -467,6 +467,12 @@ input:focus, select:focus, textarea:focus {
 /* Only keep white text on solid green buttons, not tinted green rows */
 .light-mode .bg-green-500 .text-white,
 .light-mode .bg-green-600 .text-white { color: white !important; }
+.light-mode .bg-amber-500 .text-white,
+.light-mode .bg-amber-500.text-white,
+.light-mode .bg-amber-600 .text-white,
+.light-mode .bg-amber-600.text-white,
+.light-mode .bg-emerald-600 .text-white,
+.light-mode .bg-emerald-600.text-white { color: white !important; }
 
 /* Fix: text-white on accent backgrounds should STAY white in light mode */
 .light-mode button.bg-indigo-600 { color: white !important; }
@@ -483,11 +489,19 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-gray-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
 .light-mode .bg-green-950\/30 { background-color: rgba(220, 252, 231, 0.5) !important; }
 .light-mode .bg-green-950\/50 { background-color: rgba(209, 250, 229, 0.5) !important; }
+.light-mode .bg-green-950 { background-color: rgba(209, 250, 229, 1) !important; }
 .light-mode .bg-amber-950\/20 { background-color: rgba(254, 243, 199, 0.5) !important; }
+.light-mode .bg-amber-950\/50 { background-color: rgba(254, 243, 199, 0.7) !important; }
 .light-mode .border-green-500 { border-color: #22c55e !important; }
+.light-mode .border-green-800 { border-color: #86efac !important; }
 .light-mode .border-amber-400 { border-color: #f59e0b !important; }
+.light-mode .border-amber-700 { border-color: #fbbf24 !important; }
 .light-mode .text-amber-300 { color: #b45309 !important; }
+.light-mode .text-amber-400 { color: #d97706 !important; }
 .light-mode .text-green-300 { color: #15803d !important; }
+.light-mode .bg-green-500 { background-color: #22c55e !important; }
+.light-mode .bg-indigo-950\/50 { background-color: rgba(224, 231, 255, 0.5) !important; }
+.light-mode .active\:bg-green-950:active { background-color: rgba(220, 252, 231, 0.8) !important; }
 
 /* Light mode rest timer / interactive pills */
 .light-mode .bg-white\/10 { background-color: rgba(0, 0, 0, 0.06) !important; }
@@ -547,6 +561,34 @@ input:focus, select:focus, textarea:focus {
 .light-mode .text-indigo-300 { color: var(--accent) !important; }
 .light-mode .text-indigo-200 { color: var(--accent) !important; }
 .light-mode .text-yellow-300 { color: #a16207 !important; }
+
+/* Light mode: PR celebration card */
+.light-mode .bg-amber-950\/50 { background-color: rgba(254, 243, 199, 0.7) !important; }
+.light-mode .border-amber-700 { border-color: #f59e0b !important; }
+.light-mode .text-amber-400 { color: #d97706 !important; }
+
+/* Light mode: set row completed state */
+.light-mode .bg-green-950 { background-color: rgba(220, 252, 231, 1) !important; }
+.light-mode .border-green-800 { border-color: #86efac !important; }
+
+/* Light mode: RPE slider gradient & thumb */
+.light-mode .border-gray-300 { border-color: #d1d5db !important; }
+
+/* Light mode: duration sheet */
+.light-mode .bg-emerald-600 { background-color: #059669 !important; }
+.light-mode .bg-emerald-600.text-white,
+.light-mode .bg-emerald-600 .text-white { color: white !important; }
+.light-mode .bg-amber-600 { background-color: #d97706 !important; }
+.light-mode .bg-amber-600.text-white,
+.light-mode .bg-amber-600 .text-white { color: white !important; }
+
+/* Light mode: input fields in set rows */
+.light-mode input[type="number"] { color: var(--text-primary) !important; }
+.light-mode input[type="time"] { color: var(--text-primary) !important; }
+
+/* Light mode: text-emerald and text-yellow for timer */
+.light-mode .text-emerald-400 { color: #059669 !important; }
+.light-mode .text-yellow-400 { color: #ca8a04 !important; }
 
 /* Light mode shadow adjustments */
 .light-mode .shadow-black\/20 { --tw-shadow-color: rgba(0, 0, 0, 0.06) !important; }
