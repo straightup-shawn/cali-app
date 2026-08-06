@@ -192,6 +192,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
         onTouchStart={showRpePicker ? undefined : handleTouchStart}
         onTouchMove={showRpePicker ? undefined : handleTouchMove}
         onTouchEnd={showRpePicker ? undefined : handleTouchEnd}
+        onClick={() => { if (showRpePicker) setShowRpePicker(false); }}
       >
         <div className="flex items-center gap-1.5">
           {/* Set number + previous */}
@@ -300,7 +301,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
           {showRpe && (
             <button
               type="button"
-              onClick={() => setShowRpePicker(!showRpePicker)}
+              onClick={(e) => { e.stopPropagation(); setShowRpePicker(!showRpePicker); }}
               className={`h-7 w-9 shrink-0 rounded-full text-[10px] font-medium transition-colors ${
                 set.rpe !== null
                   ? 'bg-indigo-600 text-white'
@@ -316,7 +317,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
           {mode === 'active' && (
             <button
               type="button"
-              onClick={() => set.completed ? onUncomplete?.(exerciseId, set.id) : onComplete?.(exerciseId, set.id)}
+              onClick={() => { setShowRpePicker(false); set.completed ? onUncomplete?.(exerciseId, set.id) : onComplete?.(exerciseId, set.id); }}
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
                 set.completed
                   ? 'bg-green-500 text-white'
@@ -333,7 +334,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
 
         {/* RPE picker — gradient slider */}
         {showRpePicker && (
-          <div className="mt-2 rounded-lg border border-gray-700 bg-gray-900 p-3">
+          <div className="mt-2 rounded-lg border border-gray-700 bg-gray-900 p-3" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-gray-400">RPE</span>
               <span className="text-sm font-bold text-white">{set.rpe ?? '—'}</span>
