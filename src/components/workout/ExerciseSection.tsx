@@ -185,7 +185,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
       <div
         className={`relative border px-2 py-1.5 rounded-xl transition-transform ${
           isCompleted
-            ? 'border-green-800 bg-green-950'
+            ? 'border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg-secondary))]'
             : 'border-gray-700 bg-gray-800'
         }`}
         style={{ transform: `translateX(${swipeX}px)`, transition: swipingRef.current ? 'none' : 'transform 0.2s ease-out' }}
@@ -319,10 +319,9 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
               type="button"
               onClick={() => { setShowRpePicker(false); set.completed ? onUncomplete?.(exerciseId, set.id) : onComplete?.(exerciseId, set.id); }}
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-                set.completed
-                  ? 'bg-green-500 text-white'
-                  : 'border border-gray-600 text-gray-500'
+                set.completed ? '' : 'border border-gray-600 text-gray-500'
               }`}
+              style={set.completed ? { backgroundColor: 'var(--accent)', color: 'white' } : undefined}
               aria-label={set.completed ? 'Undo set completion' : 'Complete set'}
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
