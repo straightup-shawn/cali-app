@@ -101,9 +101,10 @@ function ProfileAvatar({ initials }: { initials: string }) {
       // Save to both localStorage (immediate) and Supabase (persistent)
       localStorage.setItem(AVATAR_STORAGE_KEY, url);
       setAvatarUrl(url);
-      // Persist to profiles table
+      // Persist to profiles table using proper update
       const { supabase: sb } = await import('@/lib/supabase');
-      await sb.from('profiles').update({ avatar_url: url } as any).eq('id', user.id);
+      const { error } = await sb.from('profiles').update({ avatar_url: url }).eq('id', user.id);
+      if (error) console.error('Failed to save avatar_url to profile:', error);
     } catch (err) {
       console.error('Failed to upload avatar:', err);
     } finally {

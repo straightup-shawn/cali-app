@@ -35,12 +35,14 @@ export async function uploadWorkoutPhoto(
  */
 export async function uploadProfilePhoto(userId: string, file: File): Promise<string> {
   const ext = file.name.split('.').pop() ?? 'jpg';
-  const path = `${userId}/avatar_${Date.now()}.${ext}`;
+  // Always use the same path so we overwrite (no orphaned files)
+  const path = `${userId}/avatar.${ext}`;
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
     cacheControl: '0',
     upsert: true,
   });
   if (error) throw error;
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  // Add cache buster to force reload
+  return `${data.publicUrl}?t=${Date.now()}`;
 }
