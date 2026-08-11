@@ -93,6 +93,9 @@ interface SetRowProps {
   exerciseType: ExerciseType;
   exerciseId: string;
   previousSet?: PreviousSet;
+  bestPreviousDuration: number;
+  bestPreviousReps: number;
+  bestPreviousWeight: number;
   mode: 'active' | 'edit';
   weightLabel: string;
   kgToDisplay: (kg: number) => number;
@@ -103,7 +106,7 @@ interface SetRowProps {
   onDelete: (exerciseId: string, setId: string) => void;
 }
 
-function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel, kgToDisplay, inputToKg, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
+function SetRow({ set, exerciseType, exerciseId, previousSet, bestPreviousDuration, bestPreviousReps, bestPreviousWeight, mode, weightLabel, kgToDisplay, inputToKg, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
   const [showRpePicker, setShowRpePicker] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -120,15 +123,17 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, mode, weightLabel,
   const previousLabel = formatPreviousSet(previousSet, exerciseType);
   const isCompleted = mode === 'edit' ? true : set.completed;
 
-  const isPR = isCompleted && previousSet && (() => {
-    if (showReps && set.reps != null && previousSet.reps != null) {
-      if (showWeight && set.weightKg != null && previousSet.weightKg != null) {
-        return set.weightKg > previousSet.weightKg || (set.weightKg === previousSet.weightKg && set.reps > previousSet.reps);
+  const isPR = isCompleted && (() => {
+    if (showReps && set.reps != null && bestPreviousReps > 0) {
+      if (showWeight && set.weightKg != null && bestPreviousWeight > 0) {
+        // Weighted: PR if more weight than best previous, or more reps at same/higher weight
+        return set.weightKg > bestPreviousWeight || (set.weightKg >= bestPreviousWeight && set.reps > bestPreviousReps);
       }
-      return set.reps > previousSet.reps;
+      // Bodyweight: PR if more reps than best previous
+      return set.reps > bestPreviousReps;
     }
-    if (showDuration && set.durationSeconds != null && previousSet.durationSeconds != null) {
-      return set.durationSeconds > previousSet.durationSeconds;
+    if (showDuration && set.durationSeconds != null && bestPreviousDuration > 0) {
+      return set.durationSeconds > bestPreviousDuration;
     }
     return false;
   })();
@@ -524,6 +529,9 @@ export default function ExerciseSection({ exercise, index, total, mode, onUpdate
             exerciseType={exercise.exerciseType}
             exerciseId={exercise.id}
             previousSet={previousPerformance?.sets.find((ps) => ps.setNumber === set.setNumber)}
+            bestPreviousDuration={previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.durationSeconds ?? 0), 0) ?? 0}
+            bestPreviousReps={previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.reps ?? 0), 0) ?? 0}
+            bestPreviousWeight={previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.weightKg ?? 0), 0) ?? 0}
             mode={mode}
             weightLabel={weightLabel}
             kgToDisplay={kgToDisplay}
