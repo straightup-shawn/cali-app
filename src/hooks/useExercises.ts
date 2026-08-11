@@ -30,10 +30,19 @@ export function useExercises(filters?: ExerciseFilters) {
       let query = supabase.from('exercises').select('*');
       if (filters?.type) query = query.eq('exercise_type', filters.type);
       if (filters?.muscleGroup) query = query.contains('muscle_groups', [filters.muscleGroup]);
-      if (filters?.search) query = query.ilike('name', `%${filters.search}%`);
+      // Don't filter by search on server — we'll do fuzzy client-side
       const { data, error } = await query.order('name');
       if (error) throw error;
-      return data as ExerciseRow[];
+      let results = data as ExerciseRow[];
+
+      // Client-side fuzzy search: ignore hyphens, spaces, case
+      if (filters?.search) {
+        const normalize = (s: string) => s.toLowerCase().replace(/[-_\s]/g, '');
+        const searchNorm = normalize(filters.search);
+        results = results.filter((ex) => normalize(ex.name).includes(searchNorm));
+      }
+
+      return results;
     },
   });
 }
