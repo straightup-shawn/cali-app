@@ -178,17 +178,19 @@ export default function ImageCropper({ imageFile, onCrop, onCancel }: ImageCropp
                 transition: dragRef.current ? 'none' : 'transform 0.1s ease-out',
               }}
             />
-            {/* Crop overlay — darkened edges */}
+            {/* Crop overlay — circle frame */}
             <div className="pointer-events-none absolute inset-0">
-              {/* Square frame border */}
-              <div className="absolute inset-0 border-2 border-white/60" />
+              {/* Circle mask using radial gradient */}
+              <div className="absolute inset-0" style={{
+                background: 'radial-gradient(circle at center, transparent 48%, rgba(0,0,0,0.7) 50%)'
+              }} />
+              {/* Circle border */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-[96vw] w-[96vw] rounded-full border-2 border-white/60" />
+              </div>
             </div>
           </div>
         )}
-
-        {/* Darkened areas above and below the crop frame */}
-        <div className="pointer-events-none absolute top-0 left-0 right-0 h-[calc((100%-100vw)/2)] bg-black/60" />
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[calc((100%-100vw)/2)] bg-black/60" />
       </div>
 
       {/* Hint text */}

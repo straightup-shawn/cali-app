@@ -7,6 +7,7 @@ import { useUnitPreference } from '@/hooks/useUnitPreference';
 import { useWeeklyVolume } from '@/hooks/useWeeklyVolume';
 import { useNodeProgress } from '@/hooks/useProgression';
 import { uploadProfilePhoto } from '@/lib/storage';
+import ImageCropper from '@/components/ImageCropper';
 import { THEMES, getStoredTheme, setStoredTheme, getStoredMode, setStoredMode } from '@/lib/themes';
 import type { ThemeId, ColorMode } from '@/lib/themes';
 import { isMuted, setMuted, hapticMedium } from '@/lib/haptics';
@@ -78,6 +79,7 @@ function ProfileAvatar({ initials }: { initials: string }) {
     localStorage.getItem(AVATAR_STORAGE_KEY),
   );
   const [uploading, setUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync from profile data when it loads
@@ -94,14 +96,18 @@ function ProfileAvatar({ initials }: { initials: string }) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    setCropFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
 
+  async function handleCroppedFile(croppedFile: File) {
+    if (!user) return;
+    setCropFile(null);
     setUploading(true);
     try {
-      const url = await uploadProfilePhoto(user.id, file);
-      // Save to both localStorage (immediate) and Supabase (persistent)
+      const url = await uploadProfilePhoto(user.id, croppedFile);
       localStorage.setItem(AVATAR_STORAGE_KEY, url);
       setAvatarUrl(url);
-      // Persist to profiles table using proper update
       const { supabase: sb } = await import('@/lib/supabase');
       const { error } = await sb.from('profiles').update({ avatar_url: url }).eq('id', user.id);
       if (error) console.error('Failed to save avatar_url to profile:', error);
@@ -109,7 +115,6 @@ function ProfileAvatar({ initials }: { initials: string }) {
       console.error('Failed to upload avatar:', err);
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
@@ -1149,6 +1154,15 @@ export default function ProfilePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
+      {/* Circle crop modal */}
+      {cropFile && (
+        <ImageCropper
+          imageFile={cropFile}
+          onCrop={handleCroppedFile}
+          onCancel={() => setCropFile(null)}
+        />
+      )}
+
       {/* Header */}
       <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">Profile</h1>
