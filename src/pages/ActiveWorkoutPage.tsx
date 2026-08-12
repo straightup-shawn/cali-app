@@ -319,17 +319,18 @@ function DiscardConfirmDialog({ open, onCancel, onConfirm }: DiscardConfirmDialo
 interface FinishWorkoutButtonProps {
   onFinish: () => void;
   disabled: boolean;
+  incompleteSets: number;
 }
 
-function FinishWorkoutButton({ onFinish, disabled }: FinishWorkoutButtonProps) {
+function FinishWorkoutButton({ onFinish, disabled, incompleteSets }: FinishWorkoutButtonProps) {
   const [confirming, setConfirming] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleClick = () => {
     if (!confirming) {
       setConfirming(true);
-      // Auto-reset after 3 seconds if not confirmed
-      timeoutRef.current = setTimeout(() => setConfirming(false), 3000);
+      // Auto-reset after 4 seconds if not confirmed
+      timeoutRef.current = setTimeout(() => setConfirming(false), 4000);
     } else {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setConfirming(false);
@@ -338,18 +339,25 @@ function FinishWorkoutButton({ onFinish, disabled }: FinishWorkoutButtonProps) {
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={disabled}
-      className={`w-full rounded-xl py-3.5 text-base font-semibold text-white shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        confirming
-          ? 'bg-red-600 active:bg-red-700'
-          : 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700'
-      }`}
-    >
-      {confirming ? 'Tap Again to Finish' : 'Finish Workout'}
-    </button>
+    <div>
+      {confirming && incompleteSets > 0 && (
+        <p className="mb-2 text-center text-xs text-amber-400">
+          ⚠️ You have {incompleteSets} incomplete {incompleteSets === 1 ? 'set' : 'sets'}
+        </p>
+      )}
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={disabled}
+        className={`w-full rounded-xl py-3.5 text-base font-semibold text-white shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+          confirming
+            ? 'bg-red-600 active:bg-red-700'
+            : 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700'
+        }`}
+      >
+        {confirming ? 'Tap Again to Finish' : 'Finish Workout'}
+      </button>
+    </div>
   );
 }
 
@@ -694,7 +702,11 @@ export default function ActiveWorkoutPage() {
             />
           </div>
         )}
-        <FinishWorkoutButton onFinish={handleFinish} disabled={finishing} />
+        <FinishWorkoutButton
+          onFinish={handleFinish}
+          disabled={finishing}
+          incompleteSets={workout.exercises.reduce((count, ex) => count + ex.sets.filter(s => !s.completed).length, 0)}
+        />
         {finishError && (
           <p className="mt-2 text-center text-sm text-red-400">{finishError}</p>
         )}
