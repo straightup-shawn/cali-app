@@ -322,14 +322,33 @@ interface FinishWorkoutButtonProps {
 }
 
 function FinishWorkoutButton({ onFinish, disabled }: FinishWorkoutButtonProps) {
+  const [confirming, setConfirming] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleClick = () => {
+    if (!confirming) {
+      setConfirming(true);
+      // Auto-reset after 3 seconds if not confirmed
+      timeoutRef.current = setTimeout(() => setConfirming(false), 3000);
+    } else {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setConfirming(false);
+      onFinish();
+    }
+  };
+
   return (
     <button
       type="button"
-      onClick={onFinish}
+      onClick={handleClick}
       disabled={disabled}
-      className="w-full rounded-xl bg-indigo-600 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      className={`w-full rounded-xl py-3.5 text-base font-semibold text-white shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+        confirming
+          ? 'bg-red-600 active:bg-red-700'
+          : 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700'
+      }`}
     >
-      Finish Workout
+      {confirming ? 'Tap Again to Finish' : 'Finish Workout'}
     </button>
   );
 }
