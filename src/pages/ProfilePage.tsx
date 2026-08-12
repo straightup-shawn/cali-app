@@ -119,12 +119,21 @@ function ProfileAvatar({ initials }: { initials: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleTap}
-      className="relative h-20 w-20 shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-950"
-      aria-label="Change profile photo"
-    >
+    <>
+      {/* Circle crop modal */}
+      {cropFile && (
+        <ImageCropper
+          imageFile={cropFile}
+          onCrop={handleCroppedFile}
+          onCancel={() => setCropFile(null)}
+        />
+      )}
+      <button
+        type="button"
+        onClick={handleTap}
+        className="relative h-20 w-20 shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-950"
+        aria-label="Change profile photo"
+      >
       {avatarUrl ? (
         <img
           src={avatarUrl}
@@ -163,6 +172,7 @@ function ProfileAvatar({ initials }: { initials: string }) {
         aria-hidden="true"
       />
     </button>
+    </>
   );
 }
 
@@ -1154,15 +1164,6 @@ export default function ProfilePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-950">
-      {/* Circle crop modal */}
-      {cropFile && (
-        <ImageCropper
-          imageFile={cropFile}
-          onCrop={handleCroppedFile}
-          onCancel={() => setCropFile(null)}
-        />
-      )}
-
       {/* Header */}
       <header className="sticky top-0 z-10 glass-header px-4 py-3">
         <h1 className="text-xl font-bold text-gray-100">Profile</h1>
