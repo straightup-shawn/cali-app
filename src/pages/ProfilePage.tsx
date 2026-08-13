@@ -124,6 +124,7 @@ function ProfileAvatar({ initials }: { initials: string }) {
       {cropFile && (
         <ImageCropper
           imageFile={cropFile}
+          shape="circle"
           onCrop={handleCroppedFile}
           onCancel={() => setCropFile(null)}
         />

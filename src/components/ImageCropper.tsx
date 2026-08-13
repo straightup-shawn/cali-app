@@ -6,6 +6,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 
 interface ImageCropperProps {
   imageFile: File;
+  shape?: 'circle' | 'square';
   onCrop: (croppedFile: File) => void;
   onCancel: () => void;
 }
@@ -14,7 +15,7 @@ interface ImageCropperProps {
 // ImageCropper — full-screen modal with center-square crop via Canvas
 // =============================================================================
 
-export default function ImageCropper({ imageFile, onCrop, onCancel }: ImageCropperProps) {
+export default function ImageCropper({ imageFile, shape = 'square', onCrop, onCancel }: ImageCropperProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imgEl, setImgEl] = useState<HTMLImageElement | null>(null);
@@ -178,16 +179,20 @@ export default function ImageCropper({ imageFile, onCrop, onCancel }: ImageCropp
                 transition: dragRef.current ? 'none' : 'transform 0.1s ease-out',
               }}
             />
-            {/* Crop overlay — circle frame */}
+            {/* Crop overlay */}
             <div className="pointer-events-none absolute inset-0">
-              {/* Circle mask using radial gradient */}
-              <div className="absolute inset-0" style={{
-                background: 'radial-gradient(circle at center, transparent 48%, rgba(0,0,0,0.7) 50%)'
-              }} />
-              {/* Circle border */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-[96vw] w-[96vw] rounded-full border-2 border-white/60" />
-              </div>
+              {shape === 'circle' ? (
+                <>
+                  <div className="absolute inset-0" style={{
+                    background: 'radial-gradient(circle at center, transparent 48%, rgba(0,0,0,0.7) 50%)'
+                  }} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-[96vw] w-[96vw] rounded-full border-2 border-white/60" />
+                  </div>
+                </>
+              ) : (
+                <div className="absolute inset-0 border-2 border-white/60" />
+              )}
             </div>
           </div>
         )}
