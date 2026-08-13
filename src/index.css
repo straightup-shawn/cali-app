@@ -585,6 +585,10 @@ input:focus, select:focus, textarea:focus {
 /* Light mode: input fields in set rows */
 .light-mode input[type="number"] { color: var(--text-primary) !important; }
 .light-mode input[type="time"] { color: var(--text-primary) !important; }
+.light-mode input[type="text"] { color: var(--text-primary) !important; }
+.light-mode input[type="datetime-local"] { color: var(--text-primary) !important; }
+.light-mode select { color: var(--text-primary) !important; }
+.light-mode textarea { color: var(--text-primary) !important; }
 
 /* Light mode: text-emerald and text-yellow for timer */
 .light-mode .text-emerald-400 { color: #059669 !important; }
