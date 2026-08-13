@@ -607,11 +607,16 @@ export default function ActiveWorkoutPage() {
         startedAt={workout.startedAt}
         onTimerTap={() => workout.isPaused ? resumeWorkout() : pauseWorkout()}
         onDurationChange={(newSeconds) => {
-          // Adjust startedAt so elapsed = newSeconds
-          const newStart = new Date(Date.now() - newSeconds * 1000).toISOString();
-          updateStartedAt(newStart);
+          // Pause and set elapsed to the chosen duration
+          if (!workout.isPaused) pauseWorkout();
+          updateStartedAt(new Date(Date.now() - newSeconds * 1000).toISOString());
+          setElapsedSeconds(newSeconds);
         }}
-        onStartTimeChange={(iso) => updateStartedAt(iso)}
+        onStartTimeChange={(iso) => {
+          // Pause so the elapsed freezes, then update startedAt as metadata
+          if (!workout.isPaused) pauseWorkout();
+          updateStartedAt(iso);
+        }}
         onMenuToggle={() => setMenuOpen((o) => !o)}
       />
 
