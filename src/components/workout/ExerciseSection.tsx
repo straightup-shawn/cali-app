@@ -93,9 +93,7 @@ interface SetRowProps {
   exerciseType: ExerciseType;
   exerciseId: string;
   previousSet?: PreviousSet;
-  bestPreviousDuration: number;
-  bestPreviousReps: number;
-  bestPreviousWeight: number;
+  isPR: boolean;
   mode: 'active' | 'edit';
   weightLabel: string;
   kgToDisplay: (kg: number) => number;
@@ -106,7 +104,7 @@ interface SetRowProps {
   onDelete: (exerciseId: string, setId: string) => void;
 }
 
-function SetRow({ set, exerciseType, exerciseId, previousSet, bestPreviousDuration, bestPreviousReps, bestPreviousWeight, mode, weightLabel, kgToDisplay, inputToKg, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
+function SetRow({ set, exerciseType, exerciseId, previousSet, isPR, mode, weightLabel, kgToDisplay, inputToKg, onUpdate, onComplete, onUncomplete, onDelete }: SetRowProps) {
   const [showRpePicker, setShowRpePicker] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -122,21 +120,6 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, bestPreviousDurati
 
   const previousLabel = formatPreviousSet(previousSet, exerciseType);
   const isCompleted = mode === 'edit' ? true : set.completed;
-
-  const isPR = isCompleted && (() => {
-    if (showReps && set.reps != null && bestPreviousReps > 0) {
-      if (showWeight && set.weightKg != null && bestPreviousWeight > 0) {
-        // Weighted: PR if more weight than best previous, or more reps at same/higher weight
-        return set.weightKg > bestPreviousWeight || (set.weightKg >= bestPreviousWeight && set.reps > bestPreviousReps);
-      }
-      // Bodyweight: PR if more reps than best previous
-      return set.reps > bestPreviousReps;
-    }
-    if (showDuration && set.durationSeconds != null && bestPreviousDuration > 0) {
-      return set.durationSeconds > bestPreviousDuration;
-    }
-    return false;
-  })();
 
   // Swipe-to-delete handlers
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -522,26 +505,63 @@ export default function ExerciseSection({ exercise, index, total, mode, onUpdate
 
       {/* Sets */}
       <div className="mt-3 space-y-2">
-        {exercise.sets.map((set) => (
-          <SetRow
-            key={set.id}
-            set={set}
-            exerciseType={exercise.exerciseType}
-            exerciseId={exercise.id}
-            previousSet={previousPerformance?.sets.find((ps) => ps.setNumber === set.setNumber)}
-            bestPreviousDuration={previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.durationSeconds ?? 0), 0) ?? 0}
-            bestPreviousReps={previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.reps ?? 0), 0) ?? 0}
-            bestPreviousWeight={previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.weightKg ?? 0), 0) ?? 0}
-            mode={mode}
-            weightLabel={weightLabel}
-            kgToDisplay={kgToDisplay}
-            inputToKg={inputToKg}
-            onUpdate={onUpdate}
-            onComplete={onComplete}
-            onUncomplete={onUncomplete}
-            onDelete={onDeleteSet}
-          />
-        ))}
+        {(() => {
+          // Determine which single set is the PR (best in current session that beats previous best)
+          const bestPrevDuration = previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.durationSeconds ?? 0), 0) ?? 0;
+          const bestPrevReps = previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.reps ?? 0), 0) ?? 0;
+          const bestPrevWeight = previousPerformance?.sets.reduce((max, ps) => Math.max(max, ps.weightKg ?? 0), 0) ?? 0;
+
+          // Find the single best set ID in this session that qualifies as PR
+          let prSetId: string | null = null;
+          const showDuration = ['duration', 'static_hold', 'distance', 'rounds', 'calories'].includes(exercise.exerciseType);
+          const showReps = ['bodyweight', 'weighted', 'assisted'].includes(exercise.exerciseType);
+          const showWeight = ['weighted', 'assisted'].includes(exercise.exerciseType);
+
+          if (showDuration && bestPrevDuration > 0) {
+            let bestVal = bestPrevDuration;
+            for (const s of exercise.sets) {
+              if (s.completed && s.durationSeconds != null && s.durationSeconds > bestVal) {
+                bestVal = s.durationSeconds;
+                prSetId = s.id;
+              }
+            }
+          } else if (showWeight && bestPrevWeight > 0) {
+            let bestVal = bestPrevWeight;
+            for (const s of exercise.sets) {
+              if (s.completed && s.weightKg != null && s.weightKg > bestVal) {
+                bestVal = s.weightKg;
+                prSetId = s.id;
+              }
+            }
+          } else if (showReps && bestPrevReps > 0) {
+            let bestVal = bestPrevReps;
+            for (const s of exercise.sets) {
+              if (s.completed && s.reps != null && s.reps > bestVal) {
+                bestVal = s.reps;
+                prSetId = s.id;
+              }
+            }
+          }
+
+          return exercise.sets.map((set) => (
+            <SetRow
+              key={set.id}
+              set={set}
+              exerciseType={exercise.exerciseType}
+              exerciseId={exercise.id}
+              previousSet={previousPerformance?.sets.find((ps) => ps.setNumber === set.setNumber)}
+              isPR={set.id === prSetId}
+              mode={mode}
+              weightLabel={weightLabel}
+              kgToDisplay={kgToDisplay}
+              inputToKg={inputToKg}
+              onUpdate={onUpdate}
+              onComplete={onComplete}
+              onUncomplete={onUncomplete}
+              onDelete={onDeleteSet}
+            />
+          ));
+        })()}
       </div>
 
       {/* Add set button */}
