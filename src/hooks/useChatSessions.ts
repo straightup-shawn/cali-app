@@ -178,6 +178,35 @@ export function useSendMessage() {
 
       return assistantMessage;
     },
+    onMutate: async (variables) => {
+      // Optimistic update: show the user message immediately
+      await queryClient.cancelQueries({ queryKey: ['chat-messages', variables.sessionId] });
+      const previous = queryClient.getQueryData<ChatMessage[]>(['chat-messages', variables.sessionId]);
+      
+      const optimisticMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        session_id: variables.sessionId,
+        role: 'user',
+        content: variables.content,
+        routine_json: null,
+        routine_saved: false,
+        saved_routine_id: null,
+        created_at: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<ChatMessage[]>(
+        ['chat-messages', variables.sessionId],
+        (old) => [...(old ?? []), optimisticMessage]
+      );
+
+      return { previous };
+    },
+    onError: (_err, variables, context) => {
+      // Rollback on error
+      if (context?.previous) {
+        queryClient.setQueryData(['chat-messages', variables.sessionId], context.previous);
+      }
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages', variables.sessionId] });
       queryClient.invalidateQueries({ queryKey: ['chat-sessions'] });
