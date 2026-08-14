@@ -133,27 +133,30 @@ export function formatPreviousSet(
 ): string {
   if (!set) return '—';
 
+  const rpeStr = set.rpe != null ? ` @${set.rpe}` : '';
+
   switch (exerciseType) {
     case 'bodyweight':
-      return set.reps !== null ? `${set.reps} reps` : '—';
+      return set.reps !== null ? `${set.reps}r${rpeStr}` : '—';
     case 'weighted':
       if (set.weightKg !== null && set.reps !== null) {
-        return `${set.weightKg}kg × ${set.reps}`;
+        return `${set.weightKg}×${set.reps}${rpeStr}`;
       }
-      if (set.reps !== null) return `${set.reps} reps`;
+      if (set.reps !== null) return `${set.reps}r${rpeStr}`;
       return '—';
     case 'assisted':
       if (set.weightKg !== null && set.reps !== null) {
-        return `-${set.weightKg}kg × ${set.reps}`;
+        return `-${set.weightKg}×${set.reps}${rpeStr}`;
       }
-      if (set.reps !== null) return `${set.reps} reps`;
+      if (set.reps !== null) return `${set.reps}r${rpeStr}`;
       return '—';
     case 'duration':
     case 'static_hold':
       if (set.durationSeconds !== null) {
         const mins = Math.floor(set.durationSeconds / 60);
         const secs = set.durationSeconds % 60;
-        return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+        const timeStr = mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+        return `${timeStr}${rpeStr}`;
       }
       return '—';
     default:
