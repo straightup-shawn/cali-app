@@ -54,6 +54,7 @@ interface ActiveWorkoutContextValue {
   pauseWorkout: () => void;
   resumeWorkout: () => void;
   updateStartedAt: (iso: string) => void;
+  setWorkoutElapsed: (seconds: number) => void;
 }
 
 const ActiveWorkoutContext = createContext<ActiveWorkoutContextValue | undefined>(undefined);
@@ -419,6 +420,13 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     });
   }, []);
 
+  const setWorkoutElapsed = useCallback((seconds: number) => {
+    setWorkout((prev) => {
+      if (!prev) return prev;
+      return { ...prev, elapsedSeconds: seconds, isPaused: true };
+    });
+  }, []);
+
   // ---------------------------------------------------------------------------
   // Context value
   // ---------------------------------------------------------------------------
@@ -443,6 +451,7 @@ export function ActiveWorkoutProvider({ children }: { children: React.ReactNode 
     pauseWorkout,
     resumeWorkout,
     updateStartedAt,
+    setWorkoutElapsed,
   };
 
   return (

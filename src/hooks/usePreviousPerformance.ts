@@ -130,23 +130,27 @@ export function usePreviousPerformance(exerciseId: string | undefined): {
 export function formatPreviousSet(
   set: PreviousSet | undefined,
   exerciseType: ExerciseType,
+  weightLabel?: string,
+  kgToDisplay?: (kg: number) => number,
 ): string {
   if (!set) return '—';
 
   const rpeStr = set.rpe != null ? ` @${set.rpe}` : '';
+  const unit = weightLabel ?? 'kg';
+  const convertWeight = (kg: number) => kgToDisplay ? parseFloat(kgToDisplay(kg).toFixed(1)) : kg;
 
   switch (exerciseType) {
     case 'bodyweight':
       return set.reps !== null ? `${set.reps}r${rpeStr}` : '—';
     case 'weighted':
       if (set.weightKg !== null && set.reps !== null) {
-        return `${set.weightKg}×${set.reps}${rpeStr}`;
+        return `${convertWeight(set.weightKg)}${unit}×${set.reps}${rpeStr}`;
       }
       if (set.reps !== null) return `${set.reps}r${rpeStr}`;
       return '—';
     case 'assisted':
       if (set.weightKg !== null && set.reps !== null) {
-        return `-${set.weightKg}×${set.reps}${rpeStr}`;
+        return `-${convertWeight(set.weightKg)}${unit}×${set.reps}${rpeStr}`;
       }
       if (set.reps !== null) return `${set.reps}r${rpeStr}`;
       return '—';

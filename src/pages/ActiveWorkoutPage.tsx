@@ -382,6 +382,7 @@ export default function ActiveWorkoutPage() {
     pauseWorkout,
     resumeWorkout,
     updateStartedAt,
+    setWorkoutElapsed,
     restTimer,
     startRestTimer,
     clearRestTimer,
@@ -607,9 +608,8 @@ export default function ActiveWorkoutPage() {
         startedAt={workout.startedAt}
         onTimerTap={() => workout.isPaused ? resumeWorkout() : pauseWorkout()}
         onDurationChange={(newSeconds) => {
-          // Pause and set elapsed to the chosen duration
-          if (!workout.isPaused) pauseWorkout();
-          updateStartedAt(new Date(Date.now() - newSeconds * 1000).toISOString());
+          // Set elapsed directly — doesn't touch startedAt
+          setWorkoutElapsed(newSeconds);
           setElapsedSeconds(newSeconds);
         }}
         onStartTimeChange={(iso) => {

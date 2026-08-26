@@ -118,7 +118,7 @@ function SetRow({ set, exerciseType, exerciseId, previousSet, isPR, mode, weight
   const showCalories = exerciseType === 'calories';
   const showRpe = true;
 
-  const previousLabel = formatPreviousSet(previousSet, exerciseType);
+  const previousLabel = formatPreviousSet(previousSet, exerciseType, weightLabel, kgToDisplay);
   const isCompleted = mode === 'edit' ? true : set.completed;
 
   // Swipe-to-delete handlers
