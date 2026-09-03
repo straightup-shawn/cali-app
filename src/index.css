@@ -582,13 +582,14 @@ input:focus, select:focus, textarea:focus {
 .light-mode .bg-amber-600.text-white,
 .light-mode .bg-amber-600 .text-white { color: white !important; }
 
-/* Light mode: input fields in set rows */
-.light-mode input[type="number"] { color: var(--text-primary) !important; }
-.light-mode input[type="time"] { color: var(--text-primary) !important; }
-.light-mode input[type="text"] { color: var(--text-primary) !important; }
-.light-mode input[type="datetime-local"] { color: var(--text-primary) !important; }
-.light-mode select { color: var(--text-primary) !important; }
-.light-mode textarea { color: var(--text-primary) !important; }
+/* Light mode: input fields — force readable text over any class */
+.light-mode input,
+.light-mode input.text-white,
+.light-mode select,
+.light-mode select.text-white,
+.light-mode textarea,
+.light-mode textarea.text-white { color: var(--text-primary) !important; }
+.light-mode select option { color: #111827 !important; background-color: #ffffff !important; }
 
 /* Light mode: text-emerald and text-yellow for timer */
 .light-mode .text-emerald-400 { color: #059669 !important; }
